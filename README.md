@@ -19,3 +19,10 @@ npm run build --report
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+
+# Docker
+Docker container published in private docker hub repo as cptnsolo/zero.alpha.belt:latest and used as an image
+in [lnd-dockers](https://github.com/kkrupovich/lnd-dockers) repo.
+
+## To rebuild container docker:
+build -t cptnsolo/zero.alpha.belt .

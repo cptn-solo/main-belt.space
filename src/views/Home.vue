@@ -11,23 +11,34 @@
 </template>
 
 <script>
-// @ is an alias to /src
-import Intro from "@/components/Intro.vue";
-import Modal from './Modal'
+  import Intro from "@/components/Intro.vue";
+  import Modal from './Modal'
 
 
-export default {
-  name: "home",
-  components: {
-    Intro,
-    Modal
-  },
-  data: function() {
-    return {
-      message: "",
-      showCheckout: true,
-      showModal: false,
+  export default {
+    name: "home",
+    components: {
+      Intro,
+      Modal
+    },
+    data: function() {
+      return {
+        message: "",
+        showCheckout: true,
+        showModal: false,
+      }
+    },
+    watch: {
+      showModal(n, o) {
+        if (n) {
+          this.$ga.event(
+            'donate',
+            'showModal',
+            'BTC',
+            1
+          )
+        }
+      }
     }
-  },
-};
+  };
 </script>

@@ -1,8 +1,8 @@
 <template>
-  <div class="hello">
-    <VueQrcode class="mt4" :value="qrcodeAddress" :options="{ size: 250 }"></VueQrcode>
-    <div class="f7 fw1 lh-copy">{{ address }}</div>
-    <div class="mt4">{{ message }}</div>
+  <div class="flex-column outer-panel">
+    <VueQrcode class="mt1" :value="qrcodeAddress" :options="{ size: 250 }"></VueQrcode>
+    <div class="mt1">{{ address }}</div>
+    <div class="mt1 sf">{{ message }}</div>
   </div>
 </template>
 

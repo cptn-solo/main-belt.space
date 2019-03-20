@@ -51,4 +51,10 @@
   display: -webkit-flex;
   flex-direction: column;
 }
+.mt1 {
+  margin-top: 1em;
+}
+.sf {
+  font-size: smaller;
+}
 </style>

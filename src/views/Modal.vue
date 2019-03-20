@@ -45,6 +45,12 @@ export default {
     completedPayment() {
       this.showCheckout = false
       this.message = "Thank you"
+      this.$ga.event(
+        'donate',
+        'completedPayment',
+        'BTC',
+        1
+      )
     }
   }
 }
@@ -69,9 +75,9 @@ export default {
   }
 
   .modal-container {
-    width: 400px;
+    max-width: 400px;
     margin: 0px auto;
-    padding: 20px 30px;
+    padding: 20px 20px;
     background-color: #fff;
     border-radius: 2px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, .33);

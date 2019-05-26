@@ -1,11 +1,24 @@
 <template>
   <div class="outer-panel flex-column">
     <div class="inner-panel">
-      <h1>Woffler game</h1>
-      EOSIO based game.
-      <div class="wflbox">
-        <v-btn>test</v-btn>
-      </div>
+      <v-card>
+        <v-toolbar :color="bar.class" :dark="bar.dark">
+          <v-toolbar-side-icon></v-toolbar-side-icon>
+          <v-toolbar-title>Woffler game</v-toolbar-title>
+          <v-spacer></v-spacer>
+          <v-btn icon>
+            <v-icon>favorite</v-icon>
+          </v-btn>
+        </v-toolbar>
+        <v-card-text>
+          <div class="wflbox">&nbsp;</div>
+        </v-card-text>
+        <v-card-actions>
+          <v-btn icon>
+            <v-icon>favorite</v-icon>
+          </v-btn>
+        </v-card-actions>        
+      </v-card>
     </div>
   </div>
 </template>
@@ -14,7 +27,13 @@
   export default {
     components: {},
     data: function() {
-      return {};
+      return {
+        bar: 
+          // { 'class': '' },
+           { 'class': '', dark: true },
+          // { 'class': 'primary', dark: true },
+          // { 'class': 'elevation-0' }        
+      };
     },
     created: function() {
     },

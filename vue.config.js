@@ -1,3 +1,4 @@
+const VuetifyLoaderPlugin = require('vuetify-loader/lib/plugin')
 const webpack = require('webpack')
 const GitRevisionPlugin = require('git-revision-webpack-plugin')
 const gitRevisionPlugin = new GitRevisionPlugin()
@@ -9,6 +10,7 @@ module.exports = {
   },
   configureWebpack: {
     plugins: [
+      new VuetifyLoaderPlugin(),
       new webpack.DefinePlugin({
         'process.env': {
           VERSION: JSON.stringify(gitRevisionPlugin.version()),

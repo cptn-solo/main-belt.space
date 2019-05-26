@@ -1,11 +1,52 @@
+<script>
+  export default {
+    data: () => ({
+      drawer: null,
+      version: 'v.' + process.env.VERSION + ' (' + process.env.BRANCH + ')'
+    }),
+    props: {
+      source: String
+    }
+  }
+</script>
+
 <template>
-  <div id="app" class="flex-column">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view />
-  </div>
+  <v-app dark>
+    <v-navigation-drawer
+      v-model="drawer"
+      clipped
+      fixed
+      app
+    >
+      <v-list dense>
+        <v-list-tile to="/">
+          <v-list-tile-title>Home</v-list-tile-title>          
+        </v-list-tile>
+        <v-list-tile to="/about">
+          <v-list-tile-title>About</v-list-tile-title>
+        </v-list-tile>
+        <v-list-tile to="/woffler">
+          <v-list-tile-title>Woffler Game</v-list-tile-title>
+        </v-list-tile>
+      </v-list>
+    </v-navigation-drawer>
+    <v-toolbar app fixed clipped-left>
+      <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
+      <v-toolbar-title>Belt</v-toolbar-title>
+    </v-toolbar>
+    <v-content>
+      <v-container fluid fill-height>
+        <v-layout justify-center align-center>
+          <v-flex shrink>
+            <router-view></router-view>
+          </v-flex>
+        </v-layout>
+      </v-container>
+    </v-content>
+    <v-footer app fixed>
+      <span class="version">&copy; 2019&nbsp;|&nbsp;{{ version }}</span>
+    </v-footer>
+  </v-app>
 </template>
 
 <style>
@@ -15,20 +56,7 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   align-items: center;
-  justify-content: center;
-  color: #2c3e50;  
-}
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #3e5b79;
-}
-
-#nav a.router-link-exact-active {
-  color: #622f92;
+  justify-content: center;  
 }
 .blog-body {
   text-align: justify;
@@ -56,5 +84,12 @@
 }
 .sf {
   font-size: smaller;
+}
+.version {
+  position: absolute;
+  left: 1em;
+  bottom: 1em;
+  font-size: smaller;
+  color:slategray
 }
 </style>

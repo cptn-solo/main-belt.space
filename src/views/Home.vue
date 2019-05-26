@@ -6,15 +6,13 @@
     <a href="#" @click="showModal = true"><b>Top up Belt's lightning network channel</b></a>
     <p/>
     [ Belt's node <a href="https://1ml.com/node/022ddd76775a0deb9fc80acc3399bc19a5bb6fcb8a5acbd47ae7a9a98a7ca05ffe" target="_blank">info</a> ]
-    <Modal v-if="showModal" @close="showModal = false"></Modal>
-    <span class="version">{{ version }}</span>
+    <Modal v-if="showModal" @close="showModal = false"></Modal>    
   </div>
 </template>
 
 <script>
   import Intro from "@/components/Intro.vue";
   import Modal from './Modal'
-
 
   export default {
     name: "home",
@@ -26,8 +24,7 @@
       return {
         message: "",
         showCheckout: true,
-        showModal: false,
-        version: 'v.' + process.env.VERSION + ' (' + process.env.BRANCH + ')'
+        showModal: false        
       }
     },
     watch: {
@@ -44,13 +41,4 @@
     }
   };
 </script>
-<style scoped>
-.version {
-  position: absolute;
-  left: 1em;
-  bottom: 1em;
-  font-size: smaller;
-  color:slategray
-}
-</style>
 

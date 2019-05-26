@@ -78,7 +78,7 @@ export default {
     max-width: 400px;
     margin: 0px auto;
     padding: 20px 20px;
-    background-color: #fff;
+    background-color: #000;
     border-radius: 2px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, .33);
     transition: all .3s ease;

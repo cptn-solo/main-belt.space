@@ -11,7 +11,7 @@
 </script>
 
 <template>
-  <v-app id="app" dark>
+  <v-app dark>
     <v-navigation-drawer
       v-model="drawer"
       clipped
@@ -32,7 +32,7 @@
     </v-navigation-drawer>
     <v-toolbar app fixed clipped-left>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-toolbar-title>Application</v-toolbar-title>
+      <v-toolbar-title>Belt</v-toolbar-title>
     </v-toolbar>
     <v-content>
       <v-container fluid fill-height>

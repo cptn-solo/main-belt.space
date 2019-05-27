@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { ServerRequestError } from 'src/dialogs/serverRequestErrors'
+import { ServerRequestError } from '../dialogs/serverRequestErrors'
 
 export default {
   api: null,

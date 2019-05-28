@@ -10,13 +10,9 @@ import {
 const initialState = {
   // internals
   profileState: constants.PROFILE_UNKNOWN,
-  balances: [], // raw balance data as array [ "85 FND", "99820 ASTRO" ]
+  balances: [],
   // used in UI
-  nickname: null, // in-game 'name' after init player
-  eosBalance: 0, // only "99820"
-  vipTime: 0, // vip-time left, ms
-  vipTimeEnd: 0, // timestamp of the date till vip-status' end
-  productsInfo: [], // products ready for render
+  eosBalance: 0,
 }
 export const state = Object.assign({}, initialState)
 

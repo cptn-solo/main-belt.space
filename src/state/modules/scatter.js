@@ -150,9 +150,8 @@ export const actions = {
     }
   },
   async logout({ commit, dispatch, getters }) {
-    const scatter = getters.scatter
     try {
-      if (await dispatch('connect')) await scatter.logout()
+      if (await dispatch('connect')) await getters.scatter.logout()
     } finally {
       commit('setIdentity', null)
       commit('setScatter', null)

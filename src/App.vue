@@ -1,43 +1,26 @@
 <script>
-  import { mapGetters, mapActions, mapState } from 'vuex'
-  import ApplicationError from './dialogs/applicationError'
+  import LoginPanel from './components/LoginPanel'
+  import ProfilePanel from './components/ProfilePanel'
+  import { mapState } from 'vuex';
   
   export default {
     data: () => ({
       drawer: null,
       version: 'v.' + process.env.VERSION + ' (' + process.env.BRANCH + ')'
     }),
+    computed: {
+      ...mapState({
+        player: state => state.userProfile.player        
+      }),
+    },
+    components: {
+      LoginPanel,
+      ProfilePanel
+    },
     props: {
       source: String
     },
     methods: {
-      ...mapActions('scatter', {
-        login: 'login',
-        logout: 'logout',
-      }),
-      async loginScatter() {
-        // +
-        let loader = this.$loading.show()
-        try {
-          await this.login()
-          this.$ga.event('user', 'loginScatter', 'success', 0)
-        } catch (ex) {
-          this.$ga.event('user', 'loginScatter', 'failure', 0)
-          this.$dialog.error(ex)
-        }
-        loader.hide()
-      },
-      async logoutScatter() {
-        // +
-        this.$ga.event('user', 'logoutScatter', '--', 0)
-        let loader = this.$loading.show()
-        try {
-          await this.logout()
-        } catch (ex) {
-          this.$dialog.error(new ApplicationError(ex))
-        }
-        loader.hide()
-      }
     }
   }
 </script>
@@ -66,12 +49,8 @@
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>Belt</v-toolbar-title>
       <v-spacer/>
-      <v-btn text @click="loginScatter" color="secondary">Login&nbsp;&nbsp;
-        <img
-          style="margin-right: -5px; width: 20px; height: 20px"
-          src="/assets/images/scatter_badge_transparent.svg"
-        >
-      </v-btn>
+      <LoginPanel v-if="!player.account"/>
+      <ProfilePanel :player="player" v-else />
     </v-toolbar>
     <v-content>
       <v-container fluid fill-height>

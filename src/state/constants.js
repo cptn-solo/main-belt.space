@@ -6,6 +6,7 @@ export const CHAIN_ID = process.env.VUE_APP_CHAIN_ID
 export const NETWORK_NAME = process.env.VUE_APP_NETWORK_NAME
 export const APP_NAME = process.env.VUE_APP_APP_NAME
 export const APP_CODE = process.env.VUE_APP_CODE
+export const CURR_CODE = 'EOS'
 export const NETWORK = {
   blockchain: 'eos',
   host: NETWORK_HOST,

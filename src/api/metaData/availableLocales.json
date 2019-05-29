@@ -1,0 +1,30 @@
+[
+  {
+    "lang": "en",
+    "locale": "en",
+    "abbr": "EN",
+    "title": "eng",
+    "flagImg": "assets/images/flag_en.png"
+  },
+  {
+    "lang": "ch",
+    "locale": "ch",
+    "abbr": "CH",
+    "title": "中文",
+    "flagImg": "assets/images/flag_ch.png"
+  },
+  {
+    "lang": "ru",
+    "locale": "ru",
+    "abbr": "RU",
+    "title": "rus",
+    "flagImg": "assets/images/flag_ru.png"
+  },
+  {
+    "lang": "dev",
+    "locale": "dev",
+    "abbr": "DEV",
+    "title": "dev",
+    "flagImg": "assets/images/flag_dev.png"
+  }
+]

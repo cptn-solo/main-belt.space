@@ -3,9 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "dev": "vue-cli-service serve --mode dev",
+    "devstage": "vue-cli-service serve --mode stage",
+    "devprod": "vue-cli-service serve --mode prod",
+    "build": "cross-env NODE_ENV=production vue-cli-service build --mode dev",
+    "buildstage": "cross-env NODE_ENV=production vue-cli-service build --mode stage",
+    "buildprod": "cross-env NODE_ENV=production vue-cli-service build --mode prod"
   },
   "dependencies": {
     "@chenfengyuan/vue-qrcode": "^1.0.0",
@@ -17,7 +20,15 @@
     "vue-showdown": "^2.4.0",
     "vuetify": "^1.5.5",
     "vuex": "^3.0.1",
-    "vuex-persist": "^2.0.1"
+    "vuex-persist": "^2.0.1",
+    "axios": "^0.18.0",
+    "eosjs": "20.0.0-beta3",
+    "scatterjs-core": "^2.7.9",
+    "scatterjs-plugin-eosjs2": "^1.5.0",
+    "vue-i18n": "^8.3.0",
+    "vuedl": "^0.1.2",
+    "vuetify-dialog": "^0.1.9",
+    "vue-loading-overlay": "^3.1.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.5.0",

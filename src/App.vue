@@ -1,11 +1,26 @@
 <script>
+  import LoginPanel from './components/LoginPanel'
+  import ProfilePanel from './components/ProfilePanel'
+  import { mapState } from 'vuex';
+  
   export default {
     data: () => ({
       drawer: null,
       version: 'v.' + process.env.VERSION + ' (' + process.env.BRANCH + ')'
     }),
+    computed: {
+      ...mapState({
+        player: state => state.userProfile.player        
+      }),
+    },
+    components: {
+      LoginPanel,
+      ProfilePanel
+    },
     props: {
       source: String
+    },
+    methods: {
     }
   }
 </script>
@@ -33,6 +48,9 @@
     <v-toolbar app fixed clipped-left>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>Belt</v-toolbar-title>
+      <v-spacer/>
+      <LoginPanel v-if="!player.account"/>
+      <ProfilePanel :player="player" v-else />
     </v-toolbar>
     <v-content>
       <v-container fluid fill-height>

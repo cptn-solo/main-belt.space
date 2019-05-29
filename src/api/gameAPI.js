@@ -1,14 +1,34 @@
 import axios from 'axios'
-import { ServerRequestError } from 'src/dialogs/serverRequestErrors'
+import { ServerRequestError } from '../dialogs/serverRequestErrors'
 
 export default {
   api: null,
   rpc: null,
   accountname: null,
+  gameContract: process.env.VUE_APP_CODE,
   setAPI(api, rpc) {
     this.api = api
     this.rpc = rpc
   },  
+  getIngameProfileForAccount(accountname) {
+    return getEOSTableRows(this.rpc, {
+      code: this.gameContract,
+      scope: this.gameContract,
+      table: 'players',
+      key_type: 'name',
+      index_position: 1,
+      lower_bound: accountname,
+      limit: 1,
+    })
+  },
+  getAccountBalances(accountname = this.accountname) {
+    return getEOSTableRows(this.rpc, {
+      code: 'eosio.token',
+      scope: accountname,
+      table: 'accounts',
+    })
+    // return getTokenBalance('ASTRO') // запрос контракта не взлетел, переделал на запрос таблицы
+  },
   /** Voting */
   async getProducers() {
     return getEOSTableRows(this.rpc, {

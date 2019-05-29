@@ -1,4 +1,4 @@
-import ApplicationError from 'src/dialogs/applicationError'
+import ApplicationError from './applicationError'
 
 export class ScatterConnectError extends ApplicationError {
   constructor(error) {

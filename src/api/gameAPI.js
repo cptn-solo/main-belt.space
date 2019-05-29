@@ -29,6 +29,13 @@ export default {
     })
     // return getTokenBalance('ASTRO') // запрос контракта не взлетел, переделал на запрос таблицы
   },
+  getBranches() {
+    return getEOSTableRows(this.rpc, {
+      code: this.gameContract,
+      scope: this.gameContract,
+      table: 'branches',
+    })
+  },
   /** Voting */
   async getProducers() {
     return getEOSTableRows(this.rpc, {

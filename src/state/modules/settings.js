@@ -10,6 +10,7 @@ const initialState = {
   useScatter: false,
   localKey: null,
   localAccount: null,
+  referrerCode: null,
 }
 
 function initialLocale() {
@@ -65,6 +66,9 @@ export const getters = {
 }
 
 export const mutations = {
+  setReferrer(state, code) {
+    state.referrerCode = code
+  },
   setSelectedLocale(state, locale) {
     state.selectedLocale = locale
   },
@@ -97,6 +101,9 @@ export const mutations = {
 }
 
 export const actions = {
+  setReferrer({ commit }, code) {
+    commit('setReferrer', code)
+  },
   setSelectedLang({ dispatch, getters }, lang) {
     const locale = getters.availableLocales.find(
       locale => locale.lang === lang.trim().toLowerCase()

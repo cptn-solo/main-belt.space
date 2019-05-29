@@ -13,6 +13,9 @@
         player: state => state.userProfile.player        
       }),
     },
+    mounted() {
+      this.$store.dispatch('engine/launch')
+    },
     components: {
       LoginPanel,
       ProfilePanel

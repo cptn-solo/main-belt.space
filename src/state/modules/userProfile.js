@@ -4,6 +4,7 @@ import {
   UserBalancesLoadError,
   UserTransferAssetError,
   UserProfileNoAccountError,
+  UserProfileForgetError,
   UserProfileInitializationError,
 } from '../../dialogs/userProfileErrors'
 
@@ -75,6 +76,9 @@ export const mutations = {
   resetData: state => {
     setKeyValues(state, initialState)
   },
+  cleanupPlayerData: state => {
+    setKeyValues(state.player, initialState.player)
+  }
 }
 
 function setKeyValues(obj, source) {
@@ -87,18 +91,37 @@ function setKeyValues(obj, source) {
 }
 
 export const actions = {
-  async initPlayer({ commit, getters }, nickname) {
-    const accountname = getters.accountname
-    if (!accountname) throw new UserProfileNoAccountError()
-
+  async signup({ dispatch, getters, rootState }) {
+    const account = getters.accountname
+    if (!account) throw new UserProfileNoAccountError()
     try {
-      await getters.gameAPI.initPlayer({
-        account: accountname,
-      })
-      commit('setProfileState', constants.PROFILE_INITIALIZED)
+      await getters.gameAPI.signup(rootState.settings.referrerCode)
+      await dispatch('pickActiveAccount', account)
       return getters.profileState
     } catch (ex) {
       throw new UserProfileInitializationError(ex)
+    }
+  },
+  async forget({ commit, getters }) {
+    const account = getters.accountname
+    if (!account) throw new UserProfileNoAccountError()
+    try {
+      await getters.gameAPI.forget()
+      commit('setProfileState', constants.PROFILE_LOGGEDIN)
+      commit('cleanupPlayerData')
+      return getters.profileState
+    } catch (ex) {
+      throw new UserProfileForgetError(ex)
+    }
+  },
+  async logout({ dispatch, rootState}) {
+    if (rootState.settings.useScatter) {
+      await dispatch('scatter/logout', null, { root: true })  
+    }
+    try {
+      await dispatch('pickActiveAccount', null)
+    } catch (ex) {
+      throw ex
     }
   },
   async pickActiveAccount({ commit, dispatch, getters }, accountname) {

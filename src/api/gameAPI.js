@@ -36,6 +36,20 @@ export default {
       table: 'branches',
     })
   },
+  /** Actions */
+  signup(referrer) {
+    const data = {
+      account: this.accountname, 
+      referrer: referrer || this.gameContract
+    }
+    return transactEOS(this.api, this.accountname, this.gameContract, 'signup', data)
+  },
+  forget() {
+    const data = {
+      account: this.accountname
+    }
+    return transactEOS(this.api, this.accountname, this.gameContract, 'forget', data)
+  },
   /** Voting */
   async getProducers() {
     return getEOSTableRows(this.rpc, {

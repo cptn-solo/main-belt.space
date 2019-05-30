@@ -1,16 +1,19 @@
 <script>
   import LoginPanel from './components/LoginPanel'
   import ProfilePanel from './components/ProfilePanel'
-  import { mapState } from 'vuex';
-  
+  import { mapState } from 'vuex'
+  import * as constants from './state/constants'
+
   export default {
     data: () => ({
       drawer: null,
-      version: 'v.' + process.env.VERSION + ' (' + process.env.BRANCH + ')'
+      version: 'v.' + process.env.VERSION + ' (' + process.env.BRANCH + ')',
+      constants
     }),
     computed: {
       ...mapState({
-        player: state => state.userProfile.player        
+        player: state => state.userProfile.player,
+        status: state => state.userProfile.profileState
       }),
     },
     mounted() {
@@ -38,7 +41,7 @@
     >
       <v-list dense>
         <v-list-tile to="/">
-          <v-list-tile-title>Home</v-list-tile-title>          
+          <v-list-tile-title>Home</v-list-tile-title>
         </v-list-tile>
         <v-list-tile to="/about">
           <v-list-tile-title>About</v-list-tile-title>
@@ -52,8 +55,11 @@
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>Belt</v-toolbar-title>
       <v-spacer/>
-      <LoginPanel v-if="!player.account"/>
-      <ProfilePanel :player="player" v-else />
+      <LoginPanel v-if="status < constants.PROFILE_LOGGEDIN"/>
+      <ProfilePanel v-else
+        :player="player"
+        :status="status"
+      />
     </v-toolbar>
     <v-content>
       <v-container fluid fill-height>
@@ -77,7 +83,7 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   align-items: center;
-  justify-content: center;  
+  justify-content: center;
 }
 .blog-body {
   text-align: justify;
@@ -87,7 +93,7 @@
   align-items: center;
   justify-content: center;
 }
-.inner-panel {  
+.inner-panel {
   max-width: 500px;
   margin-left: 50px;
   margin-right: 50px;

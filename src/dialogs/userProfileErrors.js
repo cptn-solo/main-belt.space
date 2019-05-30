@@ -59,6 +59,16 @@ export class UserProfileInitializationError extends ApplicationError {
   }
 }
 
+export class UserProfileForgetError extends ApplicationError {
+  constructor(error) {
+    super(
+      error,
+      'Forget account',
+      "Error while removing player's in-game profile"
+    )
+  }
+}
+
 export class UserProfileNoKeyToImportError extends ApplicationError {
   constructor() {
     super('No valid private key specified for import', 'Import key error')

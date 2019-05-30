@@ -1,5 +1,6 @@
 <script>
-  import LoginPanel from './components/LoginPanel'
+  import ScatterPanel from './components/ScatterPanel'
+  import ImportPanel from './components/ImportPanel'
   import ProfilePanel from './components/ProfilePanel'
   import { mapState } from 'vuex'
   import * as constants from './state/constants'
@@ -20,7 +21,8 @@
       this.$store.dispatch('engine/launch')
     },
     components: {
-      LoginPanel,
+      ScatterPanel,
+      ImportPanel,
       ProfilePanel
     },
     props: {
@@ -55,11 +57,9 @@
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>Belt</v-toolbar-title>
       <v-spacer/>
-      <LoginPanel v-if="status < constants.PROFILE_LOGGEDIN"/>
-      <ProfilePanel v-else
-        :player="player"
-        :status="status"
-      />
+      <ScatterPanel v-if="status < constants.PROFILE_LOGGEDIN"/>
+      <ImportPanel v-show="status < constants.PROFILE_LOGGEDIN"/><!-- v-show used as this component must present in DOM to avoid warns -->
+      <ProfilePanel v-if="status >= constants.PROFILE_LOGGEDIN" :player="player" :status="status" />
     </v-toolbar>
     <v-content>
       <v-container fluid fill-height>

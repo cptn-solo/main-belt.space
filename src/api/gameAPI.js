@@ -50,6 +50,13 @@ export default {
     }
     return transactEOS(this.api, this.accountname, this.gameContract, 'forget', data)
   },
+  async getAccountsForPublicKey(publicKey) {
+    try {
+      return (await this.rpc.history_get_key_accounts(publicKey)).account_names
+    } catch (ex) {
+      throw ex
+    }
+  },
   /** Voting */
   async getProducers() {
     return getEOSTableRows(this.rpc, {

@@ -65,13 +65,15 @@ export const mutations = {
 }
 
 export const actions = {
-  async login({ commit, dispatch, getters }) {
+  async login({ commit, dispatch, getters }, privKey) {
     try {
-      commit('userProfile/setProfileState', constants.PROFILE_UNKNOWN, {
-        root: true,
-      })
+      if (await dispatch('importKey', privKey))
+        dispatch('settings/setLocalKey', privKey, { root: true })
+
+      commit('userProfile/setProfileState', constants.PROFILE_UNKNOWN, { root: true })
       dispatch('settings/setUseScatter', false, { root: true })
       dispatch('prepareAPI')
+
       const _accountname = getters.accountname || getters.localAccount
       const _pubKey = getters.publicKey
       const accounts = await dispatch('loadKeyAccounts', _pubKey)
@@ -81,38 +83,27 @@ export const actions = {
         return false
       } else {
         let profileState = constants.PROFILE_REGISTERED
-        commit('userProfile/setProfileState', profileState, {
-          root: true,
-        })
+        commit('userProfile/setProfileState', profileState, { root: true })
         const activeAccount =
           accounts.length === 1
             ? accounts[0]
             : _accountname && accounts.find(account => account === _accountname)
               ? _accountname
               : null
-        if (activeAccount) {
-          profileState = await dispatch(
-            'userProfile/pickActiveAccount',
-            activeAccount,
-            { root: true }
-          )
-        }
+        if (activeAccount) 
+          profileState = await dispatch('userProfile/pickActiveAccount', activeAccount, { root: true })
+        
         return profileState
       }
     } catch (ex) {
       throw ex
     }
   },
-  async forgetKey({ commit, dispatch }) {
+  async logout({ commit, dispatch }) {
     commit('setSignatureProvider', null)
     commit('setKeyAccounts', null)
     await dispatch('settings/setLocalKey', null, { root: true })
     await dispatch('prepareAPI')
-    try {
-      await dispatch('userProfile/pickActiveAccount', null, { root: true })
-    } catch (ex) {
-      throw ex
-    }
   },
   async generateKey({ commit, getters }, privateKey = null) {
     try {

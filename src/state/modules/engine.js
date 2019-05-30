@@ -42,7 +42,7 @@ export const actions = {
     try {
       const localKey = rootGetters['settings/localKey']
       if (localKey) {
-        return await dispatch('onboarding/importKey', localKey, { root: true })
+        return await dispatch('noscatter/login', localKey, { root: true })
       } else if (getters.useScatter) {
         return await dispatch('scatter/login', null, { root: true })
       }

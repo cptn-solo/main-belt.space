@@ -62,23 +62,29 @@
 <template>
   <v-menu
     v-model="showMenu"
+    id="profileMenu"
     offset-y
     offset-x
     :nudge-bottom="15"
     :close-on-content-click="false"
   >
     <template slot="activator">
-      <span>{{player.activebalance}}&nbsp;|&nbsp;<b>{{player.account}}</b></span>
+      <span v-if="status === constants.PROFILE_INITIALIZED">
+        {{player.activebalance}}&nbsp;|&nbsp;<b>{{player.account}}</b>
+      </span>
+      <span v-else>
+        {{$t('upProfileNotInit')}}
+      </span>
       <v-icon>
         arrow_drop_down
       </v-icon>
     </template>
     <v-list dense>
-      <v-list-tile v-if="status < constants.PROFILE_INITIALIZED" 
+      <v-list-tile v-if="status === constants.PROFILE_LOGGEDIN"
         @click="signup">Signup: {{account}}</v-list-tile>
       <v-list-tile v-else-if="status === constants.PROFILE_INITIALIZED" 
         @click="forget">Forget</v-list-tile>
-      <v-list-tile
+      <v-list-tile v-if="status >= constants.PROFILE_LOGGEDIN"
         @click="logout">Logout</v-list-tile>      
     </v-list>
   </v-menu>

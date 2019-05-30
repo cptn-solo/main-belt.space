@@ -117,6 +117,8 @@ export const actions = {
   async logout({ dispatch, rootState}) {
     if (rootState.settings.useScatter) {
       await dispatch('scatter/logout', null, { root: true })  
+    } else {
+      await dispatch('noscatter/logout', null, { root: true })
     }
     try {
       await dispatch('pickActiveAccount', null)

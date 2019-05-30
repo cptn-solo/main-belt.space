@@ -7,14 +7,18 @@
       showMenu: false,
       showKey: false,
       valid: false,
-      privateKey: ''
+      privateKey: '',
+      accountName: ''
     }),
     methods: {
       async login() {
         this.$ga.event('user', 'import', '--', 0)
         let loader = this.$loading.show()
         try {
-          await this.$store.dispatch('noscatter/login', this.privateKey)
+          await this.$store.dispatch('noscatter/login', {
+            accountname: this.accountName, 
+            privKey: this.privateKey 
+          })
           this.showMenu = false
         } catch (ex) {
           this.$dialog.error(new ApplicationError(ex))
@@ -39,19 +43,27 @@
         arrow_drop_down
       </v-icon>
     </template>
-    <v-list dense>
-      <v-list-tile>
-        <v-list-tile-content>
-          <VForm>
-            <input
+    <VForm>
+      <v-list style="width: 300px">
+        <v-list-tile>
+          <v-list-tile-content>
+            <VTextField
+              style="width: 100%"
+              v-model="accountName"
+              prepend-icon="person"
               type="text"
-              style="display: none"
               name="username"
               autocomplete="username"
-              value="woffler key"
-            >
+              :placeholder="$t('upImportAccountPH')"
+            />
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile>
+          <v-list-tile-content>
             <VTextField
+              style="width: 100%"
               v-model="privateKey"
+              prepend-icon="vpn_key"
               :append-icon="showKey ? 'visibility_off' : 'visibility'"
               :type="showKey ? 'text' : 'password'"
               name="password"
@@ -60,12 +72,16 @@
               @keydown.enter.prevent="login"
               @click:append="showKey = !showKey"
             />
-          </VForm>
-        </v-list-tile-content>
-        <v-list-tile-action>
-          <v-btn icon small @click="login"><v-icon>input</v-icon></v-btn>          
-        </v-list-tile-action>
-      </v-list-tile>
-    </v-list>
+          </v-list-tile-content>
+        </v-list-tile>
+        <v-list-tile>        
+          <v-list-tile-content>            
+            <v-btn text @click="login" style="width: 100%">
+              {{$t('upImportKeyBtn')}}&nbsp;&nbsp;<v-icon>input</v-icon>
+            </v-btn>            
+          </v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </VForm>    
   </v-menu>
 </template>

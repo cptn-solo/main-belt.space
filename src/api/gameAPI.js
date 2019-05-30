@@ -50,11 +50,25 @@ export default {
     }
     return transactEOS(this.api, this.accountname, this.gameContract, 'forget', data)
   },
-  async getAccountsForPublicKey(publicKey) {
+  async getAccount(accountname) {
     try {
-      return (await this.rpc.history_get_key_accounts(publicKey)).account_names
+      const fullData = {
+        json: true,
+        limit: 1,
+        account_name: accountname
+      }
+      const requestOptions = {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
+    
+      const result = (await axios.post(
+        this.rpc.endpoint + '/v1/chain/get_account',
+        fullData,
+        requestOptions
+      )).data
+      return result
     } catch (ex) {
-      throw ex
+      throw new ServerRequestError(ex)
     }
   },
   /** Voting */
@@ -120,7 +134,7 @@ async function getEOSTableRows(rpc, data, accumulated = null) {
       return await getEOSTableRows(rpc, data, rows)
     else return rows
   } catch (ex) {
-    throw new ServerRequestError(ex)
+    throw new ServerRequestError(ex)    
   }
 }
 
@@ -132,6 +146,6 @@ async function transactEOS(api, account, contract, action, data) {
       { blocksBehind: 3, expireSeconds: 30 }
     )
   } catch (ex) {
-    throw new ServerRequestError(ex)
+    throw new ServerRequestError(ex)    
   }
 }

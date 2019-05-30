@@ -132,11 +132,17 @@ export class UserProfileNoAccountError extends ApplicationError {
   }
 }
 
-export class UserProfileAccountsNotfoundError extends ApplicationError {
+export class UserProfileWrongKeyError extends ApplicationError {
   constructor() {
+    super("Wrong key provided for account specified", 'Wrong key')
+  }
+}
+
+export class UserProfileAccountsNotfoundError extends ApplicationError {
+  constructor(ex) {
     super(
-      'No accounts registred in blockchain for key specified',
-      'Accounts not found'
+      'Accounts is not registred in blockchain',
+      'Account not found'
     )
   }
 }

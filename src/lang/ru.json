@@ -1,4 +1,6 @@
 {
-	"upImportKeyPH": "Приватный ключ",
-	"upProfileNotInit": "Нет профиля"
+	"upImportAccountPH": "Имя аккаунта",
+	"upImportKeyPH": "Приватный ключ",	
+	"upProfileNotInit": "Нет профиля",
+	"upImportKeyBtn": "Импорт ключа"
 }

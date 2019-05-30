@@ -41,8 +41,9 @@ export const actions = {
   async checkSavedCredentials({ dispatch, getters, rootGetters }) {
     try {
       const localKey = rootGetters['settings/localKey']
+      const localAccount = rootGetters['settings/localAccount']
       if (localKey) {
-        return await dispatch('noscatter/login', localKey, { root: true })
+        return await dispatch('noscatter/login', { accountname: localAccount, privKey: localKey }, { root: true })
       } else if (getters.useScatter) {
         return await dispatch('scatter/login', null, { root: true })
       }

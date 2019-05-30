@@ -1,4 +1,6 @@
 {
+  "upImportAccountPH": "Account name",
   "upImportKeyPH": "Private key",
+  "upImportKeyBtn": "Import key",
   "upProfileNotInit": "No profile"
 }

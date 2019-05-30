@@ -39,7 +39,7 @@
         let loader = this.$loading.show()
         try {
           await this.$store.dispatch('userProfile/forget')
-        } catch (ex) {
+        } catch (ex) {          
           this.$dialog.error(new ApplicationError(ex))
         }
         loader.hide()

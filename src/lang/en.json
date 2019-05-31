@@ -1,6 +1,8 @@
 {
-  "upImportAccountPH": "Account name",
-  "upImportKeyPH": "Private key",
+  "upLogin": "Login",
+  "upLoginScatterBtn": "Login with Scatter",
   "upImportKeyBtn": "Import key",
+  "upImportAccountPH": "Account name",
+  "upImportKeyPH": "Private key",  
   "upProfileNotInit": "No profile"
 }

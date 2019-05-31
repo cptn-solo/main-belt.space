@@ -1,7 +1,6 @@
 <script>
-  import ScatterPanel from './components/ScatterPanel'
-  import ImportPanel from './components/ImportPanel'
   import ProfilePanel from './components/ProfilePanel'
+  import ImportPanel from './components/ImportPanel'
   import { mapState } from 'vuex'
   import * as constants from './state/constants'
 
@@ -9,7 +8,8 @@
     data: () => ({
       drawer: null,
       version: 'v.' + process.env.VERSION + ' (' + process.env.BRANCH + ')',
-      constants
+      constants,
+      importPanel: false
     }),
     computed: {
       ...mapState({
@@ -21,14 +21,10 @@
       this.$store.dispatch('engine/launch')
     },
     components: {
-      ScatterPanel,
-      ImportPanel,
-      ProfilePanel
+      ProfilePanel, ImportPanel
     },
     props: {
       source: String
-    },
-    methods: {
     }
   }
 </script>
@@ -57,9 +53,10 @@
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>Belt</v-toolbar-title>
       <v-spacer/>
-      <ScatterPanel v-if="status < constants.PROFILE_LOGGEDIN"/>
-      <ImportPanel v-show="status < constants.PROFILE_LOGGEDIN"/><!-- v-show used as this component must present in DOM to avoid warns -->
-      <ProfilePanel v-if="status >= constants.PROFILE_LOGGEDIN" :player="player" :status="status" />
+      <ProfilePanel :player="player" :status="status" @showimportpanel="importPanel = true" />
+      <v-dialog v-model="importPanel" transition="slide-y-transition" width="300">        
+        <ImportPanel @finished="importPanel = false"/>
+      </v-dialog>
     </v-toolbar>
     <v-content>
       <v-container fluid fill-height>

@@ -54,38 +54,34 @@
 </script>
 
 <template>
-  <v-card>
-    <v-dialog v-model="showBranchInfo">
-      <BranchMetaPanel @start="startGame" @hideinfo="hideMeta"/>
-    </v-dialog>
-    <v-toolbar>
-      <v-toolbar-title>Woffler game</v-toolbar-title>
-      <v-spacer></v-spacer>
-      <ReloadButton
-        :loading="loading"
-        @click="loadData"
-      />
-    </v-toolbar>
-    <v-card-text>
-      <RootBranchPicker v-if="!player.levelresult"
-        class="wflbox"                 
-        :branches="branches"
-        @showbranchinfo="showbranchinfo"/>
-      <WofflerPanel v-else
-        class="wflbox"        
-        :player="player"/>
-    </v-card-text>
-    <v-card-actions>
-      <v-btn icon>
-        <v-icon>favorite</v-icon>
-      </v-btn>
-    </v-card-actions>
-  </v-card>
+  <v-container pa-0>
+    <v-layout>
+      <v-flex>
+        <v-dialog v-model="showBranchInfo">
+          <BranchMetaPanel @start="startGame" @hideinfo="hideMeta"/>
+        </v-dialog>
+        <v-toolbar flat>
+          <v-toolbar-title>Woffler game</v-toolbar-title>
+          <v-spacer />
+          <ReloadButton
+            :loading="loading"
+            @click="loadData"
+          />
+        </v-toolbar>
+        <RootBranchPicker v-if="!player.levelresult"
+          :branches="branches"
+          @showbranchinfo="showbranchinfo"/>
+        <WofflerPanel v-else
+          class="wflbox"        
+          :player="player"/>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 <style>
 .wflbox {
-    width: 320px;
-    height: 320px;
+    width: 200px;
+    height: 200px;
     border: 1px solid black
 }
 

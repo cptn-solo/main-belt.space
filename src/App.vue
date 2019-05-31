@@ -1,6 +1,7 @@
 <script>
   import ProfilePanel from './components/ProfilePanel'
   import ImportPanel from './components/ImportPanel'
+  import PlayerInfo from './components/woffler/PlayerInfoPanel'
   import { mapState } from 'vuex'
   import * as constants from './state/constants'
 
@@ -9,19 +10,21 @@
       drawer: null,
       version: 'v.' + process.env.VERSION + ' (' + process.env.BRANCH + ')',
       constants,
-      importPanel: false
+      importPanel: false,
+      playerInfoPanel: false,
+      darkTheme: true
     }),
     computed: {
       ...mapState({
         player: state => state.userProfile.player,
-        status: state => state.userProfile.profileState
+        status: state => state.userProfile.profileState,
       }),
     },
     mounted() {
       this.$store.dispatch('engine/launch')
     },
     components: {
-      ProfilePanel, ImportPanel
+      ProfilePanel, ImportPanel, PlayerInfo
     },
     props: {
       source: String
@@ -30,7 +33,7 @@
 </script>
 
 <template>
-  <v-app dark>
+  <v-app :dark="darkTheme">
     <v-navigation-drawer
       v-model="drawer"
       clipped
@@ -47,25 +50,46 @@
         <v-list-tile to="/woffler">
           <v-list-tile-title>Woffler Game</v-list-tile-title>
         </v-list-tile>
+         <v-divider />
+        <v-list-tile @click="darkTheme = !darkTheme">
+          <v-list-tile-content>Theme</v-list-tile-content>
+          <v-list-tile-action>
+            <v-btn icon>
+              <v-icon>brightness_2</v-icon>
+            </v-btn>
+          </v-list-tile-action>          
+        </v-list-tile>
       </v-list>
     </v-navigation-drawer>
     <v-toolbar app fixed clipped-left>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>Belt</v-toolbar-title>
       <v-spacer/>
-      <ProfilePanel :player="player" :status="status" @showimportpanel="importPanel = true" />
-      <v-dialog v-model="importPanel" transition="slide-y-transition" width="300">        
-        <ImportPanel @finished="importPanel = false"/>
-      </v-dialog>
+      <ProfilePanel :player="player" :status="status"
+        @showimportpanel="importPanel = true" />
+      <template slot="extension" v-if="playerInfoPanel && status >= constants.PROFILE_LOGGEDIN">
+        <PlayerInfo :player="player" :status="status" />
+      </template>
+      <v-btn v-if="status >= constants.PROFILE_LOGGEDIN"
+        fab small bottom absolute style="left: 50%; margin-left: -13px; margin-bottom: 8px; width: 26px; height: 26px;"
+          @click="playerInfoPanel = !playerInfoPanel">
+          <v-icon v-if="playerInfoPanel">keyboard_arrow_up</v-icon>
+          <v-icon v-else>keyboard_arrow_down</v-icon>
+      </v-btn>
     </v-toolbar>
+    <v-dialog v-model="importPanel" transition="slide-y-transition" width="300">
+      <ImportPanel @finished="importPanel = false"/>
+    </v-dialog>
     <v-content>
-      <v-container fluid fill-height>
+      <!-- moved outside layout to enable custom layouts in views -->
+      <router-view></router-view>
+      <!-- <v-container fluid fill-height>
         <v-layout justify-center align-center>
           <v-flex shrink>
             <router-view></router-view>
           </v-flex>
         </v-layout>
-      </v-container>
+      </v-container> -->
     </v-content>
     <v-footer app fixed>
       <span class="version">&copy; 2019&nbsp;|&nbsp;{{ version }}</span>
@@ -92,8 +116,8 @@
 }
 .inner-panel {
   max-width: 500px;
-  margin-left: 50px;
-  margin-right: 50px;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 .flex-column {
   display: flex;

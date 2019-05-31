@@ -1,6 +1,7 @@
 {
 	"upProfileNotInit": "Нет профиля",
 	"upLogin": "Вход",
+	"upLogout": "Выход",
 	"upLoginScatterBtn": "Использовать Scatter",
 	"upImportKeyBtn": "Импорт ключа",
 	"upImportAccountPH": "Имя аккаунта",

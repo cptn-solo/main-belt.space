@@ -1,5 +1,6 @@
 {
   "upLogin": "Login",
+  "upLogout": "Logout",
   "upLoginScatterBtn": "Login with Scatter",
   "upImportKeyBtn": "Import key",
   "upImportAccountPH": "Account name",

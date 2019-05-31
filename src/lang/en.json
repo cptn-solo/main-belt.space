@@ -4,5 +4,7 @@
   "upImportKeyBtn": "Import key",
   "upImportAccountPH": "Account name",
   "upImportKeyPH": "Private key",  
-  "upProfileNotInit": "No profile"
+  "upProfileNotInit": "No profile",
+  "wflBrRoolsLink":"rools",
+  "wflBranchStake":"stake"
 }

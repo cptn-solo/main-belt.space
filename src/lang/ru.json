@@ -4,5 +4,7 @@
 	"upLoginScatterBtn": "Использовать Scatter",
 	"upImportKeyBtn": "Импорт ключа",
 	"upImportAccountPH": "Имя аккаунта",
-	"upImportKeyPH": "Приватный ключ"	
+	"upImportKeyPH": "Приватный ключ",
+	"wflRoolsLink":"правила",
+	"wflBranchStake":"стэйк"
 }

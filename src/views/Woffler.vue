@@ -25,9 +25,10 @@
     methods: {
       async loadData() {
         this.loading = true
-        if (this.player.levelresult === 0)
-          await this.$store.dispatch('woffler/loadBranches')
-        else if (this.player.account.length > 0)
+        await this.$store.dispatch('woffler/loadBranchMetas')
+        await this.$store.dispatch('woffler/loadBranches')
+        await this.$store.dispatch('woffler/loadLevels')
+        if (this.player.account.length > 0)
           await this.$store.dispatch('userProfile/loadAndProcessIngameProfile')
         this.loading = false
       }

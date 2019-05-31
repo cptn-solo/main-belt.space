@@ -29,11 +29,25 @@ export default {
     })
     // return getTokenBalance('ASTRO') // запрос контракта не взлетел, переделал на запрос таблицы
   },
+  getBranchMetas() {
+    return getEOSTableRows(this.rpc, {
+      code: this.gameContract,
+      scope: this.gameContract,
+      table: 'brnchmeta',
+    })
+  },
   getBranches() {
     return getEOSTableRows(this.rpc, {
       code: this.gameContract,
       scope: this.gameContract,
       table: 'branches',
+    })
+  },
+  getLevels() {
+    return getEOSTableRows(this.rpc, {
+      code: this.gameContract,
+      scope: this.gameContract,
+      table: 'levels',
     })
   },
   /** Actions */

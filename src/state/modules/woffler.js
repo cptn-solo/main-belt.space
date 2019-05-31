@@ -7,7 +7,8 @@ import {
 const initialState = {
     branches: [],
     brnchmetas: [],
-    levels:[]
+    levels:[],
+    selectedBranch: null
   }
 
 export const state = Object.assign({}, initialState)
@@ -30,14 +31,18 @@ export const mutations = {
       },[])
 },
   setLevels: (state, levels) => (state.levels = levels),
+  setSelectedBranch: (state, branch) => (state.selectedBranch = branch),
   resetData: state => {
     state.branches = []
     state.brnchmetas = []
     state.levels = []
-  },
+  },  
 }
 
 export const actions = {
+  selectBranch({ commit }, branch) {
+    commit('setSelectedBranch', branch)
+  },
   async loadBranchMetas({ commit, rootGetters, state }) {
     try {
       const metas = (await rootGetters['noscatter/gameAPI'].getBranchMetas())

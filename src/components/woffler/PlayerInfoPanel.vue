@@ -1,6 +1,7 @@
 <script>
 import * as constants from '../../state/constants'
 import ApplicationError from '../../dialogs/applicationError'
+import { UserProfileForgetKeyConfirm } from '../../dialogs/userProfileConfirmations'
 
 export default {
   props: {
@@ -28,7 +29,11 @@ export default {
         loader.hide()
       },
       async forget() {
+        if (!(await this.$dialog.confirm(new UserProfileForgetKeyConfirm())))
+          return
+
         this.$ga.event('user', 'forget', '--', 0)
+          
         let loader = this.$loading.show()
         try {
           await this.$store.dispatch('userProfile/forget')
@@ -46,9 +51,9 @@ export default {
       <v-flex>
         <v-layout column justify-end align-start>
           <v-btn v-if="status === constants.PROFILE_LOGGEDIN"
-            flex small flat outline @click="signup">Signup</v-btn>
+            flex small flat outline @click="signup">{{$t('upSignup')}}</v-btn>
           <v-btn v-if="status === constants.PROFILE_INITIALIZED"
-            flex small flat outline @click="forget">Forget</v-btn>
+            flex small flat outline @click="forget">{{$t('upForget')}}</v-btn>
         </v-layout>
       </v-flex>
       <v-flex>
@@ -56,11 +61,11 @@ export default {
           column justify-start align-end>      
           <template v-if="status === constants.PROFILE_INITIALIZED">
             <v-flex>
-              <span class="caption">Balance:</span>&nbsp;
+              <span class="caption">{{$t('upBalance')}}:</span>&nbsp;
               <span class="asset">{{player.activebalance}}</span>        
             </v-flex>
             <v-flex>
-              <span class="caption">Vesting:</span>&nbsp;
+              <span class="caption">{{$t('upVesting')}}:</span>&nbsp;
               <span class="asset">{{player.vestingbalance}}</span>
             </v-flex>
           </template>

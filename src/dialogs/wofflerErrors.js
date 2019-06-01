@@ -17,3 +17,9 @@ export class WflLevelsLoadError extends ApplicationError {
     super(error, 'Load levels error', 'Error loading levels')
   }
 }
+
+export class WflBranchSwitchError extends ApplicationError {
+  constructor(error) {
+    super(error, 'Join game', 'Error joining the game')
+  }
+}

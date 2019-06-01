@@ -64,6 +64,13 @@ export default {
     }
     return transactEOS(this.api, this.accountname, this.gameContract, 'forget', data)
   },
+  switchbrnch(account, idbranch) {
+    const data = {
+      account: account,
+      idbranch: idbranch
+    }
+    return transactEOS(this.api, this.accountname, this.gameContract, 'switchbrnch', data)
+  },
   async getAccount(accountname) {
     try {
       const fullData = {

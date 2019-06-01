@@ -1,7 +1,8 @@
 import {
   WflBranchMetasLoadError,
   WflBranchesLoadError,
-  WflLevelsLoadError
+  WflLevelsLoadError,
+  WflBranchSwitchError
 } from '../../dialogs/wofflerErrors'
 
 const initialState = {
@@ -14,6 +15,12 @@ const initialState = {
 export const state = Object.assign({}, initialState)
 
 export const getters = {
+  gameAPI(state, getters, rootState) {
+    return rootState.engine.gameAPI
+  },
+  accountname(state, getters) {
+    return getters.gameAPI.accountname
+  },
   startLevels(state) {//returns levelInfo (level+branch+meta)
     const activeLevels = state.levels
       .filter(l => (!l.locked && l.idparent === 0))
@@ -47,6 +54,15 @@ export const mutations = {
 export const actions = {
   selectLevel({ commit }, levelInfo) {
     commit('setSelectedLevel', levelInfo)
+  },
+  async joinGame({ getters, dispatch }, levelInfo) {
+    const account = getters.accountname
+    try {
+      await getters.gameAPI.switchbrnch(account, levelInfo.branch.id)
+      await dispatch('userProfile/loadAndProcessIngameProfile', account, { root: true })
+    } catch (ex) {
+      throw new WflBranchSwitchError(ex)
+    }
   },
   async loadBranchMetas({ commit, rootGetters, state }) {
     try {

@@ -3,6 +3,7 @@
   import LinksPanel from './components/LinksPanel'
   import ProfilePanel from './components/ProfilePanel'
   import ImportPanel from './components/ImportPanel'
+  import ActionsPanel from './components/ActionsPanel'
   import PlayerInfo from './components/woffler/PlayerInfoPanel'
   import LanguageSelector from './components/controls/LanguageSelector'
   import { mapState } from 'vuex'
@@ -10,7 +11,7 @@
 
   export default {
     components: {
-      NavigationPanel, LinksPanel, ProfilePanel, ImportPanel, PlayerInfo, LanguageSelector
+      NavigationPanel, LinksPanel, ProfilePanel, ImportPanel, ActionsPanel, PlayerInfo, LanguageSelector
     },
     props: {
       source: String
@@ -36,8 +37,8 @@
       status(n, o) {
         if (n === constants.PROFILE_INITIALIZED)
           this.playerInfoPanel = true
-      }
-    }    
+      },
+    },
   }
 </script>
 
@@ -72,6 +73,7 @@
     <v-dialog v-model="importPanel" transition="slide-y-transition" width="300">
       <ImportPanel @finished="importPanel = false"/>
     </v-dialog>
+    <ActionsPanel />
     <v-content>
       <!-- moved outside layout to enable custom layouts in views -->
       <router-view></router-view>

@@ -151,13 +151,9 @@ export const actions = {
     }
   },
   async loadAndProcessIngameProfile(
-    { commit, dispatch, getters, rootGetters },
-    accountname
-  ) {
+    { commit, dispatch, getters }, accountname) {
     try {
-      const profileRows = await getters.gameAPI.getIngameProfileForAccount(
-        accountname
-      )
+      const profileRows = await getters.gameAPI.getIngameProfileForAccount(accountname)
       let profileInitialized = false
       if (profileRows.length === 1 && profileRows[0].account === accountname) {
         profileInitialized = true

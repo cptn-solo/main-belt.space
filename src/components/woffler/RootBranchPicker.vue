@@ -1,4 +1,5 @@
 <script>  
+  import { BranchSwitchConfirm } from '../../dialogs/wofflerConfirmations'
   export default {
     props: {
       startLevels: {
@@ -8,8 +9,20 @@
     },
     methods: {
       showMeta(idx) {
-        this.$emit('showlvlinfo', idx)
-      }      
+        this.$emit('showlvlinfo', idx)                  
+      },
+      showActions(idx) {
+        this.$store.dispatch('engine/requestActions', [
+          {
+            icon: 'play_circle_outline', 
+            title: 'wflActionJoinGame', 
+            selector: 'woffler/joinGame',
+            payload: this.startLevels[idx],
+            lock: true,
+            confirm: new BranchSwitchConfirm()
+          }
+        ])
+      }
     }
   }
 </script>
@@ -17,7 +30,7 @@
   <v-list dense two-line>
     <v-list-tile v-for="(level, idx) in startLevels"      
       :key="idx"
-      @click="showMeta(idx)"
+      @click="showActions(idx)"
       ripple> 
       <v-list-tile-content>
         <v-list-tile-title>
@@ -28,7 +41,9 @@
         </v-list-tile-sub-title>
       </v-list-tile-content>
       <v-list-tile-action>
-        <v-btn icon ripple><v-icon small>info</v-icon></v-btn>        
+        <v-btn icon ripple @click.stop="showMeta(idx)">
+          <v-icon small>info</v-icon>
+        </v-btn>        
       </v-list-tile-action>
     </v-list-tile>
   </v-list>

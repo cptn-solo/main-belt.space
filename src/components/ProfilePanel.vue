@@ -55,12 +55,7 @@
 </script>
 
 <template>
-  <v-menu
-    v-model="showMenu"
-    offset-y
-    offset-x
-    :nudge-bottom="15"    
-  >
+  <v-menu v-model="showMenu">
     <template slot="activator">
       <span v-if="status >= constants.PROFILE_LOGGEDIN">
         <b>{{account}}</b>

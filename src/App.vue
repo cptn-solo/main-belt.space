@@ -1,4 +1,6 @@
 <script>
+  import NavigationPanel from './components/NavigationPanel'
+  import LinksPanel from './components/LinksPanel'
   import ProfilePanel from './components/ProfilePanel'
   import ImportPanel from './components/ImportPanel'
   import PlayerInfo from './components/woffler/PlayerInfoPanel'
@@ -8,7 +10,7 @@
 
   export default {
     components: {
-      ProfilePanel, ImportPanel, PlayerInfo, LanguageSelector
+      NavigationPanel, LinksPanel, ProfilePanel, ImportPanel, PlayerInfo, LanguageSelector
     },
     props: {
       source: String
@@ -47,28 +49,8 @@
       fixed
       app
     >
-      <v-list dense>
-        <v-list-tile to="/">
-          <v-list-tile-title>Home</v-list-tile-title>
-        </v-list-tile>
-        <v-list-tile to="/about">
-          <v-list-tile-title>About</v-list-tile-title>
-        </v-list-tile>
-        <v-list-tile to="/woffler">
-          <v-list-tile-title>Woffler Game</v-list-tile-title>
-        </v-list-tile>
-         <v-divider />
-        <v-list-tile @click="darkTheme = !darkTheme">
-          <v-list-tile-content>Theme</v-list-tile-content>
-          <v-list-tile-action>
-            <v-btn icon>
-              <v-icon>brightness_2</v-icon>
-            </v-btn>
-          </v-list-tile-action>
-        </v-list-tile>        
-      </v-list>
-      <div style="position:absolute;bottom:5px; color: gray; font-size: smaller; padding: 5px">
-      Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" 		    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 		    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+      <NavigationPanel @toggledarktheme="darkTheme = !darkTheme"/>
+      <LinksPanel />
     </v-navigation-drawer>
     <v-toolbar app fixed clipped-left>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>

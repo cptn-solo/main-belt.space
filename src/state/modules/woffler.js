@@ -8,15 +8,20 @@ const initialState = {
     branches: [],
     brnchmetas: [],
     levels:[],
-    selectedBranch: null
+    selectedLevelInfo: null //lvl.branch.meta
   }
 
 export const state = Object.assign({}, initialState)
 
 export const getters = {
-  rootBranches(state) {
-    return state.branches
-      .filter(b => b.idparent === 0)
+  startLevels(state) {//returns levelInfo (level+branch+meta)
+    const activeLevels = state.levels
+      .filter(l => (!l.locked && l.idparent === 0))
+      .reduce((ret, l) => {
+        ret.push(Object.assign(l, { branch: state.branches.find(b => b.id === l.idbranch)}))
+        return ret
+      }, [])
+    return activeLevels
   }
 }
 
@@ -31,7 +36,7 @@ export const mutations = {
       },[])
 },
   setLevels: (state, levels) => (state.levels = levels),
-  setSelectedBranch: (state, branch) => (state.selectedBranch = branch),
+  setSelectedLevel: (state, levelInfo) => (state.selectedLevelInfo = levelInfo),
   resetData: state => {
     state.branches = []
     state.brnchmetas = []
@@ -40,8 +45,8 @@ export const mutations = {
 }
 
 export const actions = {
-  selectBranch({ commit }, branch) {
-    commit('setSelectedBranch', branch)
+  selectLevel({ commit }, levelInfo) {
+    commit('setSelectedLevel', levelInfo)
   },
   async loadBranchMetas({ commit, rootGetters, state }) {
     try {

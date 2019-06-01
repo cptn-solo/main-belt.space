@@ -2,6 +2,10 @@
 import { mapState } from 'vuex';
 export default {
   props: {
+    canPlay: {
+      type: Boolean,
+      default: false
+    },
     rows: {
       type: Array,
       default: () => [
@@ -26,12 +30,12 @@ export default {
   data: () => ({}),
   computed: {
     ...mapState({
-      branchInfo: state => state.woffler.selectedBranch
+      levelInfo: state => state.woffler.selectedLevelInfo
     })
   },
   methods: {
     startGame() {
-      this.$emit('start', this.branchInfo)
+      this.$emit('start', this.levelInfo)
     },
     hideInfo() {
       this.$emit('hideinfo')
@@ -41,31 +45,46 @@ export default {
 </script>
 <template>
   <v-card>
-    <v-card-title>{{$t('wflBrMetaInfoTitle')}}</v-card-title>
-    <v-card-text v-if="branchInfo && branchInfo.meta">
-      <v-list subheader>
-        <v-subheader>{{branchInfo.meta.name}}</v-subheader>
-        <v-list-tile v-for="(row, idx) in rows" :key="idx">
-          <v-list-tile-content>
-            <v-list-tile-title>
-              {{$t('wflBrMeta'+row[0])}}:&nbsp;<b>{{branchInfo.meta[row[0]]}}<span v-if="row[1] === '%'">&nbsp;%</span></b>
-            </v-list-tile-title>
-            <v-list-tile-sub-title>
+    <v-card-title>{{$t('wflBrMetaInfoTitle')}}
+      <template v-if="levelInfo">:&nbsp;<b>{{levelInfo.branch.meta.name}}</b></template>
+      </v-card-title>
+    <v-divider />
+    <v-card-text>
+      <v-layout column v-if="levelInfo">
+        <div flex v-for="(row, idx) in rows" :key="idx" class="my-1">
+            <div class="list-title">
+              {{$t('wflBrMeta'+row[0])}}:&nbsp;
+              <b v-if="row[1] === 'bool'">{{$t('miskYESNO'+levelInfo.branch.meta[row[0]])}}</b>
+              <b v-else>{{levelInfo.branch.meta[row[0]]}}
+                <span v-if="row[1] === '%'">&nbsp;%</span>
+              </b>
+            </div>
+            <div class="subtitle">
               {{$t('wflBrMeta'+row[0]+'h')}}
-            </v-list-tile-sub-title>
-          </v-list-tile-content>
-        </v-list-tile>
-      </v-list>
+            </div>
+          </div>
+      </v-layout>      
     </v-card-text>
+    <v-divider />
     <v-card-actions>
       <v-spacer/>
-      <v-btn text @click="hideInfo" 
-        color="secondary">{{$t('wflBrMetaCloseBtn')}}
+      <v-btn small flat outline @click="hideInfo">{{$t('wflBrMetaCloseBtn')}}
       </v-btn>
-      <v-btn text @click="startGame" v-if="branchInfo && branchInfo.meta"
+      <v-btn small @click="startGame" v-if="canPlay && levelInfo"
         color="primary">{{$t('wflBrMetaPlayBtn')}}
       </v-btn>
     </v-card-actions>
   </v-card>
 </template>
+<style scoped>
+.list-title {
+  text-align: left;
+  font-weight: bolder;
+}
+.subtitle {
+  font-size: smaller;
+  text-align: left;
+}
+</style>
+
 

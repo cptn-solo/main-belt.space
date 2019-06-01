@@ -4,6 +4,7 @@
   import BranchMetaPanel from '../components/woffler/BranchMetaPanel'
 
   import { mapState, mapGetters } from 'vuex'
+  import * as constants from '../state/constants'
 
   export default {
     components: {
@@ -13,14 +14,16 @@
     },
     data:() => ({
       loading: false,
-      showBranchInfo: false      
+      showLevelInfo: false,
+      constants    
     }),
     computed: {
       ...mapState({
-        player: state => state.userProfile.player,    
+        player: state => state.userProfile.player,
+        status: state => state.userProfile.profileState,
       }),
       ...mapGetters('woffler', {
-        branches: 'rootBranches'
+        startLevels: 'startLevels'
       })
     },
     created: function() {
@@ -36,17 +39,17 @@
           await this.$store.dispatch('userProfile/loadAndProcessIngameProfile')
         this.loading = false
       },
-      showbranchinfo(idx) {
-        this.$store.dispatch('woffler/selectBranch', this.branches[idx])
-        this.showBranchInfo = true
+      showlvlinfo(idx) {
+        this.$store.dispatch('woffler/selectLevel', this.startLevels[idx])
+        this.showLevelInfo = true
       },
       hideMeta() {
-        this.showBranchInfo = false
-        this.$store.dispatch('woffler/selectBranch', null)
+        this.showLevelInfo = false
+        this.$store.dispatch('woffler/selectLevel', null)
       },
-      startGame(branch) {        
-        this.showBranchInfo = false
-        alert(branch)
+      startGame(level) {        
+        this.showLevelInfo = false
+        alert(level)
       },
 
     }
@@ -57,11 +60,13 @@
   <v-container pa-0>
     <v-layout>
       <v-flex>
-        <v-dialog v-model="showBranchInfo">
-          <BranchMetaPanel @start="startGame" @hideinfo="hideMeta"/>
+        <v-dialog v-model="showLevelInfo" scrollable max-width="500px">
+          <BranchMetaPanel 
+            :canPlay="status === constants.PROFILE_INITIALIZED"
+            @start="startGame" @hideinfo="hideMeta"/>
         </v-dialog>
         <v-toolbar flat>
-          <v-toolbar-title>Woffler game</v-toolbar-title>
+          <v-toolbar-title>{{$t('wflActiveGames')}}</v-toolbar-title>
           <v-spacer />
           <ReloadButton
             :loading="loading"
@@ -69,8 +74,8 @@
           />
         </v-toolbar>
         <RootBranchPicker v-if="!player.levelresult"
-          :branches="branches"
-          @showbranchinfo="showbranchinfo"/>
+          :startLevels="startLevels"
+          @showlvlinfo="showlvlinfo"/>
         <WofflerPanel v-else
           class="wflbox"        
           :player="player"/>

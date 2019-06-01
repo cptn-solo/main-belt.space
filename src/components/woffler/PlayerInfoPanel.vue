@@ -1,5 +1,6 @@
 <script>
 import * as constants from '../../state/constants'
+import ApplicationError from '../../dialogs/applicationError'
 
 export default {
   props: {

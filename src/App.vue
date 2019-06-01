@@ -2,10 +2,17 @@
   import ProfilePanel from './components/ProfilePanel'
   import ImportPanel from './components/ImportPanel'
   import PlayerInfo from './components/woffler/PlayerInfoPanel'
+  import LanguageSelector from './components/controls/LanguageSelector'
   import { mapState } from 'vuex'
   import * as constants from './state/constants'
 
   export default {
+    components: {
+      ProfilePanel, ImportPanel, PlayerInfo, LanguageSelector
+    },
+    props: {
+      source: String
+    },
     data: () => ({
       drawer: null,
       version: 'v.' + process.env.VERSION + ' (' + process.env.BRANCH + ')',
@@ -23,12 +30,12 @@
     mounted() {
       this.$store.dispatch('engine/launch')
     },
-    components: {
-      ProfilePanel, ImportPanel, PlayerInfo
-    },
-    props: {
-      source: String
-    }
+    watch: {
+      status(n, o) {
+        if (n === constants.PROFILE_INITIALIZED)
+          this.playerInfoPanel = true
+      }
+    }    
   }
 </script>
 
@@ -57,9 +64,11 @@
             <v-btn icon>
               <v-icon>brightness_2</v-icon>
             </v-btn>
-          </v-list-tile-action>          
-        </v-list-tile>
+          </v-list-tile-action>
+        </v-list-tile>        
       </v-list>
+      <div style="position:absolute;bottom:5px; color: gray; font-size: smaller; padding: 5px">
+      Icons made by <a href="https://www.flaticon.com/authors/freepik" title="Freepik">Freepik</a> from <a href="https://www.flaticon.com/" 		    title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/" 		    title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
     </v-navigation-drawer>
     <v-toolbar app fixed clipped-left>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
@@ -76,6 +85,7 @@
           <v-icon v-if="playerInfoPanel">keyboard_arrow_up</v-icon>
           <v-icon v-else>keyboard_arrow_down</v-icon>
       </v-btn>
+      <LanguageSelector />
     </v-toolbar>
     <v-dialog v-model="importPanel" transition="slide-y-transition" width="300">
       <ImportPanel @finished="importPanel = false"/>

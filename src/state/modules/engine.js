@@ -7,7 +7,8 @@ import ApplicationError from '../../dialogs/applicationError'
 const initialState = {
   gameAPI,
   i18n,
-  pendingGUIActions: []//{icon (md icon name), title (localisation label), selector ('module/action/), payload (obj)}
+  pendingGUIActions: [], //{icon (md icon name), title (localisation label), selector ('module/action/), payload (obj)}
+  currentGUIAction: null
 }
 export const state = Object.assign({}, initialState)
 
@@ -25,6 +26,7 @@ export const getters = {
 
 export const mutations = {
   requestActions: (state, actions) => (state.pendingGUIActions = actions),
+  setCurrentAction: (state, action) => (state.currentGUIAction = action),
   resetData: state => {
     for (var key in state) {
       if (initialState.hasOwnProperty(key)) {
@@ -46,10 +48,22 @@ export const actions = {
   requestActions({ commit }, actions) {
     commit('requestActions', actions)
   },
-  async actionPicked({ dispatch, commit, state }, idx) {
-    const action = state.pendingGUIActions[idx]
-    try {
+  actionPicked({ commit, state }, idx) {
+    try {      
+      const action = state.pendingGUIActions[idx]
+      commit('setCurrentAction', action)
+    } catch (ex) {
+      throw new ApplicationError(ex)
+    }    
+  },
+  enqueueAction({ commit }, action) {
+    commit('setCurrentAction', action)
+  },
+  async performEnqueuedAction({ dispatch, commit, state }) {
+    try {      
+      const action = state.currentGUIAction
       await dispatch(action.selector, action.payload, { root: true })
+      commit('setCurrentAction', null)
       commit('requestActions', [])
     } catch (ex) {
       throw new ApplicationError(ex)

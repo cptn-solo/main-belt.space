@@ -7,11 +7,15 @@ import { mapState } from 'vuex';
     computed: {
       ...mapState({
         pendingActions: state => state.engine.pendingGUIActions,
+        currentAction: state => state.engine.currentGUIAction,
       })
     },
     watch: {
       pendingActions(n, o) {
         this.sheet = (n.length > 0)
+      },
+      currentAction(n, o) {
+        if(n) this.processAction(n)
       },
       sheet(n, o) {
         if (!n)
@@ -19,20 +23,23 @@ import { mapState } from 'vuex';
       }
     },
     methods: {
-      async actionSelected(idx) {
-        this.$emit('action', idx)
-        const action = this.pendingActions[idx]
+      actionSelected(idx) {
+          this.$store.dispatch('engine/actionPicked', idx)
+      },
+      async processAction(action) {
         let loader
         
-        if (action.confirm && !(await this.$dialog.confirm(action.confirm)))
+        if (action.confirm && !(await this.$dialog.confirm(action.confirm))) {
+          this.$store.dispatch('engine/enqueueAction', null)
           return
+        }
 
         if (action.lock) loader = this.$loading.show()
 
         this.$ga.event('action', action.title, '--', 1)
 
         try {
-          await this.$store.dispatch('engine/actionPicked', idx)
+          await this.$store.dispatch('engine/performEnqueuedAction')
         } catch (ex) {
           this.$dialog.error(ex)
         }
@@ -45,14 +52,6 @@ import { mapState } from 'vuex';
 <template>
   <div class="text-xs-center">
     <v-bottom-sheet v-model="sheet">
-      <!-- <template v-slot:activator>
-        <v-btn
-          color="purple"
-          dark
-        >
-          Click me
-        </v-btn>
-      </template> -->
       <v-list>
         <v-subheader>Actions</v-subheader>
         <v-list-tile

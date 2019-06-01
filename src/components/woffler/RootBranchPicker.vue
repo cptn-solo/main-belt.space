@@ -4,7 +4,11 @@
     props: {
       startLevels: {
         type: Array,
-        default: () => []
+        default: () => ([])
+      },
+      startAction: {
+        type: Object,
+        default: () => ({})
       }
     },
     methods: {
@@ -12,16 +16,13 @@
         this.$emit('showlvlinfo', idx)                  
       },
       showActions(idx) {
-        this.$store.dispatch('engine/requestActions', [
-          {
-            icon: 'play_circle_outline', 
-            title: 'wflActionJoinGame', 
-            selector: 'woffler/joinGame',
-            payload: this.startLevels[idx],
-            lock: true,
-            confirm: new BranchSwitchConfirm()
-          }
-        ])
+        const payload = this.startLevels[idx]
+        const startGameAction = Object.assign(this.startAction, { payload })
+        const showRulesAction = { icon: 'info_outline', title: 'wflActionShowRules', 
+          selector: 'woffler/selectLevel', payload
+        }
+        const actions = [startGameAction, showRulesAction]
+        this.$store.dispatch('engine/requestActions', actions)
       }
     }
   }

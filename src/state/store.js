@@ -13,7 +13,8 @@ const vuexLocal = new VuexPersistence({
   clearOn: 'logout',
   reducer: state => ({
     settings: state.settings,
-    userProfile: state.userProfile
+    userProfile: state.userProfile,
+    woffler: state.woffler
   }),
   filter: mutation =>
     persistentMutations.findIndex(m => m === mutation.type) < 0, // это если исключать "неугодные" мутации. Иначе - проверять на >= 0 и держать в массиве persistentMutations угодных

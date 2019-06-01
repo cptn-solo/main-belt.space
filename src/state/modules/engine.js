@@ -6,7 +6,8 @@ import ApplicationError from '../../dialogs/applicationError'
 
 const initialState = {
   gameAPI,
-  i18n
+  i18n,
+  pendingGUIActions: []//{icon (md icon name), title (localisation label), selector ('module/action/), payload (obj)}
 }
 export const state = Object.assign({}, initialState)
 
@@ -17,9 +18,13 @@ export const getters = {
   selectedLocale(state, getters, rootState) {
     return rootState.settings.selectedLocale
   },
-}
+  pendingActions(state) {
+    return state.pendingGUIActions.length > 0
+  }
+ }
 
 export const mutations = {
+  requestActions: (state, actions) => (state.pendingGUIActions = actions),
   resetData: state => {
     for (var key in state) {
       if (initialState.hasOwnProperty(key)) {
@@ -38,11 +43,24 @@ export const actions = {
     const _locale = getters.selectedLocale.locale
     state.i18n.locale = _locale
   },
+  requestActions({ commit }, actions) {
+    commit('requestActions', actions)
+  },
+  async actionPicked({ dispatch, commit, state }, idx) {
+    const action = state.pendingGUIActions[idx]
+    try {
+      await dispatch(action.selector, action.payload, { root: true })
+      commit('requestActions', [])
+    } catch (ex) {
+      throw new ApplicationError(ex)
+    }    
+  },
   async checkSavedCredentials({ dispatch, getters, rootGetters }) {
     try {
       const localKey = rootGetters['settings/localKey']
+      const localAccount = rootGetters['settings/localAccount']
       if (localKey) {
-        return await dispatch('onboarding/importKey', localKey, { root: true })
+        return await dispatch('noscatter/login', { accountname: localAccount, privKey: localKey }, { root: true })
       } else if (getters.useScatter) {
         return await dispatch('scatter/login', null, { root: true })
       }

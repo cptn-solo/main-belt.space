@@ -5,15 +5,17 @@ import LocalSignatureProvider from '../../sigprovider/localSigner'
 
 import {
   UserProfileAccountsLoadError,
+  UserProfileAccountsNotfoundError,
   UserProfileNoKeyGeneratedError,
   UserProfileNoKeyToImportError,
   UserProfileKeyExportError,
+  UserProfileWrongKeyError
 } from '../../dialogs/userProfileErrors'
 import ApplicationError from '../../dialogs/applicationError'
 
 const initialState = {
   signatureProvider: null,
-  keyAccounts: null,
+  blockchainAccount: null
 }
 
 export const state = Object.assign({}, initialState)
@@ -37,9 +39,6 @@ export const getters = {
   localAccount(state, getters, rootState) {
     return rootState.settings.localAccount
   },
-  keyAccounts(state) {
-    return state.keyAccounts
-  },
   eosNetwork(state, getters, rootState, rootGetters) {
     return rootGetters.eosNetwork
   },
@@ -52,8 +51,8 @@ export const mutations = {
   setSignatureProvider: (state, provider) => {
     state.signatureProvider = provider
   },
-  setKeyAccounts: (state, keyAccounts) => {
-    state.keyAccounts = keyAccounts
+  setBlockchainAccount: (state, account) => {
+    state.blockchainAccount = account
   },
   resetData: state => {
     for (var key in state) {
@@ -65,54 +64,44 @@ export const mutations = {
 }
 
 export const actions = {
-  async login({ commit, dispatch, getters }) {
+  async login({ commit, dispatch, getters }, { accountname, privKey }) {
     try {
-      commit('userProfile/setProfileState', constants.PROFILE_UNKNOWN, {
-        root: true,
-      })
+      if (await dispatch('importKey', privKey))
+        dispatch('settings/setLocalKey', privKey, { root: true })
+
+      commit('userProfile/setProfileState', constants.PROFILE_UNKNOWN, { root: true })
       dispatch('settings/setUseScatter', false, { root: true })
       dispatch('prepareAPI')
-      const _accountname = getters.accountname || getters.localAccount
-      const _pubKey = getters.publicKey
-      const accounts = await dispatch('loadKeyAccounts', _pubKey)
-      if (accounts.length === 0) {
-        // no linked accounts. will register now
+
+      const _pubKey = getters.publicKey      
+      let _account = null
+      try {
+        _account = await dispatch('loadBlockchainAccount', accountname)          
+      } catch (ex) {
+        if (ex.networkError)
+          throw ex
+        
         await dispatch('settings/setLocalAccount', null, { root: true })
-        return false
-      } else {
-        let profileState = constants.PROFILE_REGISTERED
-        commit('userProfile/setProfileState', profileState, {
-          root: true,
-        })
-        const activeAccount =
-          accounts.length === 1
-            ? accounts[0]
-            : _accountname && accounts.find(account => account === _accountname)
-              ? _accountname
-              : null
-        if (activeAccount) {
-          profileState = await dispatch(
-            'userProfile/pickActiveAccount',
-            activeAccount,
-            { root: true }
-          )
-        }
-        return profileState
+        throw new UserProfileAccountsNotfoundError()
       }
+      let profileState = constants.PROFILE_REGISTERED
+      commit('userProfile/setProfileState', profileState, { root: true })
+
+      if (checkPermission(_account, _pubKey)) {
+        await dispatch('settings/setLocalAccount', accountname, { root: true })
+        profileState = await dispatch('userProfile/pickActiveAccount', accountname, { root: true })
+      } else throw new UserProfileWrongKeyError()
+      
+      return profileState
     } catch (ex) {
       throw ex
     }
   },
-  async forgetKey({ commit, dispatch }) {
+  async logout({ commit, dispatch }) {
     commit('setSignatureProvider', null)
-    commit('setKeyAccounts', null)
     await dispatch('settings/setLocalKey', null, { root: true })
+    await dispatch('settings/setLocalAccount', null, { root: true })
     await dispatch('prepareAPI')
-    try {
-      await dispatch('userProfile/pickActiveAccount', null, { root: true })
-    } catch (ex) {
-      throw ex
-    }
   },
   async generateKey({ commit, getters }, privateKey = null) {
     try {
@@ -170,15 +159,29 @@ export const actions = {
       throw new ApplicationError(ex)
     }
   },
-  async loadKeyAccounts({ commit, getters }, pubkey) {
+  async loadBlockchainAccount({ commit, getters }, accountname) {
     try {
-      commit(
-        'setKeyAccounts',
-        await getters.gameAPI.getAccountsForPublicKey(pubkey)
-      )
-      return getters.keyAccounts
+      const account = await getters.gameAPI.getAccount(accountname)
+      commit('setBlockchainAccount', account)
+      return account
     } catch (ex) {
+      if (ex.networkError)
+        throw ex
+      
       throw new UserProfileAccountsLoadError(ex)
     }
-  },
+  }
+}
+
+function checkPermission(accountData, pubKey) {
+  const keys = accountData.permissions
+    .filter(p => p.perm_name === 'active')
+    .reduce((keys, p) => {
+      const key = p.required_auth.keys.find(k => k.key === pubKey)
+      if(key) 
+        keys.push(key)
+      return keys
+    }, [])
+
+  return keys.length > 0
 }

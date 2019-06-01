@@ -158,11 +158,6 @@ export const actions = {
       dispatch('settings/setUseScatter', false, { root: true })
       dispatch('noscatter/prepareAPI', null, { root: true })
     }
-    try {
-      await dispatch('userProfile/pickActiveAccount', null, { root: true })
-    } catch (ex) {
-      throw ex
-    }
   },
   async setEosInstance({ dispatch, getters }) {
     const endpoint = getters.network.fullhost()

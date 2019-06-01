@@ -1,65 +1,89 @@
 <script>
-  import LoginPanel from './components/LoginPanel'
+  import NavigationPanel from './components/NavigationPanel'
+  import LinksPanel from './components/LinksPanel'
   import ProfilePanel from './components/ProfilePanel'
-  import { mapState } from 'vuex';
-  
+  import ImportPanel from './components/ImportPanel'
+  import ActionsPanel from './components/ActionsPanel'
+  import PlayerInfo from './components/woffler/PlayerInfoPanel'
+  import LanguageSelector from './components/controls/LanguageSelector'
+  import { mapState } from 'vuex'
+  import * as constants from './state/constants'
+
   export default {
-    data: () => ({
-      drawer: null,
-      version: 'v.' + process.env.VERSION + ' (' + process.env.BRANCH + ')'
-    }),
-    computed: {
-      ...mapState({
-        player: state => state.userProfile.player        
-      }),
-    },
     components: {
-      LoginPanel,
-      ProfilePanel
+      NavigationPanel, LinksPanel, ProfilePanel, ImportPanel, ActionsPanel, PlayerInfo, LanguageSelector
     },
     props: {
       source: String
     },
-    methods: {
-    }
+    data: () => ({
+      drawer: null,
+      version: 'v.' + process.env.VERSION + ' (' + process.env.BRANCH + ')',
+      constants,
+      importPanel: false,
+      playerInfoPanel: false,
+      darkTheme: true
+    }),
+    computed: {
+      ...mapState({
+        player: state => state.userProfile.player,
+        status: state => state.userProfile.profileState,
+      }),
+    },
+    mounted() {
+      this.$store.dispatch('engine/launch')
+    },
+    watch: {
+      status(n, o) {
+        if (n === constants.PROFILE_INITIALIZED)
+          this.playerInfoPanel = true
+      },
+    },
   }
 </script>
 
 <template>
-  <v-app dark>
+  <v-app :dark="darkTheme">
     <v-navigation-drawer
       v-model="drawer"
       clipped
       fixed
       app
     >
-      <v-list dense>
-        <v-list-tile to="/">
-          <v-list-tile-title>Home</v-list-tile-title>          
-        </v-list-tile>
-        <v-list-tile to="/about">
-          <v-list-tile-title>About</v-list-tile-title>
-        </v-list-tile>
-        <v-list-tile to="/woffler">
-          <v-list-tile-title>Woffler Game</v-list-tile-title>
-        </v-list-tile>
-      </v-list>
+      <NavigationPanel @toggledarktheme="darkTheme = !darkTheme"/>
+      <LinksPanel />
     </v-navigation-drawer>
     <v-toolbar app fixed clipped-left>
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-toolbar-title>Belt</v-toolbar-title>
       <v-spacer/>
-      <LoginPanel v-if="!player.account"/>
-      <ProfilePanel :player="player" v-else />
+      <ProfilePanel :player="player" :status="status"
+        @showimportpanel="importPanel = true" />
+      <template slot="extension" v-if="playerInfoPanel && status >= constants.PROFILE_LOGGEDIN">
+        <PlayerInfo :player="player" :status="status" />
+      </template>
+      <v-btn v-if="status >= constants.PROFILE_LOGGEDIN"
+        fab small bottom absolute style="left: 50%; margin-left: -13px; margin-bottom: 8px; width: 26px; height: 26px;"
+          @click="playerInfoPanel = !playerInfoPanel">
+          <v-icon v-if="playerInfoPanel">keyboard_arrow_up</v-icon>
+          <v-icon v-else>keyboard_arrow_down</v-icon>
+      </v-btn>
+      <LanguageSelector />
     </v-toolbar>
+    <v-dialog v-model="importPanel" transition="slide-y-transition" width="300">
+      <ImportPanel @finished="importPanel = false"/>
+    </v-dialog>
+    <ActionsPanel />
     <v-content>
-      <v-container fluid fill-height>
+      <!-- moved outside layout to enable custom layouts in views -->
+      <router-view></router-view>
+      <!-- <v-container fluid fill-height>
         <v-layout justify-center align-center>
           <v-flex shrink>
             <router-view></router-view>
           </v-flex>
         </v-layout>
-      </v-container>
+      </v-container> -->
     </v-content>
     <v-footer app fixed>
       <span class="version">&copy; 2019&nbsp;|&nbsp;{{ version }}</span>
@@ -74,7 +98,7 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   align-items: center;
-  justify-content: center;  
+  justify-content: center;
 }
 .blog-body {
   text-align: justify;
@@ -84,10 +108,10 @@
   align-items: center;
   justify-content: center;
 }
-.inner-panel {  
+.inner-panel {
   max-width: 500px;
-  margin-left: 50px;
-  margin-right: 50px;
+  margin-left: 10px;
+  margin-right: 10px;
 }
 .flex-column {
   display: flex;

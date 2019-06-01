@@ -29,6 +29,69 @@ export default {
     })
     // return getTokenBalance('ASTRO') // запрос контракта не взлетел, переделал на запрос таблицы
   },
+  getBranchMetas() {
+    return getEOSTableRows(this.rpc, {
+      code: this.gameContract,
+      scope: this.gameContract,
+      table: 'brnchmeta',
+    })
+  },
+  getBranches() {
+    return getEOSTableRows(this.rpc, {
+      code: this.gameContract,
+      scope: this.gameContract,
+      table: 'branches',
+    })
+  },
+  getLevels() {
+    return getEOSTableRows(this.rpc, {
+      code: this.gameContract,
+      scope: this.gameContract,
+      table: 'levels',
+    })
+  },
+  /** Actions */
+  signup(referrer) {
+    const data = {
+      account: this.accountname, 
+      referrer: referrer || this.gameContract
+    }
+    return transactEOS(this.api, this.accountname, this.gameContract, 'signup', data)
+  },
+  forget() {
+    const data = {
+      account: this.accountname
+    }
+    return transactEOS(this.api, this.accountname, this.gameContract, 'forget', data)
+  },
+  switchbrnch(account, idbranch) {
+    const data = {
+      account: account,
+      idbranch: idbranch
+    }
+    return transactEOS(this.api, this.accountname, this.gameContract, 'switchbrnch', data)
+  },
+  async getAccount(accountname) {
+    try {
+      const fullData = {
+        json: true,
+        limit: 1,
+        account_name: accountname
+      }
+      const requestOptions = {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      }
+    
+      const result = (await axios.post(
+        this.rpc.endpoint + '/v1/chain/get_account',
+        fullData,
+        requestOptions
+      )).data
+      return result
+    } catch (ex) {
+      throw new ServerRequestError(ex)
+    }
+  },
   /** Voting */
   async getProducers() {
     return getEOSTableRows(this.rpc, {
@@ -92,7 +155,7 @@ async function getEOSTableRows(rpc, data, accumulated = null) {
       return await getEOSTableRows(rpc, data, rows)
     else return rows
   } catch (ex) {
-    throw new ServerRequestError(ex)
+    throw new ServerRequestError(ex)    
   }
 }
 
@@ -104,6 +167,6 @@ async function transactEOS(api, account, contract, action, data) {
       { blocksBehind: 3, expireSeconds: 30 }
     )
   } catch (ex) {
-    throw new ServerRequestError(ex)
+    throw new ServerRequestError(ex)    
   }
 }

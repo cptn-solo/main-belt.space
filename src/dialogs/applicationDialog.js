@@ -1,4 +1,4 @@
-import store from 'src/state/store'
+import store from '../state/store'
 
 export default class ApplicationDialog {
   constructor(confirmable = null) {

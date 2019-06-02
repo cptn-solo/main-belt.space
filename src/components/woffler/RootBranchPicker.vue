@@ -1,28 +1,17 @@
 <script>  
-  import { BranchSwitchConfirm } from '../../dialogs/wofflerConfirmations'
   export default {
     props: {
       startLevels: {
         type: Array,
         default: () => ([])
       },
-      startAction: {
-        type: Object,
-        default: () => ({})
-      }
     },
     methods: {
       showMeta(idx) {
         this.$emit('showlvlinfo', idx)                  
       },
       showActions(idx) {
-        const payload = this.startLevels[idx]
-        const startGameAction = Object.assign(this.startAction, { payload })
-        const showRulesAction = { icon: 'info_outline', title: 'wflActionShowRules', 
-          selector: 'woffler/selectLevel', payload
-        }
-        const actions = [startGameAction, showRulesAction]
-        this.$store.dispatch('engine/requestActions', actions)
+        this.$emit('showlvlactions', idx)
       }
     }
   }

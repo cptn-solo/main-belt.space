@@ -4,12 +4,13 @@ import {
   WflLevelsLoadError,
   WflBranchSwitchError
 } from '../../dialogs/wofflerErrors'
+import ApplicationError from '../../dialogs/applicationError'
 
 const initialState = {
     branches: [],
     brnchmetas: [],
-    levels:[],
-    selectedLevelInfo: null //lvl.branch.meta
+    levels: [],
+    selectedLevelInfo: null,
   }
 
 export const state = Object.assign({}, initialState)
@@ -42,7 +43,7 @@ export const mutations = {
         return ext
       },[])
 },
-  setLevels: (state, levels) => (state.levels = levels),
+  setLevels: (state, levels) => (state.levels = levels),  
   setSelectedLevel: (state, levelInfo) => (state.selectedLevelInfo = levelInfo),
   resetData: state => {
     state.branches = []
@@ -55,13 +56,31 @@ export const actions = {
   selectLevel({ commit }, levelInfo) {
     commit('setSelectedLevel', levelInfo)
   },
-  async joinGame({ getters, dispatch }, levelInfo) {
+  async joinGame({ getters, dispatch }, idbranch) {
     const account = getters.accountname
     try {
-      await getters.gameAPI.switchbrnch(account, levelInfo.branch.id)
+      await getters.gameAPI.switchbrnch(account, idbranch)
       await dispatch('userProfile/loadAndProcessIngameProfile', account, { root: true })
     } catch (ex) {
       throw new WflBranchSwitchError(ex)
+    }
+  },
+  async signupAndJoinGame({ getters, dispatch }, levelInfo) {
+    const account = getters.accountname
+    try {
+      await dispatch('userProfile/signup', null, { root: true })
+      await dispatch('joinGame', levelInfo)
+    } catch (ex) {
+      throw new WflBranchSwitchError(ex)
+    }
+  },
+  async loadGameData({dispatch}) {
+    try {
+      await dispatch('loadBranchMetas')
+      await dispatch('loadBranches')
+      await dispatch('loadLevels')
+    } catch (ex) {
+      throw new ApplicationError(ex)
     }
   },
   async loadBranchMetas({ commit, rootGetters, state }) {

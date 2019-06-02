@@ -8,3 +8,21 @@ export class BranchSwitchConfirm extends ApplicationDialog {
     })
   }
 }
+
+export class QuitGameConfirm extends ApplicationDialog {
+  constructor() {
+    super({
+      titleLocalized: ApplicationDialog.t('wflQuitGameConfirmTitle'),
+      textLocalized: ApplicationDialog.t('wflQuitGameConfirmText'),
+    })
+  }
+}
+
+export class SignupAndBranchSwitchConfirm extends ApplicationDialog {
+  constructor() {
+    super({
+      titleLocalized: ApplicationDialog.t('wflSignupAndJoinGameConfirmTitle'),
+      textLocalized: ApplicationDialog.t('wflSignupAndJoinGameConfirmText'),
+    })
+  }
+}

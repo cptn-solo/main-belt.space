@@ -38,7 +38,7 @@ import { mapState } from 'vuex';
 
         this.$ga.event('action', action.title, '--', 1)
 
-        try {
+        try {          
           await this.$store.dispatch('engine/performEnqueuedAction')
         } catch (ex) {
           this.$dialog.error(ex)

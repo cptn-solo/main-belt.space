@@ -9,7 +9,7 @@ export default {
   setAPI(api, rpc) {
     this.api = api
     this.rpc = rpc
-  },  
+  },
   getIngameProfileForAccount(accountname) {
     return getEOSTableRows(this.rpc, {
       code: this.gameContract,
@@ -55,7 +55,7 @@ export default {
   /** Actions */
   signup(referrer) {
     const data = {
-      account: this.accountname, 
+      account: this.accountname,
       referrer: referrer || this.gameContract
     }
     return transactEOS(this.api, this.accountname, this.gameContract, 'signup', data)
@@ -80,7 +80,7 @@ export default {
       const requestOptions = {
         headers: { 'Content-Type': 'multipart/form-data' },
       }
-    
+
       const result = (await axios.post(
         this.rpc.endpoint + '/v1/chain/get_account',
         fullData,
@@ -91,19 +91,24 @@ export default {
       throw new ServerRequestError(ex)
     }
   },
-  sendAsset(quantity, from = null, to = null) {
+  depositAsset(asset) {
     const data = {
-      from: from || this.accountname,
-      to: to || this.gameContract,
-      quantity, memo: '',
-    }    
-    return transactEOS(
-      this.api,
-      this.accountname,
-      'eosio.token',
-      'transfer',
-      data
-    )
+      from: this.accountname,
+      to: this.gameContract,
+      quantity: asset,
+      memo: 'deposit',
+    }
+    console.log(data)
+    return transactEOS(this.api, this.accountname, 'eosio.token', 'transfer', data)
+  },
+  withdrawAsset(asset) {
+    const data = {
+      from: this.accountname,
+      to: this.accountname,
+      amount: asset,
+      memo: 'withdraw',
+    }
+    return transactEOS(this.api, this.accountname, this.gameContract, 'withdraw', data)
   },
   /** Voting */
   async getProducers() {
@@ -126,13 +131,7 @@ export default {
   },
   async vote(data) {
     // {voter:this.accountname, proxy:null, producers:[<owner>]}
-    const result = await transactEOS(
-      this.api,
-      this.accountname,
-      'eosio',
-      'voteproducer',
-      data
-    )
+    const result = await transactEOS(this.api, this.accountname, 'eosio', 'voteproducer', data)
     return result
   }
 }
@@ -168,7 +167,7 @@ async function getEOSTableRows(rpc, data, accumulated = null) {
       return await getEOSTableRows(rpc, data, rows)
     else return rows
   } catch (ex) {
-    throw new ServerRequestError(ex)    
+    throw new ServerRequestError(ex)
   }
 }
 
@@ -180,6 +179,6 @@ async function transactEOS(api, account, contract, action, data) {
       { blocksBehind: 3, expireSeconds: 30 }
     )
   } catch (ex) {
-    throw new ServerRequestError(ex)    
+    throw new ServerRequestError(ex)
   }
 }

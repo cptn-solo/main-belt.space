@@ -45,11 +45,10 @@ export default {
         //from, to, amount, memo
         const amount = this.parseAmount(this.depositAmount)        
         if (amount > 0) {
-          const asset = amount+" "+constants.CURR_CODE
-          const payload = {asset, from: this.player.account, to: constants.APP_CODE}
+          const payload = amount+" "+constants.CURR_CODE
           this.$store.dispatch('engine/enqueueAction', { 
-            title: 'deposit', selector: 'userProfile/transferAsset', payload,
-            lock: true, confirm: new UserProfileDepositConfirm(constants.CURR_CODE, asset, constants.APP_CODE)
+            title: 'deposit', selector: 'userProfile/depositAsset', payload,
+            lock: true, confirm: new UserProfileDepositConfirm(constants.CURR_CODE, payload, constants.APP_CODE)
           })
           this.depositDialog = false
         }
@@ -58,11 +57,10 @@ export default {
         //from, to, amount, memo
         const amount = this.parseAmount(this.withdrawAmount)        
         if (amount > 0) {
-          const asset = amount+" "+constants.CURR_CODE
-          const payload = {asset, from: constants.APP_CODE, to: this.player.account}
+          const payload = amount+" "+constants.CURR_CODE
           this.$store.dispatch('engine/enqueueAction', { 
-            title: 'withdraw', selector: 'userProfile/transferAsset', payload,
-            lock: true, confirm: new UserProfileWithdrawConfirm(constants.CURR_CODE, asset, this.player.account)
+            title: 'withdraw', selector: 'userProfile/withdrawAsset', payload,
+            lock: true, confirm: new UserProfileWithdrawConfirm(constants.CURR_CODE, payload, this.player.account)
           })
           this.withdrawDialog = false
         }

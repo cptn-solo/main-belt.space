@@ -184,12 +184,17 @@ export const actions = {
       throw new UserBalancesLoadError(ex)
     }
   },
-  async transferAsset(
-    { dispatch, rootGetters }, 
-    { asset, from, to }
-  ) {
+  async depositAsset({ dispatch, rootGetters }, asset) {
     try {
-      await rootGetters['noscatter/gameAPI'].sendAsset(asset, from, to)
+      await rootGetters['noscatter/gameAPI'].depositAsset(asset)
+      return await dispatch('loadAndProcessIngameProfile')
+    } catch (ex) {
+      throw new UserTransferAssetError(ex)
+    }
+  },
+  async withdrawAsset({ dispatch, rootGetters }, asset ) {
+    try {
+      await rootGetters['noscatter/gameAPI'].withdrawAsset(asset)
       return await dispatch('loadAndProcessIngameProfile')
     } catch (ex) {
       throw new UserTransferAssetError(ex)

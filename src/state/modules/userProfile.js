@@ -155,9 +155,12 @@ export const actions = {
     try {
       const profileRows = await getters.gameAPI.getIngameProfileForAccount(accountname)
       let profileInitialized = false
-      if (profileRows.length === 1 && profileRows[0].account === accountname) {
+      let player = null
+      if (profileRows.length === 1) {
         profileInitialized = true
-        commit('setPlayer', profileRows[0])
+        player = profileRows[0]
+        commit('setPlayer', player)        
+        await dispatch('woffler/fetchCurrentLevel', player.idlvl, { root: true })
       }
       await dispatch('loadAccountBalance')
       return profileInitialized

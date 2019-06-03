@@ -1,4 +1,5 @@
 <script>
+  import GamePanelsMenu from '../../components/woffler/GamePanelsMenu'
   import PlayerInfoPanel from '../../components/woffler/PlayerInfoPanel'
   import GamePanel from '../../components/woffler/GamePanel'
   import InfoPanel from '../../components/woffler/InfoPanel'
@@ -10,6 +11,7 @@
 
   export default {
     components: {
+      GamePanelsMenu,
       PlayerInfoPanel,
       InfoPanel,
       RootBranchPicker,
@@ -21,14 +23,14 @@
       loading: false,
       playerInfoPanel: false,
       showLevelInfo: false,
-      showPanelsList: false,
-      activePanelIdx: 0,
+      activePanel: null,      
       ...wofflerData
     }),
     computed: {
       ...mapState({
         player: state => state.userProfile.player,
-        status: state => state.userProfile.profileState,
+        status: state => state.userProfile.profileState,        
+        currentLevel: state => state.woffler.currentLevelInfo,
         selectedLevelInfo: state => state.woffler.selectedLevelInfo,
       }),
       ...mapGetters('woffler', {
@@ -37,53 +39,50 @@
       hasCurrentGame() {
         return this.player.idlvl > 0
       },
+      hasAvailableGames() {
+        return this.startLevels.length > 0
+      },
       hasIngameProfile() {
         return this.status === constants.PROFILE_INITIALIZED
       },
       loggedIn() {
         return this.status >= constants.PROFILE_LOGGEDIN
-      },
-      activePanel() {
-        return this.gamePanels[this.activePanelIdx]
       }
     },
-    created: function() {
-      this.loadData()
-      if(this.hasCurrentGame)
-        this.activePanelIdx = 2
-    },
     watch: {
+      activePanel(n, o) {
+        if (n.key != "info")
+          this.loadData()
+      },
       selectedLevelInfo(n, o) {
         this.showLevelInfo = !!n
       },
       showLevelInfo(n, o) {
         if(!n) this.hidelvlinfo()
       },
-      hasCurrentGame(n, o) {
-        this.adjustPanelsVisibility()
-        if (n)
-          this.activePanelIdx = 2
-      }
     },
     methods: {
+      setActivePanel(panel) {
+        this.activePanel = panel
+      },
       async loadData() {
         this.loading = true
         try {
-          await this.$store.dispatch('woffler/loadGameData')
           if (this.hasIngameProfile > 0)
             await this.$store.dispatch('userProfile/loadAndProcessIngameProfile', this.player.account)
+
+          switch (this.activePanel.key) {
+            case 'active':
+              await this.$store.dispatch('woffler/fetchCurrentLevel', this.player.idlvl)
+              break;
+            default:
+              await this.$store.dispatch('woffler/loadGameData')
+              break;
+          }
         } catch (ex) {
           this.$dialog.error(ex)
         }
-        this.adjustPanelsVisibility()
         this.loading = false
-      },
-      adjustPanelsVisibility() {
-        const activePanel = this.gamePanels.find(t => t.key === 'active')
-        activePanel.hidden = !this.hasCurrentGame
-
-        if (this.activePanelIdx === 2 && activePanel.hidden)
-          this.activePanelIdx--
       },
       showlvlinfo(idx) {
         this.$store.dispatch('woffler/selectLevel', this.startLevels[idx])
@@ -128,29 +127,18 @@
             @start="startGame" @hideinfo="hidelvlinfo"/>
         </v-dialog>
         <v-toolbar style="z-index:2">
-          <v-menu>
-            <template slot="activator">
-              <v-btn icon ripple 
-                @click="showPanelsList = !showPanelsList"><v-icon>more_vert</v-icon>
-              </v-btn>
-            </template>
-            <v-list>
-              <template v-for="(panel, idx) in gamePanels">
-                <v-list-tile v-if="!panel.hidden" :key="panel.key"
-                  @click="activePanelIdx = idx">
-                  <v-list-tile-action><v-icon v-text="panel.aicon"/></v-list-tile-action>
-                  <v-list-tile-title>{{$t(panel.atitle)}}</v-list-tile-title>
-                </v-list-tile>
-              </template>
-            </v-list>            
-          </v-menu>
-          <v-toolbar-title>{{$t(activePanel.ttitle)}}</v-toolbar-title>
+          <GamePanelsMenu 
+            :hasCurrentGame="hasCurrentGame"
+            :hasAvailableGames="hasAvailableGames"
+            @panelselected="setActivePanel" />
+          <v-toolbar-title v-if="activePanel">
+            {{$t(activePanel.ttitle)}}
+          </v-toolbar-title>
           <v-spacer />
-          <ReloadButton v-if="activePanelIdx > 0"
+          <ReloadButton v-if="activePanel && activePanel.key != 'info'"
             style="margin-right: -6px"
             :loading="loading"
-            @click="loadData"
-          />
+            @click="loadData"/>
           <template slot="extension" v-if="playerInfoPanel && loggedIn">
             <PlayerInfoPanel :player="player" :status="status" />
           </template>
@@ -161,17 +149,19 @@
             <v-icon v-else>keyboard_arrow_down</v-icon>
           </v-btn>
         </v-toolbar>
-        <RootBranchPicker v-if="activePanelIdx === 1"
-          :startLevels="startLevels"
-          :startAction="startGameAction"
-          @showlvlinfo="showlvlinfo"
-          @showlvlactions="showlvlactions" />
-        <template v-else-if="activePanelIdx === 2">
-          <GamePanel :player="player" />
-          <v-btn outline class="quitBtn"
-            @click="quitGame">{{$t('wflQuitGameBtn')}}</v-btn>
-        </template> 
-        <InfoPanel v-else />
+        <template v-if="activePanel">
+          <RootBranchPicker v-if="activePanel.key === 'levels'"
+            :startLevels="startLevels"
+            :startAction="startGameAction"
+            @showlvlinfo="showlvlinfo"
+            @showlvlactions="showlvlactions" />
+          <template v-else-if="activePanel.key === 'active'">
+            <GamePanel :player="player" :level="currentLevel"/>
+            <v-btn outline class="quitBtn"
+              @click="quitGame">{{$t('wflQuitGameBtn')}}</v-btn>
+          </template> 
+          <InfoPanel v-else />
+        </template>
       </v-flex>
     </v-layout>
   </v-container>

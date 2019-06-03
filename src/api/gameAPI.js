@@ -29,26 +29,28 @@ export default {
     })
     // return getTokenBalance('ASTRO') // запрос контракта не взлетел, переделал на запрос таблицы
   },
-  getBranchMetas() {
-    return getEOSTableRows(this.rpc, {
+  fetchFromMainTable(table, id = null) {
+    let data = {
       code: this.gameContract,
       scope: this.gameContract,
-      table: 'brnchmeta',
+      table
+    }
+    if (id) Object.assign(data, {
+      key_type: 'i64',
+      index_position: 1,
+      lower_bound: id,
+      upper_bound: id,
     })
+    return getEOSTableRows(this.rpc, data)
   },
-  getBranches() {
-    return getEOSTableRows(this.rpc, {
-      code: this.gameContract,
-      scope: this.gameContract,
-      table: 'branches',
-    })
+  getBranchMetas(id = null) {
+    return this.fetchFromMainTable('brnchmeta', id)
   },
-  getLevels() {
-    return getEOSTableRows(this.rpc, {
-      code: this.gameContract,
-      scope: this.gameContract,
-      table: 'levels',
-    })
+  getBranches(id = null) {
+    return this.fetchFromMainTable('branches', id)
+  },
+  getLevels(id = null) {
+    return this.fetchFromMainTable('levels', id)
   },
   /** Actions */
   signup(referrer) {
@@ -65,10 +67,7 @@ export default {
     return transactEOS(this.api, this.accountname, this.gameContract, 'forget', data)
   },
   switchbrnch(account, idbranch) {
-    const data = {
-      account: account,
-      idbranch: idbranch
-    }
+    const data = { account, idbranch }
     return transactEOS(this.api, this.accountname, this.gameContract, 'switchbrnch', data)
   },
   async getAccount(accountname) {

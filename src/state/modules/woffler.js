@@ -10,6 +10,7 @@ const initialState = {
     branches: [],
     brnchmetas: [],
     levels: [],
+    currentLevelInfo: null,
     selectedLevelInfo: null,
   }
 
@@ -45,6 +46,7 @@ export const mutations = {
 },
   setLevels: (state, levels) => (state.levels = levels),  
   setSelectedLevel: (state, levelInfo) => (state.selectedLevelInfo = levelInfo),
+  setCurrentLevel: (state, levelInfo) => (state.currentLevelInfo = levelInfo),
   resetData: state => {
     state.branches = []
     state.brnchmetas = []
@@ -110,4 +112,38 @@ export const actions = {
       throw new WflLevelsLoadError(ex)
     }
   },
+  async fetchCurrentLevel({ dispatch, commit, state }, idlevel) {
+    try {      
+      commit('setCurrentLevel', (idlevel > 0 ? (await dispatch('loadOneLevel', idlevel)) : null))
+      return state.currentLevelInfo
+    } catch (ex) {
+      throw new WflLevelsLoadError(ex)
+    }
+  },
+  async loadOneLevel({ rootGetters }, idlevel) {
+    try {
+      let level = null
+      const levels = (await rootGetters['noscatter/gameAPI'].getLevels(idlevel))
+      if (levels.length != 1) 
+        throw new ApplicationError('No valid level found for id: '+idlevel, 'Error loading level')
+        
+      const _level = levels[0]
+
+      const branches = (await rootGetters['noscatter/gameAPI'].getBranches(_level.idbranch))
+      const metas = (await rootGetters['noscatter/gameAPI'].getBranchMetas(_level.idmeta))
+
+      if (branches.length != 1) 
+        throw new ApplicationError('No valid branch found for id: '+_level.idbranch, 'Error loading levels branch')
+      
+      if (metas.length != 1) 
+        throw new ApplicationError('No valid branch meta found for id: '+_level.idmeta, 'Error loading levels branch meta')
+
+      level = Object.assign(_level, {branch: Object.assign(branches[0], { meta: metas[0] })})          
+
+      return level
+    } catch (ex) {
+      throw new WflLevelsLoadError(ex)
+    }
+  },
+
 }

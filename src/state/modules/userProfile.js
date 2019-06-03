@@ -151,8 +151,9 @@ export const actions = {
     }
   },
   async loadAndProcessIngameProfile(
-    { commit, dispatch, getters }, accountname) {
+    { commit, dispatch, getters }, account = null) {
     try {
+      const accountname = account || getters.accountname      
       const profileRows = await getters.gameAPI.getIngameProfileForAccount(accountname)
       let profileInitialized = false
       let player = null
@@ -184,17 +185,12 @@ export const actions = {
     }
   },
   async transferAsset(
-    { dispatch, rootGetters },
-    { account, amount, assetSymbol }
+    { dispatch, rootGetters }, 
+    { asset, from, to }
   ) {
     try {
-      // TODO: check if scatter available first and form Request Transfer interaction
-      await rootGetters['noscatter/gameAPI'].sendAsset(
-        account,
-        amount,
-        assetSymbol
-      )
-      return await dispatch('loadAccountBalances', this.accountname)
+      await rootGetters['noscatter/gameAPI'].sendAsset(asset, from, to)
+      return await dispatch('loadAndProcessIngameProfile')
     } catch (ex) {
       throw new UserTransferAssetError(ex)
     }

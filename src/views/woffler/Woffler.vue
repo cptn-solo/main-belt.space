@@ -2,6 +2,7 @@
   import GamePanelsMenu from '../../components/woffler/GamePanelsMenu'
   import PlayerInfoPanel from '../../components/woffler/PlayerInfoPanel'
   import GamePanel from '../../components/woffler/GamePanel'
+  import GameInfoPanel from '../../components/woffler/GameInfoPanel'
   import InfoPanel from '../../components/woffler/InfoPanel'
   import RootBranchPicker from '../../components/woffler/RootBranchPicker'
   import BranchMetaPanel from '../../components/woffler/BranchMetaPanel'
@@ -15,7 +16,8 @@
       PlayerInfoPanel,
       InfoPanel,
       RootBranchPicker,
-      GamePanel,      
+      GamePanel,
+      GameInfoPanel,
       BranchMetaPanel
     },
     data:() => ({
@@ -23,13 +25,13 @@
       loading: false,
       playerInfoPanel: false,
       showLevelInfo: false,
-      activePanel: null,      
+      activePanel: null,
       ...wofflerData
     }),
     computed: {
       ...mapState({
         player: state => state.userProfile.player,
-        status: state => state.userProfile.profileState,        
+        status: state => state.userProfile.profileState,
         currentLevel: state => state.woffler.currentLevelInfo,
         selectedLevelInfo: state => state.woffler.selectedLevelInfo,
       }),
@@ -97,22 +99,17 @@
           actions.push(Object.assign(this.startGameAction, { payload: payload.idbranch }))
         else if (this.loggedIn)
           actions.push(Object.assign(this.signupAdnJoinGameAction, { payload }))
-        
+
         actions.push(Object.assign(this.showRulesAction, { payload }))
-        
+
         this.$store.dispatch('engine/requestActions', actions)
       },
-      startGame(level) {        
-        this.showLevelInfo = false        
-        this.$store.dispatch('engine/enqueueAction', Object.assign(this.startGameAction, { 
+      startGame(level) {
+        this.showLevelInfo = false
+        this.$store.dispatch('engine/enqueueAction', Object.assign(this.startGameAction, {
           payload: level.branch.id
         }))
       },
-      quitGame() {
-        this.$store.dispatch('engine/enqueueAction', Object.assign(this.quitGameAction, { 
-          payload: 0
-        }))
-      }
     }
   }
 </script>
@@ -122,14 +119,15 @@
     <v-layout column>
       <v-flex>
         <v-dialog v-model="showLevelInfo" scrollable max-width="500px">
-          <BranchMetaPanel 
+          <BranchMetaPanel
             :canPlay="hasIngameProfile"
             @start="startGame" @hideinfo="hidelvlinfo"/>
         </v-dialog>
         <v-toolbar style="z-index:2">
-          <GamePanelsMenu 
+          <GamePanelsMenu
             :hasCurrentGame="hasCurrentGame"
             :hasAvailableGames="hasAvailableGames"
+            :oldPanelKey="activePanel ? activePanel.key : ''"
             @panelselected="setActivePanel" />
           <v-toolbar-title v-if="activePanel">
             {{$t(activePanel.ttitle)}}
@@ -157,9 +155,10 @@
             @showlvlactions="showlvlactions" />
           <template v-else-if="activePanel.key === 'active'">
             <GamePanel :player="player" :level="currentLevel"/>
-            <v-btn outline class="quitBtn"
-              @click="quitGame">{{$t('wflQuitGameBtn')}}</v-btn>
-          </template> 
+            <v-toolbar class="bottomBar">
+              <GameInfoPanel :player="player" :level="currentLevel" />
+            </v-toolbar>
+          </template>
           <InfoPanel v-else />
         </template>
       </v-flex>
@@ -167,10 +166,11 @@
   </v-container>
 </template>
 <style scoped>
-  .quitBtn {
+  .bottomBar {
     position: absolute;
-    bottom: 10px;
-    left: 16px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
   }
 </style>
 

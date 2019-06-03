@@ -1,4 +1,5 @@
 <script>
+  const MAX_TRIES = 3
   export default {
     props: {
       player: {
@@ -17,8 +18,20 @@
       ]
     }),
     computed: {
+      canTry() { return this.player.triesleft > 0 && this.player.levelresult === 1 },
+      canCommitTry() { return this.player.triesleft < MAX_TRIES && this.player.levelresult === 1 },
     },
     methods: {
+      tryturn() {},
+      committurn() {},
+      claimgreen() {},
+      claimred() {},
+      claimtake() {},
+      untake() {},
+      takelvl() {},
+      unjail() {},
+      nextlvl() {},
+      unlocklvl() {},
       cellPositionStyle(idx) {
         const r = 120
         const fi = (360/16) * idx * (Math.PI/180)
@@ -28,6 +41,9 @@
         return position
       },
       cellValueClasses(idx) {
+        if (!this.level)
+          return ['cell']//no classes for level, only board markup
+        
         const idxBin = 1<<idx
         const green = (this.level.greencells&idxBin) > 0
         const red = (this.level.redcells&idxBin) > 0
@@ -51,20 +67,40 @@
 </script>
 <template>
   <div class="wflbox">
-    <div :class="cellValueClasses(idx)" v-for="(cell,idx) in levelCells" :key="idx" :style="cellPositionStyle(idx)">
-      {{ idx }}
+    <div v-for="(cell,idx) in levelCells" :key="idx"
+      :class="cellValueClasses(idx)"  
+      :style="cellPositionStyle(idx)"
+    >{{ idx }}</div>
+    <div class="hud">
+      <v-layout row justify-center align-center fill-height>
+        <v-btn v-if="canTry" fab color="primary" class="trybtn"
+          @click="tryturn">try</v-btn>
+        <v-btn v-if="canCommitTry" fab color="secondary" class="commitbtn"
+          @click="committurn">try</v-btn>
+      </v-layout>
     </div>    
   </div>  
 </template>
 <style scoped>
+  .hud {
+    position: absolute;
+    width: 180px;
+    height: 90px;
+    left: 50%;    
+    margin-left: -90px;
+    top: 50%;
+    margin-top: -45px;
+    border: 1px solid gray;
+    border-radius: 15px;
+  }
   .wflbox {
     position: absolute;
+    width: 280px;
+    height: 280px;
     left: 50%;
     margin-left: -140px;
     top: 50%;
     margin-top: -140px;
-    width: 280px;
-    height: 280px;
     border-radius: 140px;
     border: gray 1px solid
   }
@@ -91,7 +127,6 @@
   .trypos {
     border-width: 2px;
     border-style: dotted
-
   }
 </style>
 

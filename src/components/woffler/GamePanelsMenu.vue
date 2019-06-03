@@ -12,6 +12,10 @@
       hasCurrentGame: {
         type: Boolean,
         default: false
+      },
+      oldPanelKey: {
+        type: String,
+        default: "info"
       }
     },
     data: ()=> {return {
@@ -57,9 +61,9 @@
         <v-icon>more_vert</v-icon>
       </v-btn>
     </template>
-    <v-list>
+    <v-list dense>
       <template v-for="(panel, idx) in gamePanels">
-        <v-list-tile v-if="!panel.hidden" :key="panel.key"
+        <v-list-tile v-if="!panel.hidden && panel.key != oldPanelKey" :key="panel.key"          
           @click="pickActivePanel(idx)">
           <v-list-tile-action><v-icon v-text="panel.aicon"/></v-list-tile-action>
           <v-list-tile-title>{{$t(panel.atitle)}}</v-list-tile-title>

@@ -91,6 +91,20 @@ export default {
       throw new ServerRequestError(ex)
     }
   },
+  sendAsset(quantity, from = null, to = null) {
+    const data = {
+      from: from || this.accountname,
+      to: to || this.gameContract,
+      quantity, memo: '',
+    }    
+    return transactEOS(
+      this.api,
+      this.accountname,
+      'eosio.token',
+      'transfer',
+      data
+    )
+  },
   /** Voting */
   async getProducers() {
     return getEOSTableRows(this.rpc, {

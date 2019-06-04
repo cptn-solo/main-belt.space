@@ -19,13 +19,16 @@
       constants
     }),
     methods: {
-      async quitGame() {
+      quitGame() {
         this.$store.dispatch('engine/enqueueAction', {
           title: 'quitgame', selector: 'woffler/joinGame',
           lock: true, payload: 0, //called with 0 switch to 0 branch (quit game)
           confirm: new QuitGameConfirm()
         })
       },
+      showLvlvInfo() {
+        this.$emit('showlvlinfo', this.level)
+      }
     }
   }
 </script>
@@ -47,7 +50,9 @@
               <span class="asset">{{player.idlvl}}</span>
             </v-flex>
             <v-flex v-if="level">
-              <span class="asset">{{level.branch.meta.name}}</span>
+              <span class="asset">{{level.branch.meta.name}}</span>              
+              <v-btn icon ripple style="margin: -2px -12px 0 -5px"
+                @click="showLvlvInfo"><v-icon small>info</v-icon></v-btn>
             </v-flex>
           </template>
         </v-layout>

@@ -49,7 +49,10 @@
       },
       loggedIn() {
         return this.status >= constants.PROFILE_LOGGEDIN
-      }
+      },
+      canPlay() {
+        return this.hasIngameProfile && !this.hasCurrentGame
+      }      
     },
     watch: {
       activePanel(n, o) {
@@ -89,6 +92,9 @@
       showlvlinfo(idx) {
         this.$store.dispatch('woffler/selectLevel', this.startLevels[idx])
       },
+      showlvlinfoLevel(level) {
+        this.$store.dispatch('woffler/selectLevel', level)
+      },
       hidelvlinfo() {
         this.$store.dispatch('woffler/selectLevel', null)
       },
@@ -120,7 +126,7 @@
       <v-flex>
         <v-dialog v-model="showLevelInfo" scrollable max-width="500px">
           <BranchMetaPanel
-            :canPlay="hasIngameProfile"
+            :canPlay="canPlay"
             @start="startGame" @hideinfo="hidelvlinfo"/>
         </v-dialog>
         <v-toolbar style="z-index:2">
@@ -156,7 +162,8 @@
           <template v-else-if="activePanel.key === 'active'">
             <GamePanel :player="player" :level="currentLevel"/>
             <v-toolbar class="bottomBar">
-              <GameInfoPanel :player="player" :level="currentLevel" />
+              <GameInfoPanel :player="player" :level="currentLevel"
+                @showlvlinfo="showlvlinfoLevel" />
             </v-toolbar>
           </template>
           <InfoPanel v-else />

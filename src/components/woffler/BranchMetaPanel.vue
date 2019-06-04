@@ -31,7 +31,10 @@ export default {
   computed: {
     ...mapState({
       levelInfo: state => state.woffler.selectedLevelInfo
-    })
+    }),
+    showPlayBtn() {
+      return this.canPlay && this.levelInfo && this.levelInfo.idparent === 0 && !this.levelInfo.locked
+    }
   },
   methods: {
     startGame() {
@@ -68,10 +71,11 @@ export default {
     <v-divider />
     <v-card-actions>
       <v-spacer/>
-      <v-btn small flat outline @click="hideInfo">{{$t('wflBrMetaCloseBtn')}}
+      <v-btn small flat outline 
+        @click="hideInfo">{{$t('wflBrMetaCloseBtn')}}
       </v-btn>
-      <v-btn small @click="startGame" v-if="canPlay && levelInfo"
-        color="primary">{{$t('wflBrMetaPlayBtn')}}
+      <v-btn v-if="showPlayBtn" small color="primary"
+        @click="startGame">{{$t('wflBrMetaPlayBtn')}}
       </v-btn>
     </v-card-actions>
   </v-card>

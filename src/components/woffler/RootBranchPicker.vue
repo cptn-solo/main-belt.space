@@ -27,7 +27,10 @@
           <span>#{{level.branch.id}}</span>&nbsp;<span>{{level.branch.meta.name}}</span>          
         </v-list-tile-title>
         <v-list-tile-sub-title>
-          <span>{{$t('wflBranchStake')}}:&nbsp;{{level.branch.totalstake}}</span>
+          <v-layout row justify-start align-center fill-height>
+            <span flex>{{$t('wflBranchStake')}}:&nbsp;{{level.branch.totalstake}}</span>
+            <v-chip flex v-if="level.branch.meta.startjailed" class="bage" color="warning">{{$t('wflPaidStartBage')}}</v-chip>
+          </v-layout>
         </v-list-tile-sub-title>
       </v-list-tile-content>
       <v-list-tile-action>
@@ -38,4 +41,8 @@
     </v-list-tile>
   </v-list>
 </template>
-
+<style scoped>
+.bage {
+  height: 16px;font-weight: bolder; font-size: smaller
+}
+</style>

@@ -99,5 +99,6 @@
   "wflBrMetaurl": "Rules details",
   "wflBrMetaurlh": "detailed description and info on the rules set",
   "wflBrMetawinnerrate": "Winner rate",
-  "wflBrMetawinnerrateh": "% of level's revenue paid to the branch current winner"  
+  "wflBrMetawinnerrateh": "% of level's revenue paid to the branch current winner",
+  "wflPaidStartBage": "paid start"
 }

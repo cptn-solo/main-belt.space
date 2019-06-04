@@ -109,8 +109,7 @@ export default {
       to: this.gameContract,
       quantity: asset,
       memo: 'deposit',
-    }
-    console.log(data)
+    }    
     return transactEOS(this.api, this.accountname, 'eosio.token', 'transfer', data)
   },
   withdrawAsset(asset) {
@@ -122,10 +121,9 @@ export default {
     }
     return transactEOS(this.api, this.accountname, this.gameContract, 'withdraw', data)
   },
-  playerAction(actionname) {
-    const data = { account: this.accountname }
-    return transactEOS(this.api, this.accountname, this.gameContract, actionname, data)
-
+  playerAction(payload) {
+    const data = payload.payload || { account: this.accountname }
+    return transactEOS(this.api, this.accountname, this.gameContract, payload.actionname, data)
   },
   /** Voting */
   async getProducers() {

@@ -134,6 +134,7 @@ export const actions = {
         throw new Error('No valid level found for id: '+idlevel)
         
       const _level = levels[0]
+      console.log(_level)
 
       const branches = (await getters.gameAPI.getBranches(_level.idbranch))
       const metas = (await getters.gameAPI.getBranchMetas(_level.idmeta))
@@ -141,7 +142,7 @@ export const actions = {
       const next = (children.length ? children.find(l => l.idbranch === _level.idbranch) : null)
       const split = (children.length ? children.find(l => l.idbranch != _level.idbranch) : null)
       const previous = (_level.idparent === 0 ? null : 
-        (await dispatch('loadParentLevel'), _level.idparent))
+        (await dispatch('loadParentLevel', _level.idparent)))
       
       if (branches.length != 1) 
         throw new Error('No valid branch found for id: '+_level.idbranch)
@@ -180,9 +181,9 @@ export const actions = {
       throw new WflParentLevelLoadError(ex)
     }
   },
-  async playerAction({ getters, dispatch }, actionname) {
+  async playerAction({ getters, dispatch }, payload) {
     try {      
-      await getters.gameAPI.playerAction(actionname)
+      await getters.gameAPI.playerAction(payload)
       await dispatch('userProfile/loadAndProcessIngameProfile', null, { root: true })
       await dispatch('fetchGameContext', getters.player.idlvl)
     } catch (ex) {

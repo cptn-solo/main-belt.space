@@ -42,17 +42,20 @@
         </v-layout>
       </v-flex>
       <v-flex>
-        <v-layout
-          column justify-start align-end>
-          <template>
+        <v-layout column justify-start align-end>
+          <template v-if="level">
             <v-flex>
-              <span class="caption">{{$t('wflLevelId')}}:</span>&nbsp;
-              <span class="asset">{{player.idlvl}}</span>
+              <v-layout row justify-end align-center fill-height>
+                <span flex class="caption" >{{$t('wflLevelId')}}:</span>
+                <span flex class="asset" style="margin-left: 5px">{{player.idlvl}}</span>
+              </v-layout>
             </v-flex>
-            <v-flex v-if="level">
-              <span class="asset">{{level.branch.meta.name}}</span>              
-              <v-btn icon ripple style="margin: -2px -12px 0 -5px"
-                @click="showLvlvInfo"><v-icon small>info</v-icon></v-btn>
+            <v-flex>
+              <v-layout row justify-end align-center fill-height>
+                <span flex class="asset">{{level.branch.meta.name}}</span>              
+                <v-btn flex icon ripple style="margin: -2px -12px 0 -5px"
+                  @click="showLvlvInfo"><v-icon small>info</v-icon></v-btn>
+              </v-layout>
             </v-flex>
           </template>
         </v-layout>

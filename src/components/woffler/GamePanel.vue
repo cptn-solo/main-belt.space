@@ -1,11 +1,13 @@
 <script>
   import utils from '../../utils'
+  import ActionBtn from './ActionButton'
 
   const LEVEL_LENGTH = 16
   const MAX_TRIES = 3
   const PALYER_STATE = {
     INIT: 0, SAFE: 1, RED: 2, GREEN: 3, TAKE: 4
   }
+
   export default {
     props: {
       player: {
@@ -17,11 +19,30 @@
         default: null
       }
     },
+    components: {
+      ActionBtn
+    },
     data: () => ({
       showMenu: false,
-      levelLength: LEVEL_LENGTH
+      levelLength: LEVEL_LENGTH,
+      actions: [
+        /*  0 */{ key: "unlocknext", name: "unlocklvl" },
+        /*  1 */{ key: "unlocksplit", name: "unlocklvl" },
+        /*  2 */{ key: "switchbrnch" },
+        /*  3 */{ key: "tryturn" },
+        /*  4 */{ key: "committurn" },
+        /*  5 */{ key: "nextlvl" },
+        /*  6 */{ key: "takelvl" },
+        /*  7 */{ key: "untake" },
+        /*  8 */{ key: "claimred" },
+        /*  9 */{ key: "unjail" },
+        /* 10 */{ key: "claimgreen" },
+      ]
     }),
     computed: {
+      loading() {
+        return !!this.$store.state.engine.currentGUIAction
+      },
       takeAmount() {
         try {
           const potbalance = parseFloat(this.level.potbalance.split(' ')[0])
@@ -62,6 +83,10 @@
         return this.player.levelresult === PALYER_STATE.GREEN
           && (!this.level.next || !this.level.next.locked)
       },
+      canGoNext() {
+        return this.player.levelresult === PALYER_STATE.GREEN
+          && (this.level.next && !this.level.next.locked)        
+      },
       canSplit() {
         return this.player.levelresult === PALYER_STATE.GREEN
           && !this.level.split
@@ -72,7 +97,7 @@
       },
       canUntake() {
         return this.player.levelresult === PALYER_STATE.TAKE
-          && this.player.resulttimestamp > ((new Date()).getTime / 1000)
+          && this.player.resulttimestamp + this.level.branch.meta.tkintrvl > Math.floor((Date.now() / 1000))
       },
       canClaimRed() {
         return this.player.levelresult === PALYER_STATE.RED
@@ -101,31 +126,8 @@
           && this.level.split
           && !this.level.split.locked
       }
-
     },
     methods: {
-      tryturn() {
-        const payload = 'tryturn'
-        this.$store.dispatch('engine/enqueueAction', { 
-          title: 'tryturn', selector: 'woffler/playerAction', payload, lock: true
-        })
-      },
-      committurn() {
-        const payload = 'committurn'
-        this.$store.dispatch('engine/enqueueAction', { 
-          title: 'tryturn', selector: 'woffler/playerAction', payload, lock: true
-        })
-
-      },
-      claimgreen() {},
-      claimred() {},
-      claimtake() {},
-      untake() {},
-      takelvl() {},
-      unjail() {},
-      nextlvl() {},
-      unlocklvl(idlevel) {},
-      switchbrnch(idbranch) {},
       cellPositionStyle(idx) {
         const r = 120
         const fi = (360/16) * idx * (Math.PI/180)
@@ -144,23 +146,20 @@
         const currentpos = idx === this.player.currentposition
         const trypos = idx === this.player.tryposition
 
-        let retval = ["cell"]      
+        let retval = ["cell"]
         retval.push(green ? "greenpos" : red ? "redpos" : "safepos")
 
         if (currentpos)
           retval.push("curpos")
 
-        if (trypos && !currentpos) {
-          retval.push("trypos")
+        if (trypos) {
           retval.push("jump")
+          if (!currentpos)
+            retval.push("trypos")
         }
-
         return retval
       }
     }
-  }
-  function compareAssets(a,b) {
-
   }
 </script>
 <template>
@@ -168,7 +167,7 @@
     <div v-for="idx in levelLength" :key="idx"
       :class="cellValueClasses(idx-1)"
       :style="cellPositionStyle(idx-1)"
-    >{{ idx }}</div>
+    >{{ idx-1 }}</div>
     <div class="panel levelpot">
       <span class="caption">Current pot:</span><br>
       <span class="asset">{{level.potbalance}}</span>
@@ -178,27 +177,29 @@
       <span class="asset">{{takeAmount}}</span>
     </div>
     <div v-if="level.next" class="panel nextlevel">
-      <span class="caption">Next pot:</span><br>
-      <span class="asset">{{level.next.potbalance}}</span><br>
-      <div v-if="canUnlockNext" style="line-height: 10px">
-        <v-btn fab class="unlocknextbtn"
-          @click="unlocklvl(level.next.id)">unlock</v-btn>
-        <span style="font-size: smaller">{{player.triesleft}} left</span>
-      </div>
+      <v-layout column justify-start align-end fill-height>
+        <span flex class="caption">Next pot:</span>
+        <span flex class="asset">{{level.next.potbalance}}</span>
+        <ActionBtn flex v-if="canUnlockNext" icon="lock" :action="actions[0]" 
+          :payload="{ owner: this.player.account, idlevel: level.next.id }">
+          <template #caption>{{player.triesleft+" left"}}</template>
+        </ActionBtn>
+        <ActionBtn flex v-else-if="canGoNext" icon="lock_open" :action="actions[5]">
+          <template #caption>next</template>
+        </ActionBtn>
+      </v-layout>
     </div>
     <div v-if="level.split" class="splitlevel">
       <span class="caption">Split pot:</span><br>
       <span class="asset">{{level.split.potbalance}}</span><br>
-      <div v-if="canUnlockSplit" style="line-height: 10px">
-        <v-btn fab class="unlocksplitbtn"
-          @click="unlocklvl(level.split.id)">unlock split</v-btn><br>
-        <span style="font-size: smaller">{{player.triesleft}} left</span>
-      </div>
-      <div v-else-if="canSwitchToSplit" style="line-height: 10px">
-        <v-btn fab class="switchbrnchbtn"
-          @click="switchbrnch(level.split.idbranch)">switch</v-btn><br>
-        <span style="font-size: smaller">switch branch</span>
-      </div>
+      <ActionBtn v-if="canUnlockSplit" :action="actions[1]" :payload="{ idlevel: level.split.id }">
+        <template #text>unlock</template>
+        <template #caption>{{player.triesleft+" left"}}</template>
+      </ActionBtn>
+      <ActionBtn v-else-if="canSwitchToSplit" :action="actions[2]" :payload="{ idbranch: level.split.idbranch }">
+        <template #text>switch</template>
+        <template #caption>switch branch</template>
+      </ActionBtn>
     </div>
     <div v-if="level.previous" class="panel previouslevel">
       <span class="caption">Previous pot:</span><br>
@@ -206,30 +207,38 @@
     </div>
     <div class="hud">
       <v-layout row justify-center align-center fill-height>
-        <div flex v-if="canTry" class="buttonpanel">
-          <v-btn color="primary" class="trybtn" fab
-            @click="tryturn">try</v-btn>
-          <br>
-          <span class="caption">{{player.triesleft}} left</span>
-        </div>
-        <div flex v-if="canCommitTry" class="buttonpanel">
-          <v-btn class="commitbtn" fab
-            @click="committurn">turn</v-btn>
-          <br>
-          <span class="caption">commit turn</span>
-        </div>
-        <v-btn flex v-if="canNext" fab class="nextbtn"
-          @click="nextlvl">next</v-btn>
-        <v-btn flex v-if="canTake" fab class="takebtn"
-          @click="takelvl">take</v-btn>
-        <v-btn flex v-if="canUntake" fab class="untakebtn"
-          @click="untake">un-take</v-btn>
-        <v-btn flex v-if="canClaimRed" fab class="claimredbtn"
-          @click="claimred">take</v-btn>
-        <v-btn flex v-if="canUnjail" fab class="unjailbtn"
-          @click="unjail">un-jail</v-btn>
-        <v-btn flex v-if="canClaimGreen" fab class="claimgreenbtn"
-          @click="claimgreen">to 0</v-btn>
+        <ActionBtn v-if="canTry" :action="actions[3]">
+          <template #text>try</template>
+          <template #caption>{{player.triesleft+" left"}}</template>
+        </ActionBtn>
+        <ActionBtn v-if="canCommitTry" :action="actions[4]">
+          <template #text>turn</template>
+          <template #caption>commit turn</template>
+        </ActionBtn>
+        <ActionBtn v-if="canNext" :action="actions[5]">
+          <template #text>next</template>
+          <template #caption>next level</template>
+        </ActionBtn>
+        <ActionBtn v-if="canTake" :action="actions[6]">
+          <template #text>take</template>
+          <template #caption>take reward</template>
+        </ActionBtn>
+        <ActionBtn v-if="canUntake" :action="actions[7]">
+          <template #text>un-take</template>
+          <template #caption>return reward</template>
+        </ActionBtn>
+        <ActionBtn v-if="canClaimRed" :action="actions[8]">
+          <template #text>{{level.idparent ? 'prev' : 'to 0'}}</template>
+          <template #caption>{{level.idparent ? 'to prev. lvl' : 'restart lvl'}}</template>
+        </ActionBtn>
+        <ActionBtn v-if="canUnjail" :action="actions[9]">
+          <template #text>un-jail</template>
+          <template #caption>pay to stay</template>
+        </ActionBtn>
+        <ActionBtn v-if="canClaimGreen" :action="actions[10]">
+          <template #text>to 0</template>
+          <template #caption>restart lvl</template>
+        </ActionBtn>
       </v-layout>
     </div>
   </div>
@@ -253,9 +262,8 @@
     left: 50%;
     margin-left: -90px;
     top: 50%;
-    margin-top: -45px;
-    border: 1px solid gray;
-    border-radius: 15px;
+    margin-top: -55px;
+    border: none;
   }
   .cell {
     position: absolute;
@@ -263,6 +271,8 @@
     height: 30px;
     border: 2px dotted gray;
     line-height: 28px;
+    vertical-align: middle;
+    text-align: center;
     border-radius: 15px;
     margin-left: -15px;
     margin-top: -15px
@@ -275,15 +285,12 @@
   .curpos.redpos { background-color: red; border: none}
   .curpos.greenpos { background-color: green; border: none}
   .trypos { border-width: 3px; border-style: solid; font-weight: bold }
-  .caption { font-size: smaller; color: gray }
   .asset { font-size: smaller; font-weight: bold }
-  .panel {     
+  .caption { font-size: smaller; color: gray }
+  .panel {
     border: 1px solid gray;
     border-radius: 20px;
     line-height: 16px;
-  }
-  .buttonpanel { 
-    line-height: 10px
   }
   .levelpot {
     position: absolute;
@@ -312,7 +319,11 @@
     left: 50%;
     margin-left: 50px;
     top: 50%;
-    margin-top: -100px;
+    margin-top: -175px;
+    padding: 5px    
+  }
+  .panel.nextlevel {
+    border: none
   }
   .splitlevel {
     position: absolute;
@@ -330,7 +341,7 @@
     left: 50%;
     margin-left: 50px;
     top: 50%;
-    margin-top: 50px;
+    margin-top: 135px;
   }
   .jump {
     -moz-animation: jump 0.3s infinite ease-in-out;

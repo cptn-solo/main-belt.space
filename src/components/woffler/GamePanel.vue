@@ -150,8 +150,10 @@
         if (currentpos)
           retval.push("curpos")
 
-        if (trypos && !currentpos)
+        if (trypos && !currentpos) {
           retval.push("trypos")
+          retval.push("jump")
+        }
 
         return retval
       }
@@ -330,6 +332,24 @@
     top: 50%;
     margin-top: 50px;
   }
+  .jump {
+    -moz-animation: jump 0.3s infinite ease-in-out;
+    -webkit-animation: jump 0.3s infinite ease-in-out;
+  }
+
+  @-moz-keyframes jump {
+  0% { font-weight: bold; }
+  50% { font-weight: normal; }
+  100% { font-weight: bold; }
+}
+
+@-webkit-keyframes jump {
+  0% { font-weight: bold; }
+  50% { font-weight: normal; }
+  100% { font-weight: bold; }
+}
+
+
 </style>
 
 

@@ -133,8 +133,7 @@ export const actions = {
       if (levels.length != 1) 
         throw new Error('No valid level found for id: '+idlevel)
         
-      const _level = levels[0]
-      console.log(_level)
+      const _level = levels[0]      
 
       const branches = (await getters.gameAPI.getBranches(_level.idbranch))
       const metas = (await getters.gameAPI.getBranchMetas(_level.idmeta))

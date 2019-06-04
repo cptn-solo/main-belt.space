@@ -3,6 +3,9 @@ import * as constants from '../../state/constants'
 import ApplicationError from '../../dialogs/applicationError'
 import { UserProfileForgetKeyConfirm, UserProfileDepositConfirm, UserProfileWithdrawConfirm } from '../../dialogs/userProfileConfirmations'
 import utils from '../../utils'
+import Countdown from '../controls/Countdown'
+
+let interval = null
 
 export default {
   props: {
@@ -14,6 +17,9 @@ export default {
       type: Number,
       default: constants.PROFILE_UNKNOWN
     }
+  },
+  components: {
+    Countdown
   },
   data: () => ({
     constants,
@@ -28,26 +34,79 @@ export default {
       },
     ]
   }),
+  computed: {
+    showVesting() {
+      return this.player && this.player.levelresult === 4 ? (utils.assetAmount(this.player.vestingbalance) > 0) : false
+    },
+    vestingDate() {
+      return this.player && this.showVesting ? this.player.resulttimestamp*1000 : null
+    },
+    vestingReady() {
+      return this.player && this.showVesting && this.player.resulttimestamp*1000 < Date.now()
+    }
+  },
+  created() {
+    this.initVestingInterval()
+  },
+  destroyed() {
+    if (interval)
+      clearInterval(interval)
+  },
+  watch: {
+    vestingDate(n, o) {
+      if (!n) 
+        this.clearVestingInterval()
+      else 
+        this.initVestingInterval()
+    }
+  },
   methods: {
-    async signup() {
-      this.$store.dispatch('engine/enqueueAction', { 
-        title: 'signup', selector: 'userProfile/signup', 
+    clearVestingInterval() {
+      console.log('clearVestingInterval')
+      try {
+        clearInterval(interval)
+      } catch (ex) {
+        console.log('catch clearVestingInterval', ex)
+      }
+    },
+    initVestingInterval() {
+      const now = Date.now()
+      const vesting = this.vestingDate
+      if (vesting && vesting > now) {
+        const diff = vesting - now
+        console.log('initVestingInterval', diff)      
+        interval = setInterval(() => {
+          this.vestingDateReached()  
+        }, diff)
+      } else {
+        this.clearVestingInterval()
+      }
+    },
+    signup() {
+      this.$store.dispatch('engine/enqueueAction', {
+        title: 'signup', selector: 'userProfile/signup',
         lock: true, payload: null
       })
     },
-    async forget() {
-      this.$store.dispatch('engine/enqueueAction', { 
-        title: 'forget', selector: 'userProfile/forget', 
+    forget() {
+      this.$store.dispatch('engine/enqueueAction', {
+        title: 'forget', selector: 'userProfile/forget',
         lock: true, payload: null,
         confirm: new UserProfileForgetKeyConfirm()
       })
     },
+    claimtake() {
+      this.$store.dispatch('engine/enqueueAction', {
+        title: 'deposit', selector: 'woffler/playerAction',
+        lock: true, payload: { actionname: 'claimtake' }
+      })
+    },
     deposit () {
       //from, to, amount, memo
-      const amount = utils.parseAmount(this.depositAmount)        
+      const amount = utils.parseAmount(this.depositAmount)
       if (amount > 0) {
         const payload = utils.asset(amount)
-        this.$store.dispatch('engine/enqueueAction', { 
+        this.$store.dispatch('engine/enqueueAction', {
           title: 'deposit', selector: 'userProfile/depositAsset', payload,
           lock: true, confirm: new UserProfileDepositConfirm(constants.CURR_CODE, payload, constants.APP_CODE)
         })
@@ -56,16 +115,22 @@ export default {
     },
     withdraw () {
       //from, to, amount, memo
-      const amount = utils.parseAmount(this.withdrawAmount)        
+      const amount = utils.parseAmount(this.withdrawAmount)
       if (amount > 0) {
         const payload = utils.asset(amount)
-        this.$store.dispatch('engine/enqueueAction', { 
+        this.$store.dispatch('engine/enqueueAction', {
           title: 'withdraw', selector: 'userProfile/withdrawAsset', payload,
           lock: true, confirm: new UserProfileWithdrawConfirm(constants.CURR_CODE, payload, this.player.account)
         })
         this.withdrawDialog = false
       }
     },
+    vestingDateReached() {
+      this.$store.dispatch('engine/enqueueAction', {
+        title: 'reloadprofile', 
+        selector: 'userProfile/loadAndProcessIngameProfile'        
+      })
+    }
   }
 }
 </script>
@@ -83,6 +148,17 @@ export default {
               <v-icon ripple>person_outline</v-icon>
             </template>
             <v-list dense>
+              <v-list-tile v-if="showVesting" :disabled="!vestingReady"
+                @click="claimtake">
+                <v-list-tile-action><v-icon>save_alt</v-icon></v-list-tile-action>
+                <v-list-tile-content>
+                  <v-list-tile-title>{{$t('wflClaimTake')}}</v-list-tile-title>
+                  <v-list-tile-sub-title v-if="!vestingReady">
+                    <Countdown :end="vestingDate" />
+                  </v-list-tile-sub-title>
+                  <v-list-tile-sub-title v-else>{{player.vestingbalance}}</v-list-tile-sub-title>
+                </v-list-tile-content>
+              </v-list-tile>
               <v-list-tile @click="forget">
                 <v-list-tile-action><v-icon color="warning">remove_circle</v-icon></v-list-tile-action>
                 <v-list-tile-title>{{$t('upForget')}}</v-list-tile-title>
@@ -93,19 +169,24 @@ export default {
       </v-flex>
       <v-flex>
         <v-layout
+          style="line-height: 16px;"
           column align-end>
           <template v-if="status === constants.PROFILE_INITIALIZED">
             <v-flex>
-              <span class="caption">{{$t('upBalance')}}:</span>&nbsp;
-              <span class="asset">{{player.activebalance}}</span>        
+              <v-layout row justify-end align-center fill-height>
+                <span class="caption">{{$t('upBalance')}}:</span>&nbsp;
+                <span class="asset">{{player.activebalance}}</span>
+              </v-layout>
             </v-flex>
-            <v-flex>
-              <span class="caption">{{$t('upVesting')}}:</span>&nbsp;
-              <span class="asset" >{{player.vestingbalance}}</span>
+            <v-flex v-if="showVesting">
+              <v-layout row justify-end align-center fill-height>
+                <span class="caption">{{$t('upVesting')}}:</span>&nbsp;
+                <span :class="vestingReady ? 'asset' : 'caption'">{{player.vestingbalance}}</span>
+              </v-layout>
             </v-flex>
           </template>
-          <span flex v-else>{{$t('upProfileNotInit')}}</span>        
-        </v-layout>        
+          <span flex v-else>{{$t('upProfileNotInit')}}</span>
+        </v-layout>
       </v-flex>
       <v-flex xs2>
         <v-layout row justify-end align-center fill-height>
@@ -115,7 +196,7 @@ export default {
             </template>
             <v-list dense>
               <v-list-tile @click="depositDialog = true">
-                <v-list-tile-action><v-icon>add</v-icon></v-list-tile-action>                    
+                <v-list-tile-action><v-icon>add</v-icon></v-list-tile-action>
                 <v-list-tile-title>{{$t('upDeposit')}}</v-list-tile-title>
               </v-list-tile>
               <v-list-tile @click="withdrawDialog = true">
@@ -124,14 +205,14 @@ export default {
               </v-list-tile>
             </v-list>
           </v-menu>
-        </v-layout>     
+        </v-layout>
       </v-flex>
     </v-layout>
     <v-dialog v-model="depositDialog" max-width="300px">
       <v-card>
         <v-card-title>{{$t('upDeposit')}}</v-card-title>
         <v-divider/>
-        <v-card-text>                    
+        <v-card-text>
           <VTextField
             style="width: 100%"
             v-model="depositAmount"
@@ -148,7 +229,7 @@ export default {
             @click="depositDialog = false">{{$t('miskCacel')}}</v-btn>
           <v-btn small color="primary"
             @click="deposit">{{$t('miskProceed')}}</v-btn>
-        </v-card-actions>                  
+        </v-card-actions>
       </v-card>
     </v-dialog>
 
@@ -156,7 +237,7 @@ export default {
       <v-card>
         <v-card-title>{{$t('upWithdraw')}}</v-card-title>
         <v-divider/>
-        <v-card-text>                    
+        <v-card-text>
           <VTextField
             style="width: 100%"
             v-model="withdrawAmount"
@@ -173,11 +254,11 @@ export default {
             @click="withdrawDialog = false">{{$t('miskCacel')}}</v-btn>
           <v-btn small color="primary"
             @click="withdraw">{{$t('miskProceed')}}</v-btn>
-        </v-card-actions>                  
+        </v-card-actions>
       </v-card>
-    </v-dialog>              
+    </v-dialog>
 
-  </v-container>  
+  </v-container>
 </template>
 <style scoped>
 .caption {

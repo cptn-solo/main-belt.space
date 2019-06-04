@@ -96,8 +96,7 @@
           && this.takeAmount
       },
       canUntake() {
-        return this.player.levelresult === PALYER_STATE.TAKE
-          && this.player.resulttimestamp + this.level.branch.meta.tkintrvl > Math.floor((Date.now() / 1000))
+        return this.player.levelresult === PALYER_STATE.TAKE          
       },
       canClaimRed() {
         return this.player.levelresult === PALYER_STATE.RED
@@ -270,7 +269,7 @@
     width: 30px;
     height: 30px;
     border: 2px dotted gray;
-    line-height: 28px;
+    line-height: 30px;
     vertical-align: middle;
     text-align: center;
     border-radius: 15px;

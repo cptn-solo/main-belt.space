@@ -35,3 +35,9 @@ export class WflBranchSwitchError extends ApplicationError {
     super(error, 'Join game', 'Error joining the game')
   }
 }
+
+export class WflPlayerActionError extends ApplicationError {
+  constructor(error) {
+    super(error, 'Action error', 'Error while calling an action')
+  }
+}

@@ -75,7 +75,7 @@ export const mutations = {
   },
   resetData: state => {
     setKeyValues(state, initialState)
-  },
+    },
   cleanupPlayerData: state => {
     setKeyValues(state.player, initialState.player)
   }
@@ -169,11 +169,10 @@ export const actions = {
       throw new UserProfileLoadError(ex)
     }
   },
-  async loadAccountBalance({ commit, rootGetters, state }) {
+  async loadAccountBalance({ commit, getters, state }) {
     try {
-      const balanceRows = (await rootGetters[
-        'noscatter/gameAPI'
-      ].getAccountBalances()).map(balance => balance.balance)
+      const balanceRows = (await getters.gameAPI.getAccountBalances())
+        .map(balance => balance.balance)
       commit('setBalances', balanceRows)
       if (balanceRows) {
         const balances = balanceRows.filter(asset => asset.split(' ')[1] === constants.CURR_CODE)
@@ -184,17 +183,17 @@ export const actions = {
       throw new UserBalancesLoadError(ex)
     }
   },
-  async depositAsset({ dispatch, rootGetters }, asset) {
+  async depositAsset({ dispatch, getters }, asset) {
     try {
-      await rootGetters['noscatter/gameAPI'].depositAsset(asset)
+      await getters.gameAPI.depositAsset(asset)
       return await dispatch('loadAndProcessIngameProfile')
     } catch (ex) {
       throw new UserTransferAssetError(ex)
     }
   },
-  async withdrawAsset({ dispatch, rootGetters }, asset ) {
+  async withdrawAsset({ dispatch, getters }, asset ) {
     try {
-      await rootGetters['noscatter/gameAPI'].withdrawAsset(asset)
+      await getters.gameAPI.withdrawAsset(asset)
       return await dispatch('loadAndProcessIngameProfile')
     } catch (ex) {
       throw new UserTransferAssetError(ex)

@@ -104,8 +104,19 @@
 
     },
     methods: {
-      tryturn() {},
-      committurn() {},
+      tryturn() {
+        const payload = 'tryturn'
+        this.$store.dispatch('engine/enqueueAction', { 
+          title: 'tryturn', selector: 'woffler/playerAction', payload, lock: true
+        })
+      },
+      committurn() {
+        const payload = 'committurn'
+        this.$store.dispatch('engine/enqueueAction', { 
+          title: 'tryturn', selector: 'woffler/playerAction', payload, lock: true
+        })
+
+      },
       claimgreen() {},
       claimred() {},
       claimtake() {},
@@ -133,9 +144,8 @@
         const currentpos = idx === this.player.currentposition
         const trypos = idx === this.player.tryposition
 
-        let retval = ["cell"]
-        if (green || red)
-          retval.push(green ? "greenpos" : "redpos")
+        let retval = ["cell"]      
+        retval.push(green ? "greenpos" : red ? "redpos" : "safepos")
 
         if (currentpos)
           retval.push("curpos")
@@ -154,8 +164,8 @@
 <template>
   <div class="wflbox">
     <div v-for="idx in levelLength" :key="idx"
-      :class="cellValueClasses(idx)"
-      :style="cellPositionStyle(idx)"
+      :class="cellValueClasses(idx-1)"
+      :style="cellPositionStyle(idx-1)"
     >{{ idx }}</div>
     <div class="panel levelpot">
       <span class="caption">Current pot:</span><br>
@@ -194,14 +204,18 @@
     </div>
     <div class="hud">
       <v-layout row justify-center align-center fill-height>
-        <div flex v-if="canTry" style="line-height: 10px">
+        <div flex v-if="canTry" class="buttonpanel">
           <v-btn color="primary" class="trybtn" fab
             @click="tryturn">try</v-btn>
           <br>
-          <span style="font-size: smaller">{{player.triesleft}} left</span>
+          <span class="caption">{{player.triesleft}} left</span>
         </div>
-        <v-btn flex v-if="canCommitTry" fab class="commitbtn"
-          @click="committurn">try</v-btn>
+        <div flex v-if="canCommitTry" class="buttonpanel">
+          <v-btn class="commitbtn" fab
+            @click="committurn">turn</v-btn>
+          <br>
+          <span class="caption">commit turn</span>
+        </div>
         <v-btn flex v-if="canNext" fab class="nextbtn"
           @click="nextlvl">next</v-btn>
         <v-btn flex v-if="canTake" fab class="takebtn"
@@ -245,22 +259,29 @@
     position: absolute;
     width: 30px;
     height: 30px;
-    border: 1px solid gray;
+    border: 2px dotted gray;
     line-height: 28px;
     border-radius: 15px;
     margin-left: -15px;
     margin-top: -15px
   }
+  .safepos { border-color: gray }
   .greenpos { border-color: green }
   .redpos { border-color: red }
-  .curpos { border-width: 2px; font-weight: bolder }
-  .trypos { border-width: 2px; border-style: dotted }
+  .curpos { font-weight: bold }
+  .curpos.safepos { background-color: gray; border: none}
+  .curpos.redpos { background-color: red; border: none}
+  .curpos.greenpos { background-color: green; border: none}
+  .trypos { border-width: 3px; border-style: solid; font-weight: bold }
   .caption { font-size: smaller; color: gray }
   .asset { font-size: smaller; font-weight: bold }
   .panel {     
     border: 1px solid gray;
     border-radius: 20px;
     line-height: 16px;
+  }
+  .buttonpanel { 
+    line-height: 10px
   }
   .levelpot {
     position: absolute;

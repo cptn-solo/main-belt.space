@@ -122,6 +122,11 @@ export default {
     }
     return transactEOS(this.api, this.accountname, this.gameContract, 'withdraw', data)
   },
+  playerAction(actionname) {
+    const data = { account: this.accountname }
+    return transactEOS(this.api, this.accountname, this.gameContract, actionname, data)
+
+  },
   /** Voting */
   async getProducers() {
     return getEOSTableRows(this.rpc, {

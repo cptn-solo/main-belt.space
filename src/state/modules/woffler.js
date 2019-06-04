@@ -5,6 +5,7 @@ import {
   WflBranchSwitchError,
   WflChildLevelsLoadError,
   WflParentLevelLoadError,
+  WflPlayerActionError,
 } from '../../dialogs/wofflerErrors'
 import ApplicationError from '../../dialogs/applicationError'
 
@@ -24,6 +25,9 @@ export const getters = {
   },
   accountname(state, getters) {
     return getters.gameAPI.accountname
+  },
+  player(state, getters, rootState) {
+    return rootState.userProfile.player
   },
   startLevels(state) {//returns levelInfo (level+branch+meta)
     const activeLevels = state.levels
@@ -45,8 +49,8 @@ export const mutations = {
         ext.push({...b, meta})
         return ext
       },[])
-},
-  setLevels: (state, levels) => (state.levels = levels),  
+  },
+  setLevels: (state, levels) => (state.levels = levels),    
   setSelectedLevel: (state, levelInfo) => (state.selectedLevelInfo = levelInfo),
   setCurrentLevel: (state, levelInfo) => (state.currentLevelInfo = levelInfo),
   setChildLevels: (state, children) => (state.currentLevelInfo['children'] = children),
@@ -70,8 +74,7 @@ export const actions = {
       throw new WflBranchSwitchError(ex)
     }
   },
-  async signupAndJoinGame({ getters, dispatch }, levelInfo) {
-    const account = getters.accountname
+  async signupAndJoinGame({ getters, dispatch }, levelInfo) {    
     try {
       await dispatch('userProfile/signup', null, { root: true })
       await dispatch('joinGame', levelInfo)
@@ -123,17 +126,17 @@ export const actions = {
       throw new WflLevelsLoadError(ex)
     }
   },
-  async loadGameContext({ rootGetters, dispatch }, idlevel) {
+  async loadGameContext({ getters, dispatch }, idlevel) {
     try {
       let level = null
-      const levels = (await rootGetters['noscatter/gameAPI'].getLevels(idlevel))
+      const levels = (await getters.gameAPI.getLevels(idlevel))
       if (levels.length != 1) 
         throw new Error('No valid level found for id: '+idlevel)
         
       const _level = levels[0]
 
-      const branches = (await rootGetters['noscatter/gameAPI'].getBranches(_level.idbranch))
-      const metas = (await rootGetters['noscatter/gameAPI'].getBranchMetas(_level.idmeta))
+      const branches = (await getters.gameAPI.getBranches(_level.idbranch))
+      const metas = (await getters.gameAPI.getBranchMetas(_level.idmeta))
       const children = (await dispatch('loadChildLevels', idlevel))
       const next = (children.length ? children.find(l => l.idbranch === _level.idbranch) : null)
       const split = (children.length ? children.find(l => l.idbranch != _level.idbranch) : null)
@@ -158,17 +161,17 @@ export const actions = {
       throw new WflLevelsLoadError(ex)
     }
   },
-  async loadChildLevels({ rootGetters }, idlevel) {
+  async loadChildLevels({ getters }, idlevel) {
     try {
-      const levels = (await rootGetters['noscatter/gameAPI'].getChildLevels(idlevel))
+      const levels = (await getters.gameAPI.getChildLevels(idlevel))
       return levels
     } catch (ex) {
       throw new WflChildLevelsLoadError(ex)
     }
   },
-  async loadParentLevel({ rootGetters }, idparent) {
+  async loadParentLevel({ getters }, idparent) {
     try {
-      const levels = (await rootGetters['noscatter/gameAPI'].getLevels(idparent))
+      const levels = (await getters.gameAPI.getLevels(idparent))
       if (levels.length != 1)
         throw new Error('No valid parent level for id: ' + idparent)
       
@@ -176,5 +179,15 @@ export const actions = {
     } catch (ex) {
       throw new WflParentLevelLoadError(ex)
     }
+  },
+  async playerAction({ getters, dispatch }, actionname) {
+    try {      
+      await getters.gameAPI.playerAction(actionname)
+      await dispatch('userProfile/loadAndProcessIngameProfile', null, { root: true })
+      await dispatch('fetchGameContext', getters.player.idlvl)
+    } catch (ex) {
+      throw new WflPlayerActionError(ex)
+    }
+
   }
 }

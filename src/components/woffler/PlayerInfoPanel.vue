@@ -2,6 +2,7 @@
 import * as constants from '../../state/constants'
 import ApplicationError from '../../dialogs/applicationError'
 import { UserProfileForgetKeyConfirm, UserProfileDepositConfirm, UserProfileWithdrawConfirm } from '../../dialogs/userProfileConfirmations'
+import utils from '../../utils'
 
 export default {
   props: {
@@ -28,52 +29,43 @@ export default {
     ]
   }),
   methods: {
-      async signup() {
+    async signup() {
+      this.$store.dispatch('engine/enqueueAction', { 
+        title: 'signup', selector: 'userProfile/signup', 
+        lock: true, payload: null
+      })
+    },
+    async forget() {
+      this.$store.dispatch('engine/enqueueAction', { 
+        title: 'forget', selector: 'userProfile/forget', 
+        lock: true, payload: null,
+        confirm: new UserProfileForgetKeyConfirm()
+      })
+    },
+    deposit () {
+      //from, to, amount, memo
+      const amount = utils.parseAmount(this.depositAmount)        
+      if (amount > 0) {
+        const payload = utils.asset(amount)
         this.$store.dispatch('engine/enqueueAction', { 
-          title: 'signup', selector: 'userProfile/signup', 
-          lock: true, payload: null
+          title: 'deposit', selector: 'userProfile/depositAsset', payload,
+          lock: true, confirm: new UserProfileDepositConfirm(constants.CURR_CODE, payload, constants.APP_CODE)
         })
-      },
-      async forget() {
-        this.$store.dispatch('engine/enqueueAction', { 
-          title: 'forget', selector: 'userProfile/forget', 
-          lock: true, payload: null,
-          confirm: new UserProfileForgetKeyConfirm()
-        })
-      },
-      deposit () {
-        //from, to, amount, memo
-        const amount = this.parseAmount(this.depositAmount)        
-        if (amount > 0) {
-          const payload = amount+" "+constants.CURR_CODE
-          this.$store.dispatch('engine/enqueueAction', { 
-            title: 'deposit', selector: 'userProfile/depositAsset', payload,
-            lock: true, confirm: new UserProfileDepositConfirm(constants.CURR_CODE, payload, constants.APP_CODE)
-          })
-          this.depositDialog = false
-        }
-      },
-      withdraw () {
-        //from, to, amount, memo
-        const amount = this.parseAmount(this.withdrawAmount)        
-        if (amount > 0) {
-          const payload = amount+" "+constants.CURR_CODE
-          this.$store.dispatch('engine/enqueueAction', { 
-            title: 'withdraw', selector: 'userProfile/withdrawAsset', payload,
-            lock: true, confirm: new UserProfileWithdrawConfirm(constants.CURR_CODE, payload, this.player.account)
-          })
-          this.withdrawDialog = false
-        }
-      },
-      parseAmount(text) {
-        return this.truncateDecimals(parseFloat(text), constants.CURR_DECIMALS).toFixed(constants.CURR_DECIMALS)
-      },
-      truncateDecimals(number, digits) {
-        const multiplier = Math.pow(10, digits)
-        const adjustedNum = number * multiplier
-        const truncatedNum = Math[adjustedNum < 0 ? 'ceil' : 'floor'](adjustedNum)
-        return truncatedNum / multiplier
+        this.depositDialog = false
       }
+    },
+    withdraw () {
+      //from, to, amount, memo
+      const amount = utils.parseAmount(this.withdrawAmount)        
+      if (amount > 0) {
+        const payload = utils.asset(amount)
+        this.$store.dispatch('engine/enqueueAction', { 
+          title: 'withdraw', selector: 'userProfile/withdrawAsset', payload,
+          lock: true, confirm: new UserProfileWithdrawConfirm(constants.CURR_CODE, payload, this.player.account)
+        })
+        this.withdrawDialog = false
+      }
+    },
   }
 }
 </script>

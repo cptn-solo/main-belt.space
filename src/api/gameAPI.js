@@ -52,6 +52,18 @@ export default {
   getLevels(id = null) {
     return this.fetchFromMainTable('levels', id)
   },
+  getChildLevels(id) {
+    let data = {
+      code: this.gameContract,
+      scope: this.gameContract,
+      table: 'levels',
+      key_type: 'i64',
+      index_position: 2,
+      lower_bound: id,
+      upper_bound: id,
+    }
+    return getEOSTableRows(this.rpc, data)
+  },
   /** Actions */
   signup(referrer) {
     const data = {

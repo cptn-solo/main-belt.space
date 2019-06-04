@@ -75,7 +75,7 @@
 
           switch (this.activePanel.key) {
             case 'active':
-              await this.$store.dispatch('woffler/fetchCurrentLevel', this.player.idlvl)
+              await this.$store.dispatch('woffler/fetchGameContext', this.player.idlvl)
               break;
             default:
               await this.$store.dispatch('woffler/loadGameData')

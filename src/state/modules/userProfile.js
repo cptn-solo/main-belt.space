@@ -161,7 +161,7 @@ export const actions = {
         profileInitialized = true
         player = profileRows[0]
         commit('setPlayer', player)        
-        await dispatch('woffler/fetchCurrentLevel', player.idlvl, { root: true })
+        await dispatch('woffler/fetchGameContext', player.idlvl, { root: true })
       }
       await dispatch('loadAccountBalance')
       return profileInitialized

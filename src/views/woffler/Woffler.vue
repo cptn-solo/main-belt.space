@@ -8,9 +8,10 @@
   import BranchMetaPanel from '../../components/woffler/BranchMetaPanel'
   import { mapState, mapGetters } from 'vuex'
   import * as constants from '../../state/constants'
-  import wofflerData from './wofflerData'
+  import vesting from './vestingMixin'
 
   export default {
+    mixins:[ vesting ],
     components: {
       GamePanelsMenu,
       PlayerInfoPanel,
@@ -24,19 +25,17 @@
       constants,
       loading: false,
       playerInfoPanel: false,
-      showLevelInfo: false,
       activePanel: null,
-      ...wofflerData
     }),
     computed: {
       ...mapState({
         player: state => state.userProfile.player,
         status: state => state.userProfile.profileState,
         currentLevel: state => state.woffler.currentLevelInfo,
-        selectedLevelInfo: state => state.woffler.selectedLevelInfo,
       }),
       ...mapGetters('woffler', {
-        startLevels: 'startLevels'
+        startLevels: 'startLevels',
+        lockedLevels: 'lockedStartLevels',
       }),
       hasCurrentGame() {
         return this.player.idlvl > 0
@@ -59,12 +58,6 @@
         if (n.key != "info")
           this.loadData()
       },
-      selectedLevelInfo(n, o) {
-        this.showLevelInfo = !!n
-      },
-      showLevelInfo(n, o) {
-        if(!n) this.hidelvlinfo()
-      },
     },
     methods: {
       setActivePanel(panel) {
@@ -76,45 +69,14 @@
           if (this.hasIngameProfile > 0)
             await this.$store.dispatch('userProfile/loadAndProcessIngameProfile', this.player.account)
 
-          switch (this.activePanel.key) {
-            case 'active':
-              await this.$store.dispatch('woffler/fetchGameContext', this.player.idlvl)
-              break;
-            default:
-              await this.$store.dispatch('woffler/loadGameData')
-              break;
-          }
+          if (this.activePanel.key === 'active')
+            await this.$store.dispatch('woffler/fetchGameContext', this.player.idlvl)
+          else
+            await this.$store.dispatch('woffler/loadGameData')           
         } catch (ex) {
           this.$dialog.error(ex)
         }
         this.loading = false
-      },
-      showlvlinfo(idx) {
-        this.$store.dispatch('woffler/selectLevel', this.startLevels[idx])
-      },
-      showlvlinfoLevel(level) {
-        this.$store.dispatch('woffler/selectLevel', level)
-      },
-      hidelvlinfo() {
-        this.$store.dispatch('woffler/selectLevel', null)
-      },
-      showlvlactions(idx) {
-        const payload = this.startLevels[idx]
-        const actions = []
-        if (this.hasIngameProfile)
-          actions.push(Object.assign(this.startGameAction, { payload: payload.idbranch }))
-        else if (this.loggedIn)
-          actions.push(Object.assign(this.signupAdnJoinGameAction, { payload }))
-
-        actions.push(Object.assign(this.showRulesAction, { payload }))
-
-        this.$store.dispatch('engine/requestActions', actions)
-      },
-      startGame(level) {
-        this.showLevelInfo = false
-        this.$store.dispatch('engine/enqueueAction', Object.assign(this.startGameAction, {
-          payload: level.branch.id
-        }))
       },
     }
   }
@@ -124,11 +86,7 @@
   <v-container pa-0>
     <v-layout column>
       <v-flex>
-        <v-dialog v-model="showLevelInfo" scrollable max-width="500px">
-          <BranchMetaPanel
-            :canPlay="canPlay"
-            @start="startGame" @hideinfo="hidelvlinfo"/>
-        </v-dialog>
+        <BranchMetaPanel :canPlay="canPlay"/>
         <v-toolbar style="z-index:2">
           <GamePanelsMenu
             :hasCurrentGame="hasCurrentGame"
@@ -139,12 +97,13 @@
             {{$t(activePanel.ttitle)}}
           </v-toolbar-title>
           <v-spacer />
-          <ReloadButton v-if="activePanel && activePanel.key != 'info'"
-            style="margin-right: -6px"
-            :loading="loading"
-            @click="loadData"/>
+          <v-btn v-if="activePanel && activePanel.key != 'info'"
+            style="margin-right: -6px" :loading="loading" :disabled="loading"
+            @click="loadData" icon><v-icon>cached</v-icon></v-btn>
           <template slot="extension" v-if="playerInfoPanel && loggedIn">
-            <PlayerInfoPanel :player="player" :status="status" />
+            <PlayerInfoPanel 
+              :player="player" :status="status" 
+              :showVesting="showVesting" :vestingReady="vestingReady" :vestingDate="vestingDate"/>
           </template>
           <v-btn v-if="loggedIn"
             fab small bottom absolute style="left: 50%; margin-left: -13px; margin-bottom: 8px; width: 26px; height: 26px;"
@@ -155,15 +114,15 @@
         </v-toolbar>
         <template v-if="activePanel">
           <RootBranchPicker v-if="activePanel.key === 'levels'"
-            :startLevels="startLevels"
-            :startAction="startGameAction"
-            @showlvlinfo="showlvlinfo"
-            @showlvlactions="showlvlactions" />
+            :startLevels="startLevels" :hasIngameProfile="hasIngameProfile" />
+          <RootBranchPicker v-if="activePanel.key === 'locked'"
+            :startLevels="lockedLevels" :hasIngameProfile="hasIngameProfile" />
           <template v-else-if="activePanel.key === 'active'">
-            <GamePanel :player="player" :level="currentLevel"/>
+            <GamePanel 
+              :player="player" :level="currentLevel" 
+              :showVesting="showVesting" :vestingReady="vestingReady" :vestingDate="vestingDate"/>
             <v-toolbar class="bottomBar">
-              <GameInfoPanel :player="player" :level="currentLevel"
-                @showlvlinfo="showlvlinfoLevel" />
+              <GameInfoPanel :player="player" :level="currentLevel" />
             </v-toolbar>
           </template>
           <InfoPanel v-else />

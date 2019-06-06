@@ -41,3 +41,16 @@ export class WflPlayerActionError extends ApplicationError {
     super(error, 'Action error', 'Error while calling an action')
   }
 }
+
+export class WflUnlockRootLevelError extends ApplicationError {
+  constructor(error) {
+    super(error, 'Unlock error', 'Error while unlocking root level')
+  }
+}
+
+export class WflUpdateBranchStakeError extends ApplicationError {
+  constructor(error) {
+    super(error, 'Load stake info error', 'Error loading stake info updates')
+  }
+}
+

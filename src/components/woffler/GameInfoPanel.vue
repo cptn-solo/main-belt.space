@@ -27,7 +27,7 @@
         })
       },
       showLvlvInfo() {
-        this.$emit('showlvlinfo', this.level)
+        this.$store.dispatch('gui/showDialog', { key: "levelInfoDialog", payload: this.level })          
       }
     }
   }
@@ -47,7 +47,7 @@
             <v-flex>
               <v-layout row justify-end align-center fill-height>
                 <span flex class="caption" >{{$t('wflLevelId')}}:</span>
-                <span flex class="asset" style="margin-left: 5px">{{player.idlvl}}</span>
+                <span flex class="asset" style="margin-left: 5px">{{player.idlvl}}&nbsp;({{level.generation}}/{{level.branch.winlevgen}})</span>
               </v-layout>
             </v-flex>
             <v-flex>

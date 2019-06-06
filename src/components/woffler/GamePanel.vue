@@ -1,14 +1,15 @@
 <script>
   import utils from '../../utils'
   import ActionBtn from './ActionButton'
+  import Countdown from '../controls/Countdown'
+  import { WflVestingInfo } from '../../dialogs/wofflerConfirmations'
+  import amounts from './gameAmountsMixin'
+  import permissions from './gamePermissionsMixin'
 
   const LEVEL_LENGTH = 16
-  const MAX_TRIES = 3
-  const PALYER_STATE = {
-    INIT: 0, SAFE: 1, RED: 2, GREEN: 3, TAKE: 4
-  }
 
   export default {
+    mixins: [amounts, permissions],
     props: {
       player: {
         type: Object,
@@ -17,10 +18,13 @@
       level: {
         type: Object,
         default: null
-      }
+      },
+      showVesting: { type: Boolean, default: false},
+      vestingReady: { type: Boolean, default: false},
+      vestingDate: { type: Number, default: 0}
     },
     components: {
-      ActionBtn
+      ActionBtn, Countdown
     },
     data: () => ({
       showMenu: false,
@@ -37,93 +41,14 @@
         /*  8 */{ key: "claimred" },
         /*  9 */{ key: "unjail" },
         /* 10 */{ key: "claimgreen" },
+        /* 11 */{ key: "claimtake" },
+        /* 12 */{ key: "vestingwarning", info: new WflVestingInfo() },
+        /* 13 */{ key: "splitlvl" },
       ]
     }),
     computed: {
       loading() {
         return !!this.$store.state.engine.currentGUIAction
-      },
-      takeAmount() {
-        try {
-          const potbalance = parseFloat(this.level.potbalance.split(' ')[0])
-          const tkrate = this.level.branch.meta.tkrate
-          const potmin = parseFloat(this.level.branch.meta.potmin.split(' ')[0])
-
-          const amount = utils.parseAmount((potbalance * tkrate) / 100)
-          const remains = potbalance - amount
-
-          return remains > potmin ? utils.asset(amount) : null
-        } catch (error) {
-          return null
-        }
-      },
-      unjailAmount() {
-        try {
-          const potbalance = parseFloat(this.level.potbalance.split(' ')[0])
-          const unjlrate = this.level.branch.meta.unjlrate
-          const unjlmin = parseFloat(this.level.branch.meta.unjlmin.split(' ')[0])
-
-          const amount = utils.parseAmount((potbalance * unjlrate) / 100)
-          const asset = utils.asset(Math.max(amount, unjlmin))
-          return asset
-
-        } catch (error) {
-          return null
-        }
-      },
-      canTry() {
-        return this.player.levelresult === PALYER_STATE.SAFE
-          && this.player.triesleft > 0
-      },
-      canCommitTry() {
-        return this.player.levelresult === PALYER_STATE.SAFE
-          && this.player.triesleft < MAX_TRIES
-      },
-      canNext() {
-        return this.player.levelresult === PALYER_STATE.GREEN
-          && (!this.level.next || !this.level.next.locked)
-      },
-      canGoNext() {
-        return this.player.levelresult === PALYER_STATE.GREEN
-          && (this.level.next && !this.level.next.locked)        
-      },
-      canSplit() {
-        return this.player.levelresult === PALYER_STATE.GREEN
-          && !this.level.split
-      },
-      canTake() {
-        return this.player.levelresult === PALYER_STATE.GREEN
-          && this.takeAmount
-      },
-      canUntake() {
-        return this.player.levelresult === PALYER_STATE.TAKE          
-      },
-      canClaimRed() {
-        return this.player.levelresult === PALYER_STATE.RED
-          && (this.level.idparent > 0 || this.level.branch.meta.startjailed === 0)
-      },
-      canUnjail() {
-        return this.player.levelresult === PALYER_STATE.RED
-      },
-      canClaimGreen() {
-        return this.player.levelresult === PALYER_STATE.GREEN
-      },
-      canUnlockNext() {
-        return this.player.levelresult === PALYER_STATE.GREEN
-          && this.level.next
-          && this.level.next.locked
-          && this.player.triesleft > 0
-      },
-      canUnlockSplit() {
-        return this.player.levelresult === PALYER_STATE.GREEN
-          && this.level.split
-          && this.level.split.locked
-          && this.player.triesleft > 0
-      },
-      canSwitchToSplit() {
-        return this.player.levelresult === PALYER_STATE.GREEN
-          && this.level.split
-          && !this.level.split.locked
       }
     },
     methods: {
@@ -175,6 +100,41 @@
       <span class="caption">Reward:</span><br>
       <span class="asset">{{takeAmount}}</span>
     </div>
+    <div v-if="level.previous" class="panel previouslevel">
+      <span class="caption">Previous pot:</span><br>
+      <span class="asset">{{level.previous.potbalance}}</span>
+    </div>
+    <div class="hud">
+      <v-layout row justify-center align-center fill-height>
+        <ActionBtn v-if="canTry" :action="actions[3]" 
+          :color="player.triesleft > 2 ? 'primary' : player.triesleft > 1 ? null : 'warning'">
+          <template #text>try</template>
+          <template #caption>{{player.triesleft+" left"}}</template>
+        </ActionBtn>
+        <ActionBtn v-if="canCommitTry" :action="actions[4]">
+          <template #text>turn</template>
+          <template #caption>commit turn</template>
+        </ActionBtn>
+        <ActionBtn v-if="canClaimTake" :action="actions[11]">
+          <template #text>claim</template>
+          <template #caption>claim reward</template>
+        </ActionBtn>
+        <ActionBtn v-if="showVesting && !canClaimTake" :action="actions[12]">
+          <template #text><Countdown :end="vestingDate"/></template>
+          <template #caption>vesting lock</template>
+        </ActionBtn>
+        <ActionBtn v-if="canClaimGreen" :action="actions[10]">
+          <template #text>to 0</template>
+          <template #caption>restart lvl</template>
+        </ActionBtn>
+      </v-layout>
+    </div>
+    <ActionBtn v-if="canNext && !level.next" 
+      :panel="true"
+      :action="actions[5]">
+      <template #text>next</template>
+      <template #caption>next level will get {{nextPotAmount}}</template>
+    </ActionBtn>
     <div v-if="level.next" class="panel nextlevel">
       <v-layout column justify-start align-end fill-height>
         <span flex class="caption">Next pot:</span>
@@ -188,58 +148,52 @@
         </ActionBtn>
       </v-layout>
     </div>
-    <div v-if="level.split" class="splitlevel">
-      <span class="caption">Split pot:</span><br>
-      <span class="asset">{{level.split.potbalance}}</span><br>
-      <ActionBtn v-if="canUnlockSplit" :action="actions[1]" :payload="{ idlevel: level.split.id }">
-        <template #text>unlock</template>
-        <template #caption>{{player.triesleft+" left"}}</template>
-      </ActionBtn>
-      <ActionBtn v-else-if="canSwitchToSplit" :action="actions[2]" :payload="{ idbranch: level.split.idbranch }">
-        <template #text>switch</template>
-        <template #caption>switch branch</template>
-      </ActionBtn>
-    </div>
-    <div v-if="level.previous" class="panel previouslevel">
-      <span class="caption">Previous pot:</span><br>
-      <span class="asset">{{level.previous.potbalance}}</span>
-    </div>
-    <div class="hud">
-      <v-layout row justify-center align-center fill-height>
-        <ActionBtn v-if="canTry" :action="actions[3]">
-          <template #text>try</template>
+    <ActionBtn v-if="canSplit" 
+      :panel="true"
+      :action="actions[13]">
+      <template #text>split</template>
+      <template #caption>split level will get {{splitPotAmount}}</template>
+    </ActionBtn>
+    <div v-if="level.split" class="panel splitlevel">
+      <v-layout column justify-start align-start fill-height>
+        <span flex class="caption">Split pot:</span>
+        <span flex class="asset">{{level.split.potbalance}}</span>
+        <ActionBtn flex v-if="canUnlockSplit" icon="lock" :action="actions[1]" 
+          :payload="{ owner: this.player.account, idlevel: level.split.id }">          
           <template #caption>{{player.triesleft+" left"}}</template>
         </ActionBtn>
-        <ActionBtn v-if="canCommitTry" :action="actions[4]">
-          <template #text>turn</template>
-          <template #caption>commit turn</template>
-        </ActionBtn>
-        <ActionBtn v-if="canNext" :action="actions[5]">
-          <template #text>next</template>
-          <template #caption>next level</template>
-        </ActionBtn>
-        <ActionBtn v-if="canTake" :action="actions[6]">
-          <template #text>take</template>
-          <template #caption>take reward</template>
-        </ActionBtn>
-        <ActionBtn v-if="canUntake" :action="actions[7]">
-          <template #text>un-take</template>
-          <template #caption>return reward</template>
-        </ActionBtn>
-        <ActionBtn v-if="canClaimRed" :action="actions[8]">
-          <template #text>{{level.idparent ? 'prev' : 'to 0'}}</template>
-          <template #caption>{{level.idparent ? 'to prev. lvl' : 'restart lvl'}}</template>
-        </ActionBtn>
-        <ActionBtn v-if="canUnjail" :action="actions[9]">
-          <template #text>un-jail</template>
-          <template #caption>pay to stay</template>
-        </ActionBtn>
-        <ActionBtn v-if="canClaimGreen" :action="actions[10]">
-          <template #text>to 0</template>
-          <template #caption>restart lvl</template>
+        <ActionBtn flex v-else-if="canSwitchToSplit" icon="lock_open" :action="actions[2]" 
+          :payload="{ account: this.player.account, idbranch: level.split.idbranch }">          
+          <template #caption>switch</template>
         </ActionBtn>
       </v-layout>
     </div>
+    <ActionBtn v-if="canTake" 
+      :panel="true"
+      :action="actions[6]">
+      <template #text>take</template>
+      <template #caption>put {{takeAmount}} to vesting balance<div class="takewarning">blocks progress!</div></template>
+    </ActionBtn>
+    <ActionBtn v-if="canUntake" 
+      :panel="true"
+      :action="actions[7]">
+      <template #text>un-take</template>
+      <template #caption>return reward to continue</template>
+    </ActionBtn>
+    <ActionBtn v-if="canClaimRed" 
+      :panel="true"
+      :action="actions[8]">
+      <template #text v-if="level.idparent">return</template>
+      <template #text v-else>restart</template>
+      <template #caption v-if="level.idparent">go to previous level</template>
+      <template #caption v-else>go to 0 cell in current level</template>
+    </ActionBtn>
+    <ActionBtn v-if="canUnjail" 
+      :panel="true"
+      :action="actions[9]">
+      <template #text>un-jail</template>
+      <template #caption>pay {{unjailAmount}} to stay on the current level</template>
+    </ActionBtn>
   </div>
 </template>
 <style scoped>
@@ -261,7 +215,7 @@
     left: 50%;
     margin-left: -90px;
     top: 50%;
-    margin-top: -55px;
+    margin-top: -45px;
     border: none;
   }
   .cell {
@@ -288,7 +242,7 @@
   .caption { font-size: smaller; color: gray }
   .panel {
     border: 1px solid gray;
-    border-radius: 20px;
+    border-radius: 5px;
     line-height: 16px;
   }
   .levelpot {
@@ -311,6 +265,22 @@
     border: 1px solid gray;
     border-radius: 20px;
   }
+  .buttonpanel.takelvl {
+    margin-left: -75px;
+    margin-top: 85px;
+    width: 150px;
+    background-color:purple;
+  }  
+
+  .buttonpanel {
+    position: absolute;
+    width: 120px;
+    left: 50%;
+    top: 50%;
+    padding: 5px;
+    border: 1px solid gray;
+    border-radius: 10px;    
+  }
   .nextlevel {
     position: absolute;
     width: 100px;
@@ -319,19 +289,42 @@
     margin-left: 50px;
     top: 50%;
     margin-top: -175px;
-    padding: 5px    
+    padding: 5px;
   }
-  .panel.nextlevel {
-    border: none
+  .buttonpanel.nextlvl {
+    margin-left: 30px;
+    margin-top: -155px;
+    background-color: green;
   }
   .splitlevel {
     position: absolute;
     width: 100px;
-    height: 60px;
+    height: 40px;
     left: 50%;
-    margin-left: -100px;
+    margin-left: -150px;
     top: 50%;
-    margin-top: -100px;
+    margin-top: -175px;
+    padding: 5px; 
+  }
+  .buttonpanel.splitlvl {
+    margin-left: -150px;
+    margin-top: -155px;
+    background-color: green;
+  }
+  .buttonpanel.claimred {
+    margin-left: -150px;
+    margin-top: 105px;
+    background-color:orangered;
+  }
+  .buttonpanel.unjail {
+    margin-left: -60px;
+    margin-top: -40px;
+    background-color: maroon;
+  }
+  .buttonpanel.untake {
+    margin-left: -60px;
+    margin-top: 85px;
+    background-color: green;
   }
   .previouslevel {
     position: absolute;
@@ -341,6 +334,9 @@
     margin-left: 50px;
     top: 50%;
     margin-top: 135px;
+  }
+  .takewarning {
+    background-color:yellow; font-weight: bold; margin-top: 3px; color: black; border-radius: 3px; padding: 0 3px 0 3px;
   }
   .jump {
     -moz-animation: jump 0.3s infinite ease-in-out;

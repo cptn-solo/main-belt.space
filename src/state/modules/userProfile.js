@@ -6,6 +6,8 @@ import {
   UserProfileNoAccountError,
   UserProfileForgetError,
   UserProfileInitializationError,
+  LoadPlayerStakesError, 
+  AddBranchStakesError,
 } from '../../dialogs/userProfileErrors'
 
 const initialState = {
@@ -25,7 +27,8 @@ const initialState = {
     triesleft: 0,
     levelresult: 0,
     resulttimestamp: 0  
-  }
+  },
+  playerStakes: []
 }
 
 export const state = Object.assign({}, initialState)
@@ -64,6 +67,9 @@ export const mutations = {
         state.player[key] = playerObj[key]
       }
     }
+  },
+  setPlayerStakes(state, stakes) {
+    state.playerStakes = stakes
   },
   setBalances(state, balances) {
     state.balances = balances
@@ -160,7 +166,8 @@ export const actions = {
       if (profileRows.length === 1) {
         profileInitialized = true
         player = profileRows[0]
-        commit('setPlayer', player)        
+        commit('setPlayer', player)
+        await dispatch('loadPlayerStakes')
         await dispatch('woffler/fetchGameContext', player.idlvl, { root: true })
       }
       await dispatch('loadAccountBalance')
@@ -199,4 +206,26 @@ export const actions = {
       throw new UserTransferAssetError(ex)
     }
   },
+  async loadPlayerStakes({ getters, commit, state }) {
+    try {      
+      commit('setPlayerStakes', await getters.gameAPI.getPlayerStakes())
+      return state.playerStakes
+    } catch (ex) {
+      throw new LoadPlayerStakesError(ex)//TODO
+    }
+  },
+  async addBranchStake({ dispatch, getters }, { level, amount }) {
+    try {
+      await getters.gameAPI.playerAction({actionname: 'stkaddval', payload: {
+        owner: getters.accountname, 
+        idbranch: level.idbranch,
+        amount: amount
+      }})
+      await dispatch('loadAndProcessIngameProfile')
+      await dispatch('woffler/updateBranchStake', level, { root: true })
+    } catch (ex) {
+      throw new AddBranchStakesError(ex)//TODO
+    }
+  }
+
 }

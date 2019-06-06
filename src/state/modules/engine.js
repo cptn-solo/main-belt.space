@@ -1,7 +1,5 @@
 import gameAPI from '../../api/gameAPI'
 import i18n from '../../lang/lang'
-
-import * as constants from '../constants'
 import ApplicationError from '../../dialogs/applicationError'
 
 const initialState = {

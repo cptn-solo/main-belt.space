@@ -1,22 +1,24 @@
 import ApplicationDialog from './applicationDialog'
 
 export class UserProfileDepositConfirm extends ApplicationDialog {
-  constructor(assetSymbol, value, account) {
-    super({
-      titleLocalized:
-        ApplicationDialog.t('udCDepositTitle') + ': ' + assetSymbol,
-      textLocalized: ApplicationDialog.t('udCDepositText', [value, account]),
-    })
+  constructor(params = []) {
+    super({ titleLocalized: ApplicationDialog.t('udCDepositTitle') })
+    this.params = params
+  }
+  setAsset(asset) {
+    this.params.push(asset)
+    this.text = ApplicationDialog.t('udCDepositText', this.params)
   }
 }
 
 export class UserProfileWithdrawConfirm extends ApplicationDialog {
-  constructor(assetSymbol, value, account) {
-    super({
-      titleLocalized:
-        ApplicationDialog.t('udCWithdrawTitle') + ': ' + assetSymbol,
-      textLocalized: ApplicationDialog.t('udCWithdrawText', [value, account]),
-    })
+  constructor(params = []) {
+    super({ titleLocalized: ApplicationDialog.t('udCWithdrawTitle') })
+    this.params = params
+  }
+  setAsset(asset) {
+    this.params.push(asset)
+    this.text = ApplicationDialog.t('udCWithdrawText', this.params)
   }
 }
 

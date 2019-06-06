@@ -6,6 +6,8 @@ import {
   WflChildLevelsLoadError,
   WflParentLevelLoadError,
   WflPlayerActionError,
+  WflUnlockRootLevelError,
+  WflUpdateBranchStakeError,
 } from '../../dialogs/wofflerErrors'
 import ApplicationError from '../../dialogs/applicationError'
 
@@ -13,8 +15,7 @@ const initialState = {
     branches: [],
     brnchmetas: [],
     levels: [],
-    currentLevelInfo: null,
-    selectedLevelInfo: null,
+    currentLevelInfo: null,     
   }
 
 export const state = Object.assign({}, initialState)
@@ -29,6 +30,9 @@ export const getters = {
   player(state, getters, rootState) {
     return rootState.userProfile.player
   },
+  playerStakes(state, getters, rootState) {
+    return rootState.userProfile.playerStakes
+  },
   startLevels(state) {//returns levelInfo (level+branch+meta)
     const activeLevels = state.levels
       .filter(l => (!l.locked && l.idparent === 0))
@@ -37,21 +41,47 @@ export const getters = {
         return ret
       }, [])
     return activeLevels
+  },
+  lockedStartLevels(state) {
+    const lockedLevels = state.levels
+      .filter(l => (l.locked && l.idparent === 0))
+      .reduce((ret, l) => {
+        ret.push(Object.assign(l, { branch: state.branches.find(b => b.id === l.idbranch)}))
+        return ret
+      }, [])
+    return lockedLevels
+
   }
+}
+
+function updateProps(obj, props) {
+  if (!obj) return 
+  
+  for (var key in props) {
+      if (obj.hasOwnProperty(key)) {
+        obj[key] = props[key]
+      }
+    }  
 }
 
 export const mutations = {
   setBranchMetas: (state, brnchmetas) => (state.brnchmetas = brnchmetas),
-  setBranches: (state, branches) => {
+  setBranches: (state, { branches, stakes }) => {
     state.branches = branches
       .reduce((ext, b) => {
         const meta = state.brnchmetas.find(m => m.id === b.idmeta) || { name: '' }
-        ext.push({...b, meta})
+        const stake = stakes.find(s => s.idbranch === b.id) || { stake: null, revenue: null }
+        ext.push({...b, meta, stake})
         return ext
       },[])
   },
-  setLevels: (state, levels) => (state.levels = levels),    
-  setSelectedLevel: (state, levelInfo) => (state.selectedLevelInfo = levelInfo),
+  setLevels: (state, levels) => (state.levels = levels),
+  updateBranchProps: (state, { id, props}) => {
+    updateProps(state.branches.find(b => b.id === id), props)
+  },
+  updateLevelProps: (state, { id, props }) => {
+    updateProps(state.levels.find(l => l.id === id), props)
+  },
   setCurrentLevel: (state, levelInfo) => (state.currentLevelInfo = levelInfo),
   setChildLevels: (state, children) => (state.currentLevelInfo['children'] = children),
   resetData: state => {
@@ -62,9 +92,6 @@ export const mutations = {
 }
 
 export const actions = {
-  selectLevel({ commit }, levelInfo) {
-    commit('setSelectedLevel', levelInfo)
-  },
   async joinGame({ getters, dispatch }, idbranch) {
     const account = getters.accountname
     try {
@@ -74,7 +101,7 @@ export const actions = {
       throw new WflBranchSwitchError(ex)
     }
   },
-  async signupAndJoinGame({ getters, dispatch }, levelInfo) {    
+  async signupAndJoinGame({ dispatch }, levelInfo) {    
     try {
       await dispatch('userProfile/signup', null, { root: true })
       await dispatch('joinGame', levelInfo)
@@ -91,27 +118,27 @@ export const actions = {
       throw new ApplicationError(ex)
     }
   },
-  async loadBranchMetas({ commit, rootGetters, state }) {
+  async loadBranchMetas({ commit, getters, state }) {
     try {
-      const metas = (await rootGetters['noscatter/gameAPI'].getBranchMetas())
+      const metas = (await getters.gameAPI.getBranchMetas())
       commit('setBranchMetas', metas)
       return state.brnchmetas
     } catch (ex) {
       throw new WflBranchMetasLoadError(ex)
     }
   },
-  async loadBranches({ commit, rootGetters, state }) {
+  async loadBranches({ commit, getters, state }) {
     try {
-      const branches = (await rootGetters['noscatter/gameAPI'].getBranches())
-      commit('setBranches', branches)
+      const branches = (await getters.gameAPI.getBranches())
+      commit('setBranches', { branches, stakes: getters.playerStakes })
       return state.branches
     } catch (ex) {
       throw new WflBranchesLoadError(ex)
     }
   },
-  async loadLevels({ commit, rootGetters, state }) {
+  async loadLevels({ commit, getters, state }) {
     try {
-      const levels = (await rootGetters['noscatter/gameAPI'].getLevels())
+      const levels = (await getters.gameAPI.getLevels())
       commit('setLevels', levels)
       return state.levels
     } catch (ex) {
@@ -188,6 +215,33 @@ export const actions = {
     } catch (ex) {
       throw new WflPlayerActionError(ex)
     }
-
+  },
+  //payload: { owner, idlevel }
+  async unlockRootLevel({ getters, commit }, idlevel) {
+    try {      
+      await getters.gameAPI.playerAction({actionname: 'unlocklvl', payload: {owner: getters.accountname, idlevel}})
+      const level = (await getters.gameAPI.getLevels(idlevel))[0]
+      commit('updateLevelProps', {id: level.id, props: { locked: level.locked }})
+    } catch (ex) {
+      throw new WflUnlockRootLevelError(ex)
+    }
+  },
+  async updateBranchStake({ getters, commit }, levelinfo) {
+    try {
+      console.log('updateBranchStake', levelinfo)
+      const level = (await getters.gameAPI.getLevels(levelinfo.id))[0]
+      const branch = (await getters.gameAPI.getBranches(levelinfo.branch.id))[0]
+      const stake = getters.playerStakes.find(s => s.idbranch === branch.id)
+      commit('updateLevelProps', { 
+        id: level.id, 
+        props: { locked: level.locked, potbalance: level.potbalance }
+      }, { root: true })
+      commit('updateBranchProps', { 
+        id: levelinfo.branch.id, 
+        props: { totalstake: branch.totalstake, stake }
+      }, { root: true })  
+    } catch (ex) {
+      throw new WflUpdateBranchStakeError(ex)
+    }
   }
 }

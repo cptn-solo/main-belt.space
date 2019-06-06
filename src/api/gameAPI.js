@@ -64,6 +64,32 @@ export default {
     }
     return getEOSTableRows(this.rpc, data)
   },
+  getPlayerStakes() {
+    let data = {
+      code: this.gameContract,
+      scope: this.gameContract,
+      table: 'stakes',
+      key_type: 'name',
+      index_position: 3,
+      lower_bound: this.accountname,
+      upper_bound: this.accountname,
+    }
+    return getEOSTableRows(this.rpc, data)
+  },
+  getPlayerStakeInBranch(idbranch) {//TODO
+    const id = this.accountname+idbranch
+    //(uint128_t{x} << 64) | y
+    let data = {
+      code: this.gameContract,
+      scope: this.gameContract,
+      table: 'stakes',
+      key_type: 'i128',
+      index_position: 4,
+      lower_bound: id,
+      upper_bound: id,
+    }
+    return getEOSTableRows(this.rpc, data)
+  },  
   /** Actions */
   signup(referrer) {
     const data = {

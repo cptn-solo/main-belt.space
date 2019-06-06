@@ -18,6 +18,18 @@ export class UserTransferAssetError extends ApplicationError {
   }
 }
 
+export class LoadPlayerStakesError extends ApplicationError {
+  constructor(error) {
+    super(error, 'Load stakes error', 'Error while loading player stakes')
+  }
+}
+
+export class AddBranchStakesError extends ApplicationError {
+  constructor(error) {
+    super(error, 'Add stake error', 'Error while adding player stake to branch')
+  }
+}
+
 export class UserProfileReCaptchaError extends ApplicationError {
   constructor(error) {
     super(error, 'Registration error', 'Error getting reCAPTCHA from user')

@@ -6,7 +6,7 @@ COPY package*.json ./
 RUN yarn global add @vue/cli -g
 RUN yarn install
 COPY . .
-RUN yarn build
+RUN yarn buildstage
 
 # production stage
 FROM nginx:stable-alpine as production-stage

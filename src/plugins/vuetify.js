@@ -2,7 +2,8 @@ import Vue from 'vue'
 import Vuetify, {
   VBtn, VIcon, VSpacer, VDialog,
   VCard, VCardText, VCardActions, VCardTitle,
-  VToolbar, VToolbarTitle  
+  VToolbar, VToolbarTitle,
+  VSnackbar
 } from 'vuetify/lib'
 import 'vuetify/src/stylus/app.styl'
 
@@ -11,6 +12,7 @@ Vue.use(Vuetify, {
   components: {
     VBtn, VIcon, VSpacer, VDialog,
     VCard, VCardText, VCardActions, VCardTitle,
-    VToolbar, VToolbarTitle    
+    VToolbar, VToolbarTitle,
+    VSnackbar
     }
 })

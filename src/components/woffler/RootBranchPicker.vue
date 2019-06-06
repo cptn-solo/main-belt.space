@@ -21,6 +21,9 @@
       showMeta(idx) {
         this.$store.dispatch('gui/showDialog', { key: "levelInfoDialog", payload: this.startLevels[idx] })          
       },
+      createRootBranch() {
+        this.$dialog.message.info('coming soon')
+      },
       showActions(idx) {
         const payload = this.startLevels[idx]
         if (payload.locked) 
@@ -100,6 +103,12 @@
         </v-btn>        
       </v-list-tile-action>
     </v-list-tile>
+    <v-divider v-if="startLevels.length > 0"/>
+    <v-btn style="margin: 20px 0 20px 0"
+      @click="createRootBranch">
+      <v-icon ripple mr-2>add</v-icon>
+      create your own game!
+    </v-btn>
     <AssetPanel guiKey="stakeDialog" 
       :placeholder="$t('upAddStakeAmountPH')">
       <template #title>{{$t('upAddStake')}}</template>

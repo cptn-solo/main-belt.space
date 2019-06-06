@@ -115,7 +115,7 @@
         <template v-if="activePanel">
           <RootBranchPicker v-if="activePanel.key === 'levels'"
             :startLevels="startLevels" :hasIngameProfile="hasIngameProfile" />
-          <RootBranchPicker v-if="activePanel.key === 'locked'"
+          <RootBranchPicker v-else-if="activePanel.key === 'locked'"
             :startLevels="lockedLevels" :hasIngameProfile="hasIngameProfile" />
           <template v-else-if="activePanel.key === 'active'">
             <GamePanel 

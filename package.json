@@ -7,7 +7,7 @@
     "devstage": "vue-cli-service serve --mode stage",
     "devprod": "vue-cli-service serve --mode prod",
     "build": "cross-env NODE_ENV=production vue-cli-service build --mode dev",
-    "yarn": "vue-cli-service build --mode stage",
+    "buildstage": "vue-cli-service build --mode stage",
     "buildprod": "cross-env NODE_ENV=production vue-cli-service build --mode prod"
   },
   "dependencies": {

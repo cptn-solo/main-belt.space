@@ -4,14 +4,13 @@
   import ProfilePanel from './components/ProfilePanel'
   import ImportPanel from './components/ImportPanel'
   import ActionsPanel from './components/ActionsPanel'
-  import PlayerInfo from './components/woffler/PlayerInfoPanel'
   import LanguageSelector from './components/controls/LanguageSelector'
   import { mapState } from 'vuex'
   import * as constants from './state/constants'
 
   export default {
     components: {
-      NavigationPanel, LinksPanel, ProfilePanel, ImportPanel, ActionsPanel, PlayerInfo, LanguageSelector
+      NavigationPanel, LinksPanel, ProfilePanel, ImportPanel, ActionsPanel, LanguageSelector
     },
     props: {
       source: String
@@ -21,19 +20,25 @@
       version: 'v.' + process.env.VERSION + ' (' + process.env.BRANCH + ')',
       constants,
       importPanel: false,
-      playerInfoPanel: false,
-      darkTheme: true
+      darkTheme: true,
+      currentRoute: { name: "home"},
     }),
     computed: {
       ...mapState({
         player: state => state.userProfile.player,
         status: state => state.userProfile.profileState,
       }),
+      toolbarFlat() { 
+        return this.currentRoute.name === "woffler"
+      }
     },
     mounted() {
       this.$store.dispatch('engine/launch')
     },
     watch: {
+      '$route'(n, o) {
+        if (n && n.name) this.currentRoute = n 
+      },
       status(n, o) {
         if (n === constants.PROFILE_INITIALIZED)
           this.playerInfoPanel = true
@@ -53,21 +58,12 @@
       <NavigationPanel @toggledarktheme="darkTheme = !darkTheme"/>
       <LinksPanel />
     </v-navigation-drawer>
-    <v-toolbar app fixed clipped-left>
+    <v-toolbar app fixed clipped-left :flat="toolbarFlat">
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-toolbar-title>Belt</v-toolbar-title>
+      <v-toolbar-title>{{$t('routeTitle'+currentRoute.name)}}</v-toolbar-title>
       <v-spacer/>
       <ProfilePanel :player="player" :status="status"
         @showimportpanel="importPanel = true" />
-      <template slot="extension" v-if="playerInfoPanel && status >= constants.PROFILE_LOGGEDIN">
-        <PlayerInfo :player="player" :status="status" />
-      </template>
-      <v-btn v-if="status >= constants.PROFILE_LOGGEDIN"
-        fab small bottom absolute style="left: 50%; margin-left: -13px; margin-bottom: 8px; width: 26px; height: 26px;"
-          @click="playerInfoPanel = !playerInfoPanel">
-          <v-icon v-if="playerInfoPanel">keyboard_arrow_up</v-icon>
-          <v-icon v-else>keyboard_arrow_down</v-icon>
-      </v-btn>
       <LanguageSelector />
     </v-toolbar>
     <v-dialog v-model="importPanel" transition="slide-y-transition" width="300">

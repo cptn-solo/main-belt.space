@@ -9,7 +9,7 @@ export default {
   setAPI(api, rpc) {
     this.api = api
     this.rpc = rpc
-  },  
+  },
   getIngameProfileForAccount(accountname) {
     return getEOSTableRows(this.rpc, {
       code: this.gameContract,
@@ -29,31 +29,71 @@ export default {
     })
     // return getTokenBalance('ASTRO') // запрос контракта не взлетел, переделал на запрос таблицы
   },
-  getBranchMetas() {
-    return getEOSTableRows(this.rpc, {
+  fetchFromMainTable(table, id = null) {
+    let data = {
       code: this.gameContract,
       scope: this.gameContract,
-      table: 'brnchmeta',
+      table
+    }
+    if (id) Object.assign(data, {
+      key_type: 'i64',
+      index_position: 1,
+      lower_bound: id,
+      upper_bound: id,
     })
+    return getEOSTableRows(this.rpc, data)
   },
-  getBranches() {
-    return getEOSTableRows(this.rpc, {
-      code: this.gameContract,
-      scope: this.gameContract,
-      table: 'branches',
-    })
+  getBranchMetas(id = null) {
+    return this.fetchFromMainTable('brnchmeta', id)
   },
-  getLevels() {
-    return getEOSTableRows(this.rpc, {
+  getBranches(id = null) {
+    return this.fetchFromMainTable('branches', id)
+  },
+  getLevels(id = null) {
+    return this.fetchFromMainTable('levels', id)
+  },
+  getChildLevels(id) {
+    let data = {
       code: this.gameContract,
       scope: this.gameContract,
       table: 'levels',
-    })
+      key_type: 'i64',
+      index_position: 2,
+      lower_bound: id,
+      upper_bound: id,
+    }
+    return getEOSTableRows(this.rpc, data)
   },
+  getPlayerStakes() {
+    let data = {
+      code: this.gameContract,
+      scope: this.gameContract,
+      table: 'stakes',
+      key_type: 'name',
+      index_position: 3,
+      lower_bound: this.accountname,
+      upper_bound: this.accountname,
+    }
+    return getEOSTableRows(this.rpc, data)
+  },
+  getPlayerStakeInBranch(idbranch) {//TODO
+    const id = this.accountname+idbranch
+    //(uint128_t{x} << 64) | y
+    let data = {
+      code: this.gameContract,
+      scope: this.gameContract,
+      table: 'stakes',
+      key_type: 'i128',
+      index_position: 4,
+      lower_bound: id,
+      upper_bound: id,
+    }
+    return getEOSTableRows(this.rpc, data)
+  },  
   /** Actions */
   signup(referrer) {
     const data = {
-      account: this.accountname, 
+      account: this.accountname,
       referrer: referrer || this.gameContract
     }
     return transactEOS(this.api, this.accountname, this.gameContract, 'signup', data)
@@ -65,10 +105,7 @@ export default {
     return transactEOS(this.api, this.accountname, this.gameContract, 'forget', data)
   },
   switchbrnch(account, idbranch) {
-    const data = {
-      account: account,
-      idbranch: idbranch
-    }
+    const data = { account, idbranch }
     return transactEOS(this.api, this.accountname, this.gameContract, 'switchbrnch', data)
   },
   async getAccount(accountname) {
@@ -81,7 +118,7 @@ export default {
       const requestOptions = {
         headers: { 'Content-Type': 'multipart/form-data' },
       }
-    
+
       const result = (await axios.post(
         this.rpc.endpoint + '/v1/chain/get_account',
         fullData,
@@ -91,6 +128,28 @@ export default {
     } catch (ex) {
       throw new ServerRequestError(ex)
     }
+  },
+  depositAsset(asset) {
+    const data = {
+      from: this.accountname,
+      to: this.gameContract,
+      quantity: asset,
+      memo: 'deposit',
+    }    
+    return transactEOS(this.api, this.accountname, 'eosio.token', 'transfer', data)
+  },
+  withdrawAsset(asset) {
+    const data = {
+      from: this.accountname,
+      to: this.accountname,
+      amount: asset,
+      memo: 'withdraw',
+    }
+    return transactEOS(this.api, this.accountname, this.gameContract, 'withdraw', data)
+  },
+  playerAction(payload) {
+    const data = payload.payload || { account: this.accountname }
+    return transactEOS(this.api, this.accountname, this.gameContract, payload.actionname, data)
   },
   /** Voting */
   async getProducers() {
@@ -113,13 +172,7 @@ export default {
   },
   async vote(data) {
     // {voter:this.accountname, proxy:null, producers:[<owner>]}
-    const result = await transactEOS(
-      this.api,
-      this.accountname,
-      'eosio',
-      'voteproducer',
-      data
-    )
+    const result = await transactEOS(this.api, this.accountname, 'eosio', 'voteproducer', data)
     return result
   }
 }
@@ -155,7 +208,7 @@ async function getEOSTableRows(rpc, data, accumulated = null) {
       return await getEOSTableRows(rpc, data, rows)
     else return rows
   } catch (ex) {
-    throw new ServerRequestError(ex)    
+    throw new ServerRequestError(ex)
   }
 }
 
@@ -167,6 +220,6 @@ async function transactEOS(api, account, contract, action, data) {
       { blocksBehind: 3, expireSeconds: 30 }
     )
   } catch (ex) {
-    throw new ServerRequestError(ex)    
+    throw new ServerRequestError(ex)
   }
 }

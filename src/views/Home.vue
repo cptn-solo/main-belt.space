@@ -3,7 +3,7 @@
     <v-layout justify-center align-center>
       <v-flex shrink>
         <div class="home">
-          <img alt="Vue logo" src="../assets/logo.png" />
+          <img alt="Vue logo" src="/assets/images/logo.png" />
           <Intro msg="Welcome to the Belt, buddy" />
           <p/>
           <a href="#" @click="showModal = true"><b>Top up Belt's lightning network channel</b></a>

@@ -1,5 +1,9 @@
 # Intro
 
+<img src="/assets/images/logo.png"
+     alt="Markdown Monster icon"
+     style="float: right; margin-left: 10px;" />
+
 Hey belters!
 
 It was a long time ago. Suppose more than 35. I was a kid of a kind, you know - looking up to the stars in the evening and thinking "what the hell is it?" And waiting that something will once come from out there and change my life.

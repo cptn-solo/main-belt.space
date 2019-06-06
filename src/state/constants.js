@@ -7,6 +7,7 @@ export const NETWORK_NAME = process.env.VUE_APP_NETWORK_NAME
 export const APP_NAME = process.env.VUE_APP_APP_NAME
 export const APP_CODE = process.env.VUE_APP_CODE
 export const CURR_CODE = 'EOS'
+export const CURR_DECIMALS = 4
 export const NETWORK = {
   blockchain: 'eos',
   host: NETWORK_HOST,

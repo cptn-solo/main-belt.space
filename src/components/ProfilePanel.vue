@@ -1,5 +1,5 @@
 <script>
-  import { mapGetters } from 'vuex'
+  import { mapGetters, mapState } from 'vuex'
   import ApplicationError from '../dialogs/applicationError'
   import * as constants from '../state/constants'
 
@@ -20,7 +20,10 @@
     },
     computed: {
       ...mapGetters('userProfile', {
-        account: 'accountname'
+        account: 'accountname',        
+      }),
+      ...mapState({
+        accountBalance: state => state.userProfile.accountBalance
       })
     },
     methods: {
@@ -57,9 +60,10 @@
 <template>
   <v-menu v-model="showMenu">
     <template slot="activator">
-      <span v-if="status >= constants.PROFILE_LOGGEDIN">
-        <b>{{account}}</b>
-      </span>
+      <span v-if="status >= constants.PROFILE_LOGGEDIN"
+        style="text-align: right; line-height: 14px; margin-top: 15px">
+        <b>{{account}}</b><br><span style="font-size:smaller; color: gray">{{accountBalance}}</span>
+      </span>      
       <span v-else>
         {{$t('upLogin')}}
       </span>

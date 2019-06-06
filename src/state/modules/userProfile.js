@@ -6,6 +6,8 @@ import {
   UserProfileNoAccountError,
   UserProfileForgetError,
   UserProfileInitializationError,
+  LoadPlayerStakesError, 
+  AddBranchStakesError,
 } from '../../dialogs/userProfileErrors'
 
 const initialState = {
@@ -25,7 +27,8 @@ const initialState = {
     triesleft: 0,
     levelresult: 0,
     resulttimestamp: 0  
-  }
+  },
+  playerStakes: []
 }
 
 export const state = Object.assign({}, initialState)
@@ -65,6 +68,9 @@ export const mutations = {
       }
     }
   },
+  setPlayerStakes(state, stakes) {
+    state.playerStakes = stakes
+  },
   setBalances(state, balances) {
     state.balances = balances
   },
@@ -75,7 +81,7 @@ export const mutations = {
   },
   resetData: state => {
     setKeyValues(state, initialState)
-  },
+    },
   cleanupPlayerData: state => {
     setKeyValues(state.player, initialState.player)
   }
@@ -151,13 +157,18 @@ export const actions = {
     }
   },
   async loadAndProcessIngameProfile(
-    { commit, dispatch, getters }, accountname) {
+    { commit, dispatch, getters }, account = null) {
     try {
+      const accountname = account || getters.accountname      
       const profileRows = await getters.gameAPI.getIngameProfileForAccount(accountname)
       let profileInitialized = false
-      if (profileRows.length === 1 && profileRows[0].account === accountname) {
+      let player = null
+      if (profileRows.length === 1) {
         profileInitialized = true
-        commit('setPlayer', profileRows[0])
+        player = profileRows[0]
+        commit('setPlayer', player)
+        await dispatch('loadPlayerStakes')
+        await dispatch('woffler/fetchGameContext', player.idlvl, { root: true })
       }
       await dispatch('loadAccountBalance')
       return profileInitialized
@@ -165,11 +176,10 @@ export const actions = {
       throw new UserProfileLoadError(ex)
     }
   },
-  async loadAccountBalance({ commit, rootGetters, state }) {
+  async loadAccountBalance({ commit, getters, state }) {
     try {
-      const balanceRows = (await rootGetters[
-        'noscatter/gameAPI'
-      ].getAccountBalances()).map(balance => balance.balance)
+      const balanceRows = (await getters.gameAPI.getAccountBalances())
+        .map(balance => balance.balance)
       commit('setBalances', balanceRows)
       if (balanceRows) {
         const balances = balanceRows.filter(asset => asset.split(' ')[1] === constants.CURR_CODE)
@@ -180,20 +190,42 @@ export const actions = {
       throw new UserBalancesLoadError(ex)
     }
   },
-  async transferAsset(
-    { dispatch, rootGetters },
-    { account, amount, assetSymbol }
-  ) {
+  async depositAsset({ dispatch, getters }, asset) {
     try {
-      // TODO: check if scatter available first and form Request Transfer interaction
-      await rootGetters['noscatter/gameAPI'].sendAsset(
-        account,
-        amount,
-        assetSymbol
-      )
-      return await dispatch('loadAccountBalances', this.accountname)
+      await getters.gameAPI.depositAsset(asset)
+      return await dispatch('loadAndProcessIngameProfile')
     } catch (ex) {
       throw new UserTransferAssetError(ex)
     }
   },
+  async withdrawAsset({ dispatch, getters }, asset ) {
+    try {
+      await getters.gameAPI.withdrawAsset(asset)
+      return await dispatch('loadAndProcessIngameProfile')
+    } catch (ex) {
+      throw new UserTransferAssetError(ex)
+    }
+  },
+  async loadPlayerStakes({ getters, commit, state }) {
+    try {      
+      commit('setPlayerStakes', await getters.gameAPI.getPlayerStakes())
+      return state.playerStakes
+    } catch (ex) {
+      throw new LoadPlayerStakesError(ex)//TODO
+    }
+  },
+  async addBranchStake({ dispatch, getters }, { level, amount }) {
+    try {
+      await getters.gameAPI.playerAction({actionname: 'stkaddval', payload: {
+        owner: getters.accountname, 
+        idbranch: level.idbranch,
+        amount: amount
+      }})
+      await dispatch('loadAndProcessIngameProfile')
+      await dispatch('woffler/updateBranchStake', level, { root: true })
+    } catch (ex) {
+      throw new AddBranchStakesError(ex)//TODO
+    }
+  }
+
 }

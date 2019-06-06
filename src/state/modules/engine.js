@@ -1,13 +1,12 @@
 import gameAPI from '../../api/gameAPI'
 import i18n from '../../lang/lang'
-
-import * as constants from '../constants'
 import ApplicationError from '../../dialogs/applicationError'
 
 const initialState = {
   gameAPI,
   i18n,
-  pendingGUIActions: []//{icon (md icon name), title (localisation label), selector ('module/action/), payload (obj)}
+  pendingGUIActions: [], //{icon (md icon name), title (localisation label), selector ('module/action/) | promise, payload (obj)}
+  currentGUIAction: null
 }
 export const state = Object.assign({}, initialState)
 
@@ -25,6 +24,7 @@ export const getters = {
 
 export const mutations = {
   requestActions: (state, actions) => (state.pendingGUIActions = actions),
+  setCurrentAction: (state, action) => (state.currentGUIAction = action),
   resetData: state => {
     for (var key in state) {
       if (initialState.hasOwnProperty(key)) {
@@ -46,14 +46,31 @@ export const actions = {
   requestActions({ commit }, actions) {
     commit('requestActions', actions)
   },
-  async actionPicked({ dispatch, commit, state }, idx) {
-    const action = state.pendingGUIActions[idx]
-    try {
-      await dispatch(action.selector, action.payload, { root: true })
-      commit('requestActions', [])
-    } catch (ex) {
+  actionPicked({ dispatch, state }, idx) {
+    try {      
+      const action = state.pendingGUIActions[idx]
+      dispatch('enqueueAction', action)
+    } catch (ex) {//in case action is not queued
       throw new ApplicationError(ex)
     }    
+  },
+  enqueueAction({ commit }, action) {
+    commit('setCurrentAction', action)
+  },
+  async performEnqueuedAction({ dispatch, commit, state }) {
+    try {      
+      const action = state.currentGUIAction
+      if (action.selector)
+        await dispatch(action.selector, action.payload, { root: true })
+      else if (action.promise) {        
+        await action.promise
+      }        
+      commit('requestActions', [])//actions left queued if exception occured to allow retry
+    } catch (ex) {
+      throw new ApplicationError(ex)
+    } finally {
+      commit('setCurrentAction', null)
+    }
   },
   async checkSavedCredentials({ dispatch, getters, rootGetters }) {
     try {

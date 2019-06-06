@@ -20,7 +20,7 @@ export default {
 <template>
   <v-menu>
     <template slot="activator">
-      <img :src="selectedLocale.flagImg" style="width: 22px; margin-left: 5px">
+      <img :src="selectedLocale.flagImg" style="width: 22px; margin-left: 5px;">
     </template>
     <v-list>
       <v-list-tile v-for="(loc, idx) in availableLocales" :key="idx"

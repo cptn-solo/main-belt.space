@@ -4,7 +4,6 @@ import App from "./App.vue";
 import router from "./router";
 import store from "./state/store";
 import i18n from './lang/lang'
-import "./registerServiceWorker";
 import VuetifyDialog from 'vuetify-dialog'
 import Loading from 'vue-loading-overlay'
 import 'vue-loading-overlay/dist/vue-loading.css'

@@ -34,16 +34,12 @@
         let loader = this.$loading.show()
         try {
           await this.$store.dispatch('scatter/login')
-          this.$ga.event('user', 'loginScatter', 'success', 0)
         } catch (ex) {
-          this.$ga.event('user', 'loginScatter', 'failure', 0)
           this.$dialog.error(ex)
         }
         loader.hide()
       },
       async logout() {
-        // +
-        this.$ga.event('user', 'logout', '--', 0)
         let loader = this.$loading.show()
         try {
           await this.$store.dispatch('userProfile/logout')

@@ -34,18 +34,6 @@
         showModal: false        
       }
     },
-    watch: {
-      showModal(n, o) {
-        if (n) {
-          this.$ga.event(
-            'donate',
-            'showModal',
-            'BTC',
-            1
-          )
-        }
-      }
-    }
   };
 </script>
 

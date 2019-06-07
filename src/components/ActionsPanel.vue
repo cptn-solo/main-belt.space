@@ -36,8 +36,6 @@ import { mapState } from 'vuex';
 
         if (action.lock) loader = this.$loading.show()
 
-        this.$ga.event('action', action.title, '--', 1)
-
         try {          
           await this.$store.dispatch('engine/performEnqueuedAction')
         } catch (ex) {

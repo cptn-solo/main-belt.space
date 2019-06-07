@@ -11,7 +11,6 @@
     }),
     methods: {
       async login() {
-        this.$ga.event('user', 'import', '--', 0)
         let loader = this.$loading.show()
         try {
           await this.$store.dispatch('noscatter/login', {

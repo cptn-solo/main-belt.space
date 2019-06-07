@@ -8,7 +8,6 @@
 
 <script>
 import VueQrcode from '@chenfengyuan/vue-qrcode'
-const io = require('socket.io-client')
 
 const eventToListenTo = 'tx'
 const room = 'inv'
@@ -27,25 +26,7 @@ export default {
     }
   },
   beforeMount(){
-    this.qrcodeAddress = `bitcoin:${this.address}`
-    const socket = io("https://insight.bitpay.com/")
-
-    const ref = this
-
-    socket.on('connect', function() {
-      // Join the room.
-      socket.emit('subscribe', room)
-      ref.message = `Waiting for ${ref.amount} BTC payment...`
-    })
-
-    socket.on(eventToListenTo, function(data) {
-      if (data.vout.some(e => Object.keys(e)[0] === ref.address)) {
-        if (data.vout.some(e => e[ref.address] / 100000000 === ref.amount)) {
-          ref.message = ""
-          ref.$emit('completedPayment')
-        }
-      }
-    });
+    this.qrcodeAddress = `bitcoin:${this.address}`    
   },
   components: {
     VueQrcode

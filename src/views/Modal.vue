@@ -45,12 +45,6 @@ export default {
     completedPayment() {
       this.showCheckout = false
       this.message = "Thank you"
-      this.$ga.event(
-        'donate',
-        'completedPayment',
-        'BTC',
-        1
-      )
     }
   }
 }

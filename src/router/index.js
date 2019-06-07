@@ -1,7 +1,6 @@
 import Vue from "vue";
 import Router from "vue-router";
 import routes from './routes'
-import NProgress from 'nprogress/nprogress'
 import store from '../state/store'
 
 Vue.use(Router);
@@ -17,8 +16,6 @@ router.beforeEach(async (routeTo, routeFrom, next) => {
   // If this isn't an initial page load...
   try {
     if (routeFrom.name !== null) {
-      // Start the route progress bar.
-      NProgress.start()
     } else if (!routeTo.params.exception) {
       try {
         const referrerCode = routeTo.query['code']
@@ -62,7 +59,6 @@ router.beforeEach(async (routeTo, routeFrom, next) => {
 
   function redirectToLogin(ex = null) {
     // Pass the original route to the login component
-    NProgress.done()
     next({ name: 'home', params: { exception: ex } })
   }
 })
@@ -107,7 +103,6 @@ router.beforeResolve(async (routeTo, routeFrom, next) => {
 // When each route is finished evaluating...
 router.afterEach((routeTo, routeFrom) => {
   // Complete the animation of the route progress bar.
-  NProgress.done()
 })
 
 export default router;

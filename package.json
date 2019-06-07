@@ -7,7 +7,7 @@
     "devstage": "vue-cli-service serve --mode stage",
     "devprod": "vue-cli-service serve --mode prod",
     "build": "cross-env NODE_ENV=production vue-cli-service build --mode dev",
-    "buildstage": "vue-cli-service build --mode stage",
+    "buildstage": "cross-env NODE_ENV=production vue-cli-service build --mode stage",
     "buildprod": "cross-env NODE_ENV=production vue-cli-service build --mode prod"
   },
   "dependencies": {
@@ -37,6 +37,7 @@
     "@vue/cli-plugin-pwa": "^3.5.0",
     "@vue/cli-service": "^3.5.0",
     "babel-eslint": "^10.0.1",
+    "cross-env": "^5.2.0",
     "eslint": "^5.8.0",
     "eslint-plugin-vue": "^5.0.0",
     "git-revision-webpack-plugin": "^3.0.3",

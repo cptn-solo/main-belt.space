@@ -2,9 +2,19 @@
   "name": "zero.alpha.belt",
   "short_name": "zero.alpha.belt",
   "icons": [
+    {
+      "src": "/assets/images/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/images/icon-256x256.png",
+      "sizes": "256x256",
+      "type": "image/png"
+    }
   ],
-  "start_url": "./index.html",
-  "display": "standalone",
+  "start_url": "/",
+  "display": "fullscreen",
   "background_color": "#000000",
   "theme_color": "#4DBA87"
 }

@@ -87,7 +87,7 @@
   }
 </script>
 <template>
-  <div class="wflbox">
+  <div class="wflbox" v-if="level">
     <div v-for="idx in levelLength" :key="idx"
       :class="cellValueClasses(idx-1)"
       :style="cellPositionStyle(idx-1)"
@@ -172,7 +172,7 @@
       :panel="true"
       :action="actions[6]">
       <template #text>take</template>
-      <template #caption>put {{takeAmount}} to vesting balance<div class="takewarning">blocks progress!</div></template>
+      <template #caption>receive {{takeAmount}} to vesting balance<div class="takewarning">blocks progress!</div></template>
     </ActionBtn>
     <ActionBtn v-if="canUntake" 
       :panel="true"

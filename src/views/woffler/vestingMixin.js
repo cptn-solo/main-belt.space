@@ -1,12 +1,11 @@
 import { mapState } from "vuex";
 import utils from '../../utils'
 
-let interval = null
-
 export default {
   data(){
     return {
       vestingReady: false,
+      interval: null
     }    
   },
   computed: {
@@ -24,12 +23,12 @@ export default {
     this.initVestingInterval()
   },
   destroyed() {
-    clearInterval(interval)
+    clearInterval(this.interval)
   },
   watch: {
     vestingDate(n, o) {
       if (!n)
-        clearInterval(interval)
+        clearInterval(this.interval)
       else
         this.initVestingInterval()
     }
@@ -41,19 +40,16 @@ export default {
         if (vesting && vesting > now) {
           this.vestingReady = false
           const diff = vesting - now
-          interval = setInterval(() => {
-            this.vestingDateReached()
+          this.interval = setInterval(() => {
+            this.vestingReady = true
+            clearInterval(this.interval)              
           }, diff)
         } else if (vesting && vesting < now) {
           this.vestingReady = true
         } else {
           this.vestingReady = false
-          clearInterval(interval)
+          clearInterval(this.interval)
         }
       }
     },
-    vestingDateReached() {
-      this.vestingReady = true
-      clearInterval(interval)      
-    }
   }

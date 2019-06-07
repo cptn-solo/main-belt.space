@@ -235,11 +235,11 @@ export const actions = {
       commit('updateLevelProps', { 
         id: level.id, 
         props: { locked: level.locked, potbalance: level.potbalance }
-      }, { root: true })
+      })
       commit('updateBranchProps', { 
         id: levelinfo.branch.id, 
         props: { totalstake: branch.totalstake, stake }
-      }, { root: true })  
+      })  
     } catch (ex) {
       throw new WflUpdateBranchStakeError(ex)
     }

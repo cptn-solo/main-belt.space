@@ -55,6 +55,7 @@ export const actions = {
     }    
   },
   enqueueAction({ commit }, action) {
+    console.log('enqueueAction', action)
     commit('setCurrentAction', action)
   },
   async performEnqueuedAction({ dispatch, commit, state }) {

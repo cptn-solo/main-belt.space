@@ -1,9 +1,7 @@
 <script>
 import * as constants from '../../state/constants'
-import ApplicationError from '../../dialogs/applicationError'
-import { UserProfileForgetKeyConfirm, UserProfileDepositConfirm, UserProfileWithdrawConfirm } from '../../dialogs/userProfileConfirmations'
-import utils from '../../utils'
-import Countdown from '../controls/Countdown'
+import PlayerProfileMenu from './PlayerProfileMenu'
+import PlayerBalanceMenu from './PlayerBalanceMenu'
 import AssetPanel from './AssetPanel'
 
 export default {
@@ -21,7 +19,7 @@ export default {
     vestingDate: { type: Number, default: 0}
   },
   components: {
-    Countdown, AssetPanel
+    PlayerProfileMenu, PlayerBalanceMenu, AssetPanel
   },
   data: () => ({
     constants,
@@ -33,31 +31,6 @@ export default {
         lock: true, payload: null
       })
     },
-    forget() {
-      this.$store.dispatch('engine/enqueueAction', {
-        title: 'forget', selector: 'userProfile/forget',
-        lock: true, payload: null,
-        confirm: new UserProfileForgetKeyConfirm()
-      })
-    },
-    claimtake() {
-      this.$store.dispatch('engine/enqueueAction', {
-        title: 'deposit', selector: 'woffler/playerAction',
-        lock: true, payload: { actionname: 'claimtake' }
-      })
-    },
-    depositDialog() {
-      this.$store.dispatch('gui/showDialog', { key: "depositDialog", payload: { 
-        title: 'deposit', selector: 'userProfile/depositAsset', 
-        lock: true, confirm: new UserProfileDepositConfirm([constants.APP_CODE])
-      } })
-    },
-    withdrawDialog() {
-      this.$store.dispatch('gui/showDialog', { key: "withdrawDialog", payload: { 
-        title: 'withdraw', selector: 'userProfile/withdrawAsset', 
-        lock: true, confirm: new UserProfileWithdrawConfirm([this.player.account])
-      } })
-    }
   }
 }
 </script>
@@ -70,28 +43,12 @@ export default {
             flex icon ripple
             style="margin-left: -7px"
             @click="signup"><v-icon>person_add</v-icon></v-btn>
-          <v-menu v-if="status === constants.PROFILE_INITIALIZED">
-            <template slot="activator">
-              <v-icon ripple>person_outline</v-icon>
-            </template>
-            <v-list dense>
-              <v-list-tile v-if="showVesting" :disabled="!vestingReady"
-                @click="claimtake">
-                <v-list-tile-action><v-icon :disabled="!vestingReady">save_alt</v-icon></v-list-tile-action>
-                <v-list-tile-content>
-                  <v-list-tile-title>{{$t('wflClaimTake')}}</v-list-tile-title>
-                  <v-list-tile-sub-title v-if="!vestingReady">
-                    <Countdown :end="vestingDate" />
-                  </v-list-tile-sub-title>
-                  <v-list-tile-sub-title v-else>{{player.vestingbalance}}</v-list-tile-sub-title>
-                </v-list-tile-content>
-              </v-list-tile>
-              <v-list-tile @click="forget">
-                <v-list-tile-action><v-icon color="warning">remove_circle</v-icon></v-list-tile-action>
-                <v-list-tile-title>{{$t('upForget')}}</v-list-tile-title>
-              </v-list-tile>
-            </v-list>
-          </v-menu>
+          <PlayerProfileMenu v-if="status === constants.PROFILE_INITIALIZED" 
+            :player="player"
+            :showVesting="showVesting"
+            :vestingReady="vestingReady"
+            :vestingDate="vestingDate"
+            />
         </v-layout>
       </v-flex>
       <v-flex>
@@ -117,21 +74,7 @@ export default {
       </v-flex>
       <v-flex xs2>
         <v-layout row justify-end align-center fill-height>
-          <v-menu>
-            <template slot="activator">
-              <v-icon ripple>monetization_on</v-icon>
-            </template>
-            <v-list dense>
-              <v-list-tile @click="depositDialog">
-                <v-list-tile-action><v-icon>add</v-icon></v-list-tile-action>
-                <v-list-tile-title>{{$t('upDeposit')}}</v-list-tile-title>
-              </v-list-tile>
-              <v-list-tile @click="withdrawDialog">
-                <v-list-tile-action><v-icon>remove</v-icon></v-list-tile-action>
-                <v-list-tile-title>{{$t('upWithdraw')}}</v-list-tile-title>
-              </v-list-tile>
-            </v-list>
-          </v-menu>
+          <PlayerBalanceMenu :player="player"/>
         </v-layout>
       </v-flex>
     </v-layout>

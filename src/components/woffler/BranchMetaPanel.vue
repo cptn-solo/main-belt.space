@@ -44,8 +44,10 @@ export default {
   },
   methods: {
     startGame() {
-      this.$store.dispatch('engine/enqueAction',
-        Object.assign(commonActions.startGameAction), { payload: this.levelInfo.branch.id })
+      const idbranch = this.levelInfo.idbranch
+      this.$store.dispatch('engine/enqueueAction',
+        Object.assign(commonActions.startGameAction), { payload: idbranch})
+      this.dialog = false
     },
   },
 }

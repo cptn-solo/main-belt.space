@@ -115,17 +115,22 @@
           <template #text>turn</template>
           <template #caption>commit turn</template>
         </ActionBtn>
-        <ActionBtn v-if="canClaimTake" :action="actions[11]">
+        <ActionBtn v-if="canClaimTake" 
+          :panel="true"
+          color="primary"
+          :action="actions[11]">
           <template #text>claim</template>
-          <template #caption>claim reward</template>
+          <template #caption>claim vested:<br>{{player.vestingbalance}}</template>
         </ActionBtn>
         <ActionBtn v-if="showVesting && !canClaimTake" :action="actions[12]">
           <template #text><Countdown :end="vestingDate"/></template>
           <template #caption>vesting lock</template>
         </ActionBtn>
-        <ActionBtn v-if="canClaimGreen" :action="actions[10]">
-          <template #text>to 0</template>
-          <template #caption>restart lvl</template>
+        <ActionBtn v-if="canClaimGreen" 
+          :panel="true"
+          :action="actions[10]">
+          <template #text>restart lvl</template>
+          <template #caption>restart current level</template>
         </ActionBtn>
       </v-layout>
     </div>
@@ -315,6 +320,14 @@
     margin-left: -150px;
     margin-top: 105px;
     background-color:orangered;
+  }
+  .buttonpanel.claimgreen {
+    margin-left: -60px;
+    margin-top: -40px;    
+  }
+  .buttonpanel.claimtake {
+    margin-left: -60px;
+    margin-top: -40px;    
   }
   .buttonpanel.unjail {
     margin-left: -60px;

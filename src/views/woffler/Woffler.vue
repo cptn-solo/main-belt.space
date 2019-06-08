@@ -6,6 +6,7 @@
   import InfoPanel from '../../components/woffler/InfoPanel'
   import RootBranchPicker from '../../components/woffler/RootBranchPicker'
   import BranchMetaPanel from '../../components/woffler/BranchMetaPanel'
+  import BranchMetaPicker from '../../components/woffler/BranchMetaPicker'
   import { mapState, mapGetters } from 'vuex'
   import * as constants from '../../state/constants'
   import vesting from './vestingMixin'
@@ -19,7 +20,8 @@
       RootBranchPicker,
       GamePanel,
       GameInfoPanel,
-      BranchMetaPanel
+      BranchMetaPanel,
+      BranchMetaPicker,
     },
     data:() => ({
       constants,
@@ -32,10 +34,10 @@
         player: state => state.userProfile.player,
         status: state => state.userProfile.profileState,
         currentLevel: state => state.woffler.currentLevelInfo,
+        metas: state => state.woffler.brnchmetas,
       }),
       ...mapGetters('woffler', {
-        startLevels: 'startLevels',
-        lockedLevels: 'lockedStartLevels',
+        startLevels: 'startLevels'
       }),
       hasCurrentGame() {
         return this.player.idlvl > 0
@@ -62,6 +64,7 @@
     methods: {
       setActivePanel(panel) {
         this.activePanel = panel
+        console.log(panel)
       },
       async loadData() {
         this.loading = true
@@ -113,10 +116,10 @@
           </v-btn>
         </v-toolbar>
         <template v-if="activePanel">
-          <RootBranchPicker v-if="activePanel.key === 'levels'"
-            :startLevels="startLevels" :hasIngameProfile="hasIngameProfile" />
-          <RootBranchPicker v-else-if="activePanel.key === 'locked'"
-            :startLevels="lockedLevels" :hasIngameProfile="hasIngameProfile" />
+          <BranchMetaPicker v-if="activePanel.key === 'metas'" 
+            :metas="metas" :loggedIn="loggedIn"/>
+          <RootBranchPicker v-else-if="activePanel.key === 'levels'"
+            :startLevels="startLevels" :loggedIn="loggedIn" :hasIngameProfile="hasIngameProfile" />
           <template v-else-if="activePanel.key === 'active'">
             <GamePanel 
               :player="player" :level="currentLevel" 

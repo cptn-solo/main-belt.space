@@ -6,10 +6,12 @@ import {
   WflChildLevelsLoadError,
   WflParentLevelLoadError,
   WflPlayerActionError,
+  WflCreateBranchError,
   WflUnlockRootLevelError,
   WflUpdateBranchStakeError,
 } from '../../dialogs/wofflerErrors'
 import ApplicationError from '../../dialogs/applicationError'
+import utils from './../../utils'
 
 const initialState = {
     branches: [],
@@ -35,7 +37,7 @@ export const getters = {
   },
   startLevels(state) {//returns levelInfo (level+branch+meta)
     const activeLevels = state.levels
-      .filter(l => (!l.locked && l.idparent === 0))
+      .filter(l => (l.idparent === 0))
       .reduce((ret, l) => {
         ret.push(Object.assign(l, { branch: state.branches.find(b => b.id === l.idbranch)}))
         return ret
@@ -65,7 +67,15 @@ function updateProps(obj, props) {
 }
 
 export const mutations = {
-  setBranchMetas: (state, brnchmetas) => (state.brnchmetas = brnchmetas),
+  setBranchMetas: (state, brnchmetas) => {
+    state.brnchmetas = brnchmetas.reduce((ext, _meta) => {
+      const stkmin = utils.assetAmount(_meta.stkmin)      
+      const minPot = (((stkmin * 100) / _meta.stkrate) * 100) / _meta.spltrate;
+      _meta['minPot'] = utils.asset(utils.parseAmount(minPot))
+      ext.push(_meta)
+      return ext
+    }, [])
+  },
   setBranches: (state, { branches, stakes }) => {
     state.branches = branches
       .reduce((ext, b) => {
@@ -214,6 +224,20 @@ export const actions = {
       await dispatch('fetchGameContext', getters.player.idlvl)
     } catch (ex) {
       throw new WflPlayerActionError(ex)
+    }
+  },
+  //payload: { owner, idmeta, pot}
+  async createBranch({ dispatch, getters }, { idmeta, amount }) {
+    try {
+      await getters.gameAPI.playerAction({actionname: 'branch', payload: {
+        owner: getters.accountname, 
+        idmeta,
+        pot: amount
+      }})
+      await dispatch('userProfile/loadAndProcessIngameProfile', null, { root: true})
+      await dispatch('loadGameData')
+    } catch (ex) {
+      throw new WflCreateBranchError(ex)
     }
   },
   //payload: { owner, idlevel }

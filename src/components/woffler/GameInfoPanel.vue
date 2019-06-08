@@ -37,8 +37,10 @@
     <v-layout row justify-space-between align-center>
       <v-flex>
         <v-layout column justify-end align-start>
-          <v-btn small outline color="warning"
-            @click="quitGame">{{$t('wflQuitGameBtn')}}</v-btn>
+          <v-btn icon style="margin: 15px 0px 0px -5px"
+            @click="quitGame">
+            <v-icon color="warning">highlight_off</v-icon>
+          </v-btn>
         </v-layout>
       </v-flex>
       <v-flex>
@@ -47,13 +49,13 @@
             <v-flex>
               <v-layout row justify-end align-center fill-height>
                 <span flex class="caption" >{{$t('wflLevelId')}}:</span>
-                <span flex class="asset" style="margin-left: 5px">{{player.idlvl}}&nbsp;({{level.generation}}/{{level.branch.winlevgen}})</span>
+                <span flex class="asset" style="margin-left: 5px;">{{player.idlvl}}&nbsp;({{level.generation}}/{{level.branch.winlevgen}})</span>
               </v-layout>
             </v-flex>
             <v-flex>
-              <v-layout row justify-end align-center fill-height>
-                <span flex class="asset">{{level.branch.meta.name}}</span>              
-                <v-btn flex icon ripple style="margin: -2px -12px 0 -5px"
+              <v-layout row justify-end align-start fill-height>
+                <span flex class="asset" style="line-height: 12px; text-align: right;">{{level.branch.meta.name}}</span>              
+                <v-btn flex icon ripple style="width: 20px; height: 20px; margin: -3px -3px 0 0;"
                   @click="showLvlvInfo"><v-icon small>info</v-icon></v-btn>
               </v-layout>
             </v-flex>

@@ -42,6 +42,12 @@ export class WflPlayerActionError extends ApplicationError {
   }
 }
 
+export class WflCreateBranchError extends ApplicationError {
+  constructor(error) {
+    super(error, 'Create root branch error', 'Error creating root branch')
+  }
+}
+
 export class WflUnlockRootLevelError extends ApplicationError {
   constructor(error) {
     super(error, 'Unlock error', 'Error while unlocking root level')

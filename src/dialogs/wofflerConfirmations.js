@@ -20,6 +20,17 @@ export class AddStakeConfirm extends ApplicationDialog {
   }  
 }
 
+export class CreateBranchConfirm extends ApplicationDialog {
+  constructor(params = []) {
+    super({ titleLocalized: ApplicationDialog.t('wflCreateBranchConfirmTitle') })
+    this.params = params
+  }
+  setAsset(asset) {
+    this.params.push(asset)
+    this.text = ApplicationDialog.t('wflCreateBranchConfirmText', this.params)
+  }  
+}
+
 export class QuitGameConfirm extends ApplicationDialog {
   constructor() {
     super({

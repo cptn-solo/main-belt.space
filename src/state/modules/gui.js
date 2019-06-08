@@ -1,7 +1,8 @@
 export const state = {
-  stakeDialog: false,
   depositDialog: false,
-  withdrawDialog: false,
+  withdrawDialog: false,  
+  branchDialog: false,
+  stakeDialog: false,
   levelInfoDialog: false,
   payload: null
 }

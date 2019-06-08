@@ -1,7 +1,7 @@
 <script>
   const PANEL_INFO = 0
   const PANEL_LIST = 1
-  const PANEL_LISTLOCkED = 2
+  const PANEL_META = 2
   const PANEL_ACTIVE = 3
 
   export default {
@@ -25,7 +25,7 @@
       gamePanels: [
         { key: 'info', ttitle: 'wflInfoPanelTitle', atitle: 'wflInfoActionTitle', aicon: 'help_outline' },
         { key: 'levels', ttitle: 'wflStartBranchesPanelTitle', atitle: 'wflStartBranchesActionTitle', aicon: 'list' },
-        { key: 'locked', ttitle: 'wflLockedBranchesPanelTitle', atitle: 'wflLockedBranchesActionTitle', aicon: 'ballot' },
+        { key: 'metas', ttitle: 'wflMetasPanelTitle', atitle: 'wflMetasActionTitle', aicon: 'ballot' },
         { key: 'active', ttitle: 'wflActiveGamePanelTitle', atitle: 'wflActiveGameActionTitle', aicon: 'videogame_asset', hidden: true }
       ],
     }},

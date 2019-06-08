@@ -6,6 +6,15 @@ export const commonActions = {
     lock: true
     //add payload before use
   },
+  branchDialogAction: {
+    icon: 'play_circle_outline', title: 'wflActionBranch', selector: 'gui/showDialog'    
+    //add payload before use
+  },
+  branchAction: {
+    icon: 'play_circle_outline', title: 'wflActionBranch', selector: 'woffler/createBranch',
+    lock: true
+    //add payload before use
+  },
   addStakeDialogAction: {
     icon: 'attach_money', title: 'wflActionAddStake', selector: 'gui/showDialog'    
     //add payload before use
@@ -15,11 +24,11 @@ export const commonActions = {
     lock: true
     //add payload before use
   },
-  startGameAction: {
-    icon: 'play_circle_outline', title: 'wflActionJoinGame', selector: 'woffler/joinGame',
+  joinGameAction: {
+    icon: 'play_circle_filled', title: 'wflActionJoinGame', selector: 'woffler/joinGame',
     lock: true, confirm: new BranchSwitchConfirm()
     //add payload before use
-  },
+  },  
   showRulesAction: { 
     icon: 'info_outline', title: 'wflActionShowRules', selector: 'gui/showDialog'
     //add payload before use

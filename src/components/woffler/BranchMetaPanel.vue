@@ -46,7 +46,7 @@ export default {
     startGame() {
       const idbranch = this.levelInfo.idbranch
       this.$store.dispatch('engine/enqueueAction',
-        Object.assign(commonActions.startGameAction), { payload: idbranch})
+        Object.assign(commonActions.joinGameAction), { payload: idbranch})
       this.dialog = false
     },
   },
@@ -65,8 +65,10 @@ export default {
               <div class="list-title">
                 {{$t('wflBrMeta'+row[0])}}:&nbsp;
                 <b v-if="row[1] === 'bool'">{{$t('miskYESNO'+levelInfo.branch.meta[row[0]])}}</b>
-                <b v-else>{{levelInfo.branch.meta[row[0]]}}
-                  <span v-if="row[1] === '%'">&nbsp;%</span>
+                <b v-else>
+                  <span>{{levelInfo.branch.meta[row[0]]}}</span>
+                  <span v-if="row[1] === '%'">%</span>
+                  <span v-else-if="row[1] === 'interval'">&nbsp;{{$t('miskSeconds')}}</span>
                 </b>
               </div>
               <div class="subtitle">

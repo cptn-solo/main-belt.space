@@ -15,7 +15,6 @@
     "@chenfengyuan/vue-qrcode": "^1.0.0",
     "axios": "^0.18.0",
     "eosjs": "20.0.0-beta3",
-    "register-service-worker": "^1.6.2",
     "scatterjs-core": "^2.7.9",
     "scatterjs-plugin-eosjs2": "^1.5.0",
     "vue": "^2.6.6",

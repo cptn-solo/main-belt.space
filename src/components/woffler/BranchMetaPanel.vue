@@ -19,6 +19,8 @@ export default {
         ['tkintrvl','interval'],
         ['unjlmin','asset'],
         ['unjlrate','%'],
+        ['buytrymin','asset'],
+        ['buytryrate','%'],
         ['nxtrate','%'],
         ['spltrate','%'],
         ['stkrate','%'],

@@ -221,7 +221,7 @@ export const actions = {
     try {      
       await getters.gameAPI.playerAction(payload)
       await dispatch('userProfile/loadAndProcessIngameProfile', null, { root: true })
-      await dispatch('fetchGameContext', getters.player.idlvl)
+      await dispatch('fetchGameContext', getters.player.idlevel)
     } catch (ex) {
       throw new WflPlayerActionError(ex)
     }
@@ -242,8 +242,9 @@ export const actions = {
   },
   //payload: { owner, idlevel }
   async unlockRootLevel({ getters, commit }, idlevel) {
-    try {      
-      await getters.gameAPI.playerAction({actionname: 'unlocklvl', payload: {owner: getters.accountname, idlevel}})
+    try {
+      const account = getters.accountname
+      await getters.gameAPI.playerAction({actionname: 'unlocklvl', payload: { account, idlevel }})
       const level = (await getters.gameAPI.getLevels(idlevel))[0]
       commit('updateLevelProps', {id: level.id, props: { locked: level.locked }})
     } catch (ex) {

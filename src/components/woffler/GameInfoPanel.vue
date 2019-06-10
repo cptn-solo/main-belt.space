@@ -49,7 +49,7 @@
             <v-flex>
               <v-layout row justify-end align-center fill-height>
                 <span flex class="caption" >{{$t('wflLevelId')}}:</span>
-                <span flex class="asset" style="margin-left: 5px;">{{player.idlvl}}&nbsp;({{level.generation}}/{{level.branch.winlevgen}})</span>
+                <span flex class="asset" style="margin-left: 5px;">{{player.idlevel}}&nbsp;({{level.generation}}/{{level.branch.winlevgen}})</span>
               </v-layout>
             </v-flex>
             <v-flex>

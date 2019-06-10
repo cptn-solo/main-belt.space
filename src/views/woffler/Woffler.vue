@@ -40,7 +40,7 @@
         startLevels: 'startLevels'
       }),
       hasCurrentGame() {
-        return this.player.idlvl > 0
+        return this.player.idlevel > 0
       },
       hasAvailableGames() {
         return this.startLevels.length > 0
@@ -73,7 +73,7 @@
             await this.$store.dispatch('userProfile/loadAndProcessIngameProfile', this.player.account)
 
           if (this.activePanel.key === 'active')
-            await this.$store.dispatch('woffler/fetchGameContext', this.player.idlvl)
+            await this.$store.dispatch('woffler/fetchGameContext', this.player.idlevel)
           else
             await this.$store.dispatch('woffler/loadGameData')           
         } catch (ex) {

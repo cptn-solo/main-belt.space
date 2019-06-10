@@ -19,13 +19,13 @@ const initialState = {
   player: {
     account: "",
     channel: "",
-    idlvl: 0,
+    idlevel: 0,
     activebalance: "0 EOS",
     vestingbalance: "0 EOS",
     tryposition: 0,
     currentposition: 0,
     triesleft: 0,
-    levelresult: 0,
+    status: 0,
     resulttimestamp: 0  
   },
   playerStakes: []
@@ -168,7 +168,7 @@ export const actions = {
         player = profileRows[0]
         commit('setPlayer', player)
         await dispatch('loadPlayerStakes')
-        await dispatch('woffler/fetchGameContext', player.idlvl, { root: true })
+        await dispatch('woffler/fetchGameContext', player.idlevel, { root: true })
       }
       await dispatch('loadAccountBalance')
       return profileInitialized

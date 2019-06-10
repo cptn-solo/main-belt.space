@@ -13,7 +13,7 @@ export default {
       player: state => state.userProfile.player,
     }),
     showVesting() {
-      return this.player && this.player.levelresult === 4 ? (utils.assetAmount(this.player.vestingbalance) > 0) : false
+      return this.player && this.player.status === 4 ? (utils.assetAmount(this.player.vestingbalance) > 0) : false
     },
     vestingDate() {
       return this.player && this.showVesting ? this.player.resulttimestamp*1000 : null

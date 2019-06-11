@@ -20,5 +20,11 @@ export default [
     name: "woffler",
     component: () => import("../views/woffler/Woffler.vue")
   },
+  {
+    path: "/contract",
+    name: "contract",
+    component: () => import("../views/woffler/Contract.vue")
+  },
+
   { path: "*", component: NotFoundComponent }
 ]

@@ -14,14 +14,14 @@
         let loader = this.$loading.show()
         try {
           await this.$store.dispatch('noscatter/login', {
-            accountname: this.accountName, 
-            privKey: this.privateKey 
+            accountname: this.accountName,
+            privKey: this.privateKey
           })
           this.$emit('finished')
         } catch (ex) {
           this.$dialog.error(new ApplicationError(ex))
         }
-        loader.hide()        
+        loader.hide()
       },
     }
   }
@@ -59,20 +59,20 @@
                   :type="showKey ? 'text' : 'password'"
                   name="password"
                   :placeholder="$t('upImportKeyPH')"
-                  autocomplete="current-password"                            
+                  autocomplete="current-password"
                   @keydown.enter.prevent="login"
                   @click:append="showKey = !showKey"
                 />
               </v-list-tile-content>
             </v-list-tile>
           </v-list>
-        </VForm>    
+        </VForm>
     </v-card-text>
     <v-divider/>
     <v-card-actions>
       <v-btn text @click="login" style="width: 100%">
         {{$t('upImportKeyBtn')}}&nbsp;&nbsp;<v-icon>input</v-icon>
-      </v-btn>            
+      </v-btn>
     </v-card-actions>
   </v-card>
 </template>

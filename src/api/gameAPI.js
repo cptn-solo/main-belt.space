@@ -1,5 +1,6 @@
 import axios from 'axios'
 import { ServerRequestError } from '../dialogs/serverRequestErrors'
+import ApplicationError from '../dialogs/applicationError';
 
 export default {
   api: null,
@@ -174,6 +175,37 @@ export default {
     // {voter:this.accountname, proxy:null, producers:[<owner>]}
     const result = await transactEOS(this.api, this.accountname, 'eosio', 'voteproducer', data)
     return result
+  },
+  /** Contract */
+  async cleanupContractTables() {
+    try {
+      await asyncForEach(await this.fetchFromMainTable('stakes'), async obj => {
+        await this.playerAction({actionname: "rmstake", payload: { idstake: obj.id }})
+      })
+      await asyncForEach(await this.fetchFromMainTable('levels'), async obj => {
+        await this.playerAction({actionname: "rmlevel", payload: { idlevel: obj.id }})
+      })
+      await asyncForEach(await this.fetchFromMainTable('branches'), async obj => {
+        await this.playerAction({actionname: "rmbranch", payload: { idbranch: obj.id }})
+      })
+      await asyncForEach(await this.fetchFromMainTable('brnchmeta'), async obj => {
+        await this.playerAction({actionname: "rmbrmeta", payload: { owner: obj.owner, idmeta: obj.id }})
+      })
+      await asyncForEach(await this.fetchFromMainTable('players'), async obj => {
+        await this.playerAction({actionname: "rmplayer", payload: { account: obj.account }})
+      })
+      await asyncForEach(await this.fetchFromMainTable('channels'), async obj => {
+        await this.playerAction({actionname: "rmpchannel", payload: { account: obj.owner }})
+      })  
+    } catch (ex) {
+      throw new ApplicationError(ex)
+    }
+  }
+}
+
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
   }
 }
 

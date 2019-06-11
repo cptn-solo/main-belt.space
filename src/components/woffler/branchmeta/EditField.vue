@@ -112,7 +112,6 @@ export default {
       :counter="isCounter"
       :maxlength="maxLength"   
       :hint="$t('wflBrMeta'+value.key+'h')"
-    />
-    {{valueLimit}}
+    />    
   </div>  
 </template>

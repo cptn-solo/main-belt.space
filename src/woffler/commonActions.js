@@ -1,4 +1,4 @@
-import { BranchSwitchConfirm, SignupAndBranchSwitchConfirm } from '../dialogs/wofflerConfirmations'
+import { BranchSwitchConfirm, SignupAndBranchSwitchConfirm, BranchMetaModifyConfirm, BranchMetaRemoveConfirm } from '../dialogs/wofflerConfirmations'
 
 export const commonActions = {
   unlockGameAction: {
@@ -31,6 +31,19 @@ export const commonActions = {
   },  
   showRulesAction: { 
     icon: 'info_outline', title: 'wflActionShowRules', selector: 'gui/showDialog'
+    //add payload before use
+  },
+  modifyRulesAction: {
+    icon: 'ballot', title: 'wflActionBranchMeta', selector: 'gui/showDialog'    
+  },
+  brnchmetaAction: {
+    icon: 'ballot', title: 'wflActionBranch', selector: 'woffler/changeMeta',
+    lock: true, confirm: new BranchMetaModifyConfirm()
+    //add payload before use
+  },
+  deleteRulesAction: {
+    icon: 'delete_forever', title: 'wflActionRmMeta', selector: 'woffler/deleteMeta',
+    lock: true, confirm: new BranchMetaRemoveConfirm()
     //add payload before use
   },
   signupAdnJoinGameAction: {

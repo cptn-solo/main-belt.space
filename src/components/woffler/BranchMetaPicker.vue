@@ -2,9 +2,14 @@
 import { commonActions } from '../../woffler/commonActions'
 import { CreateBranchConfirm } from '../../dialogs/wofflerConfirmations'
 import AssetPanel from './AssetPanel'
+import defaultMeta from '../woffler/branchmeta/defaultMeta.json'
+import utils from '../../utils';
 
 export default {
-  props: {    
+  props: {
+    player: {
+      type: Object, default: null
+    },
     metas: {
       type: Array, default: () => []
     },
@@ -25,13 +30,15 @@ export default {
         ['slsrate','%'],
         ['winnerrate','%'],
       ]
-    },
-    loggedIn: {
-      type: Boolean, default: false
-    }
+    },    
   },
   components: {
     AssetPanel
+  },
+  computed: {
+    loggedIn() { 
+      return !!this.player.account
+    }
   },
   methods: {
       showMeta(idx) {
@@ -41,13 +48,29 @@ export default {
       },
       createBranchWithMeta(idx) {
         const meta = this.metas[idx]
+
+        if (!this.loggedIn || utils.assetAmount(this.player.activebalance) < utils.assetAmount(meta.minPot)) {
+          this.$dialog.warning({
+            text: this.$t('wflCreateBranchConditioinsWarnText', [meta.minPot]),
+            title: this.$t('wflCreateBranchConditioinsWarnTitle')
+          })
+          return
+        }
+
         const branchAction = Object.assign({}, commonActions.branchAction)
         branchAction.payload = { idmeta: meta.id }
         branchAction.confirm = new CreateBranchConfirm([meta.id])
         this.$store.dispatch('gui/showDialog', { key: "branchDialog", payload: branchAction })
       },
       createBranchMeta() {
-        this.$dialog.message.info('coming soon')
+        const meta = defaultMeta
+        meta.id = 0 //for contract integrity checks
+        meta.owner = this.player.account //for contract integrity checks
+        this.$store.dispatch('gui/showDialog', { 
+          key: "levelInfoDialog", 
+          payload: { branch: { meta }},
+          props: { editMode: true }
+        })
       },
       showActions(idx) {
         const meta = this.metas[idx]
@@ -57,14 +80,21 @@ export default {
           branchAction.payload = { idmeta: meta.id }
           branchAction.confirm = new CreateBranchConfirm([meta.id])
           actions.push(Object.assign(commonActions.branchDialogAction, { 
-            payload: { 
-              key: "branchDialog", payload: branchAction }
-            }))
+            payload: { key: "branchDialog", payload: branchAction } }))                    
+          
+          if (meta.owner === this.player.account) {
+            actions.push(Object.assign(commonActions.modifyRulesAction, { 
+              payload: { key: "levelInfoDialog", payload: { branch: { meta }}, props: { editMode: true } } }))                    
+
+            actions.push(Object.assign(commonActions.deleteRulesAction, { 
+              payload: { idmeta: meta.id } }))            
+          }
         }
 
         actions.push(Object.assign(commonActions.showRulesAction, { 
           payload: { 
-            key: "levelInfoDialog", payload: { branch: { meta }}}}))
+            key: "levelInfoDialog", 
+            payload: { branch: { meta }}}}))
 
         this.$store.dispatch('engine/requestActions', actions)
       },    

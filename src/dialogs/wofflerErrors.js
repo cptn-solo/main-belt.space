@@ -48,6 +48,12 @@ export class WflCreateBranchError extends ApplicationError {
   }
 }
 
+export class WflModifyBranchMetaError extends ApplicationError {
+  constructor(error) {
+    super(error, 'Change branch meta error', 'Error modifying branch metadata')
+  }
+}
+
 export class WflUnlockRootLevelError extends ApplicationError {
   constructor(error) {
     super(error, 'Unlock error', 'Error while unlocking root level')

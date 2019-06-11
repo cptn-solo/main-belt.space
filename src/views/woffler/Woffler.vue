@@ -5,7 +5,7 @@
   import GameInfoPanel from '../../components/woffler/GameInfoPanel'
   import InfoPanel from '../../components/woffler/InfoPanel'
   import RootBranchPicker from '../../components/woffler/RootBranchPicker'
-  import BranchMetaPanel from '../../components/woffler/BranchMetaPanel'
+  import BranchMetaPanel from '../../components/woffler/branchmeta/BranchMetaPanel'
   import BranchMetaPicker from '../../components/woffler/BranchMetaPicker'
   import { mapState, mapGetters } from 'vuex'
   import * as constants from '../../state/constants'
@@ -117,7 +117,7 @@
         </v-toolbar>
         <template v-if="activePanel">
           <BranchMetaPicker v-if="activePanel.key === 'metas'" 
-            :metas="metas" :loggedIn="loggedIn"/>
+            :metas="metas" :player="player"/>
           <RootBranchPicker v-else-if="activePanel.key === 'levels'"
             :startLevels="startLevels" :loggedIn="loggedIn" :hasIngameProfile="hasIngameProfile" />
           <template v-else-if="activePanel.key === 'active'">

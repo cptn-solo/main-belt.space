@@ -161,6 +161,7 @@ export const actions = {
     try {
       const accountname = account || getters.accountname      
       const profileRows = await getters.gameAPI.getIngameProfileForAccount(accountname)
+      console.log('profileRows',profileRows)
       let profileInitialized = false
       let player = null
       if (profileRows.length === 1) {

@@ -19,6 +19,7 @@ export default {
       key_type: 'name',
       index_position: 1,
       lower_bound: accountname,
+      upper_bound: accountname,
       limit: 1,
     })
   },

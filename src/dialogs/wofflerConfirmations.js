@@ -31,6 +31,24 @@ export class CreateBranchConfirm extends ApplicationDialog {
   }  
 }
 
+export class BranchMetaModifyConfirm extends ApplicationDialog {
+  constructor() {
+    super({
+      titleLocalized: ApplicationDialog.t('wflModifyMetaConfirmTitle'),
+      textLocalized: ApplicationDialog.t('wflModifyMetaConfirmText'),
+    })
+  }
+}
+
+export class BranchMetaRemoveConfirm extends ApplicationDialog {
+  constructor() {
+    super({
+      titleLocalized: ApplicationDialog.t('wflRemoveMetaConfirmTitle'),
+      textLocalized: ApplicationDialog.t('wflRemoveMetaConfirmText'),
+    })
+  }
+}
+
 export class QuitGameConfirm extends ApplicationDialog {
   constructor() {
     super({

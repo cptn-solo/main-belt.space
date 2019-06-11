@@ -6,6 +6,7 @@ import {
   WflChildLevelsLoadError,
   WflParentLevelLoadError,
   WflPlayerActionError,
+  WflModifyBranchMetaError,
   WflCreateBranchError,
   WflUnlockRootLevelError,
   WflUpdateBranchStakeError,
@@ -70,7 +71,7 @@ export const mutations = {
   setBranchMetas: (state, brnchmetas) => {
     state.brnchmetas = brnchmetas.reduce((ext, _meta) => {
       const stkmin = utils.assetAmount(_meta.stkmin)      
-      const minPot = (((stkmin * 100) / _meta.stkrate) * 100) / _meta.spltrate;
+      const minPot = stkmin / (_meta.spltrate / 100);
       _meta['minPot'] = utils.asset(utils.parseAmount(minPot))
       ext.push(_meta)
       return ext
@@ -224,6 +225,27 @@ export const actions = {
       await dispatch('fetchGameContext', getters.player.idlevel)
     } catch (ex) {
       throw new WflPlayerActionError(ex)
+    }
+  },  
+  async changeMeta({ dispatch, getters }, { idmeta, meta }) {
+    try {
+      await getters.gameAPI.playerAction({actionname: 'brnchmeta', payload: {
+        owner: getters.accountname, 
+        idmeta, meta
+      }})
+      await dispatch('loadGameData')
+    } catch (ex) {
+      throw new WflModifyBranchMetaError(ex)
+    }
+  },  
+  async deleteMeta({ dispatch, getters }, { idmeta }) {
+    try {
+      await getters.gameAPI.playerAction({actionname: 'rmbrmeta', payload: {
+        owner: getters.accountname, idmeta
+      }})
+      await dispatch('loadGameData')
+    } catch (ex) {
+      throw new WflModifyBranchMetaError(ex)
     }
   },
   //payload: { owner, idmeta, pot}

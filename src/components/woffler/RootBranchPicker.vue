@@ -2,6 +2,7 @@
   import { commonActions } from '../../woffler/commonActions'
   import { AddStakeConfirm } from '../../dialogs/wofflerConfirmations'
   import AssetPanel from './AssetPanel'
+import utils from '../../utils';
   
   export default {    
     props: {
@@ -11,12 +12,17 @@
       hasIngameProfile: {
         type: Boolean, default: false
       },
-      loggedIn: {
-        type: Boolean, default: false
+      player: {
+        type: Object, default: null
       }
     },
     components: {
       AssetPanel
+    },
+    computed: {
+      loggedIn() {
+        return !!this.player.account
+      }
     },
     methods: {
       showMeta(idx) {
@@ -45,9 +51,17 @@
             actions.push(Object.assign(commonActions.signupAdnJoinGameAction, { payload }))
 
           const addStakeAction = Object.assign({}, commonActions.addStakeAction)
+          const minStakeValue = utils.parseAmount(
+            Math.max(
+              (utils.assetAmount(payload.potbalance) * payload.branch.meta.stkrate) / 100,
+              utils.assetAmount(payload.branch.meta.stkmin)
+            )
+          )
+          const maxPayment = utils.assetAmount(this.player.activebalance)
           addStakeAction.payload = { level: payload }
           addStakeAction.confirm = new AddStakeConfirm([payload.idbranch])
-          actions.push(Object.assign(commonActions.addStakeDialogAction, { payload: { key: "stakeDialog", payload: addStakeAction }}))
+          actions.push(Object.assign(commonActions.addStakeDialogAction, { 
+            payload: { key: "stakeDialog", payload: addStakeAction, props: { min: minStakeValue, max: maxPayment } }}))
         }
                 
         actions.push(Object.assign(commonActions.showRulesAction, { payload: { key: "levelInfoDialog", payload } }))

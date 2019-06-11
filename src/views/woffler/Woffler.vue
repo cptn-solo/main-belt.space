@@ -32,6 +32,7 @@
     computed: {
       ...mapState({
         player: state => state.userProfile.player,
+        balance: state => state.userProfile.accountBalance,
         status: state => state.userProfile.profileState,
         currentLevel: state => state.woffler.currentLevelInfo,
         metas: state => state.woffler.brnchmetas,
@@ -105,7 +106,7 @@
             @click="loadData" icon><v-icon>cached</v-icon></v-btn>
           <template slot="extension" v-if="playerInfoPanel && loggedIn">
             <PlayerInfoPanel 
-              :player="player" :status="status" 
+              :player="player" :status="status" :balance="balance"
               :showVesting="showVesting" :vestingReady="vestingReady" :vestingDate="vestingDate"/>
           </template>
           <v-btn v-if="loggedIn"
@@ -119,7 +120,7 @@
           <BranchMetaPicker v-if="activePanel.key === 'metas'" 
             :metas="metas" :player="player"/>
           <RootBranchPicker v-else-if="activePanel.key === 'levels'"
-            :startLevels="startLevels" :loggedIn="loggedIn" :hasIngameProfile="hasIngameProfile" />
+            :startLevels="startLevels" :player="player" :hasIngameProfile="hasIngameProfile" />
           <template v-else-if="activePanel.key === 'active'">
             <GamePanel 
               :player="player" :level="currentLevel" 

@@ -6,14 +6,9 @@ import AssetPanel from './AssetPanel'
 
 export default {
   props: {
-    player: {
-      type: Object,
-      default: null
-    },
-    status: {
-      type: Number,
-      default: constants.PROFILE_UNKNOWN
-    },
+    player: { type: Object, default: null },
+    balance: { type: String, default: null },
+    status: { type: Number, default: constants.PROFILE_UNKNOWN },
     showVesting: { type: Boolean, default: false},
     vestingReady: { type: Boolean, default: false},
     vestingDate: { type: Number, default: 0}
@@ -44,7 +39,7 @@ export default {
             style="margin-left: -7px"
             @click="signup"><v-icon>person_add</v-icon></v-btn>
           <PlayerProfileMenu v-if="status === constants.PROFILE_INITIALIZED" 
-            :player="player"
+            :player="player"            
             :showVesting="showVesting"
             :vestingReady="vestingReady"
             :vestingDate="vestingDate"
@@ -74,7 +69,7 @@ export default {
       </v-flex>
       <v-flex xs2>
         <v-layout row justify-end align-center fill-height>
-          <PlayerBalanceMenu :player="player"/>
+          <PlayerBalanceMenu :player="player" :balance="balance" />
         </v-layout>
       </v-flex>
     </v-layout>

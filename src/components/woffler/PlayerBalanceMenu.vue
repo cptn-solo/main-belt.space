@@ -6,9 +6,11 @@ import utils from '../../utils'
 export default {
   props: {
     player: {
-      type: Object,
-      default: null
+      type: Object, default: null
     },
+    balance: {
+      type: String, default: null
+    }
   },
   data: () => ({
     constants,
@@ -19,12 +21,16 @@ export default {
       this.$store.dispatch('gui/showDialog', { key: "depositDialog", payload: { 
         title: 'deposit', selector: 'userProfile/depositAsset', 
         lock: true, confirm: new UserProfileDepositConfirm([constants.APP_CODE])
+      }, props: {
+        max: utils.assetAmount(this.balance)
       } })
     },
     withdrawDialog() {
       this.$store.dispatch('gui/showDialog', { key: "withdrawDialog", payload: { 
         title: 'withdraw', selector: 'userProfile/withdrawAsset', 
         lock: true, confirm: new UserProfileWithdrawConfirm([this.player.account])
+      }, props: {
+        max: utils.assetAmount(this.player.activebalance)
       } })
     },
   }  

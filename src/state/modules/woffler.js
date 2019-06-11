@@ -250,6 +250,7 @@ export const actions = {
   },
   //payload: { owner, idmeta, pot}
   async createBranch({ dispatch, getters }, { idmeta, amount }) {
+    console.log('createBranch',amount)
     try {
       await getters.gameAPI.playerAction({actionname: 'branch', payload: {
         owner: getters.accountname, 

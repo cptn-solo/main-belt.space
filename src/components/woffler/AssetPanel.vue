@@ -11,21 +11,37 @@ export default {
   data: () => ({
     constants,    
     amount: null,
-    amountRules: [
-      value => {
-        const pattern = /^[0-9]{1,10}(\.[0-9]{1,4})?$/
-        return pattern.test(value) || 'invalid amount'
-      },
-    ]
   }),
   computed: {
     ...mapState({
-      action: (state) => state.gui.payload      
+      action: (state) => state.gui.payload,
+      minValue: (state) => state.gui.props ? state.gui.props.min : null,
+      maxValue: (state) => state.gui.props ? state.gui.props.max : null,
     }),
     dialog: {
       get() { return this.$store.state.gui[this.guiKey] },
-      set() { this.$store.dispatch('gui/showDialog', { key: this.guiKey, payload: null }) }
+      set() { 
+        this.$store.dispatch('gui/showDialog', { key: this.guiKey, payload: null, props: null }) 
+        this.amount = null
+      }
+    },
+    amountRules() {
+      const arr = [value => {
+        const pattern = /^[0-9]{1,10}(\.[0-9]{1,4})?$/
+        return pattern.test(value) || 'invalid amount'
+      }]
+
+      if (this.minValue) 
+        arr.push(value => { return parseFloat(value) >= this.minValue || 'min. '+utils.asset(this.minValue) })
+      
+      if (this.maxValue) 
+        arr.push(value => { return parseFloat(value) <= this.maxValue || 'max. '+utils.asset(this.maxValue) })
+      
+      console.log(arr)
+      
+      return arr
     }
+
   },
   methods: {
     submitAction () {      
@@ -44,6 +60,12 @@ export default {
         this.dialog = false
       }
     },
+    setMinValue() {
+      this.amount = this.minValue
+    },
+    setMaxValue() {
+      this.amount = this.maxValue
+    }
   }    
 }
 </script>
@@ -62,6 +84,10 @@ export default {
           :placeholder="placeholder"
           :suffix="constants.CURR_CODE"
         />
+        <v-btn flat small v-if="minValue"
+          @click="setMinValue">min. {{minValue}}</v-btn>
+        <v-btn flat small v-if="maxValue"
+          @click="setMaxValue">max. {{maxValue}}</v-btn>
       </v-card-text>
       <v-divider/>
       <v-card-actions>

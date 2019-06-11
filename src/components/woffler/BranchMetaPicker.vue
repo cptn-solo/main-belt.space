@@ -60,7 +60,9 @@ export default {
         const branchAction = Object.assign({}, commonActions.branchAction)
         branchAction.payload = { idmeta: meta.id }
         branchAction.confirm = new CreateBranchConfirm([meta.id])
-        this.$store.dispatch('gui/showDialog', { key: "branchDialog", payload: branchAction })
+        this.$store.dispatch('gui/showDialog', { key: "branchDialog", payload: branchAction, props: {
+          min: utils.assetAmount(meta.minPot), max: utils.assetAmount(this.player.activebalance)
+        } })
       },
       createBranchMeta() {
         const meta = defaultMeta
@@ -80,7 +82,9 @@ export default {
           branchAction.payload = { idmeta: meta.id }
           branchAction.confirm = new CreateBranchConfirm([meta.id])
           actions.push(Object.assign(commonActions.branchDialogAction, { 
-            payload: { key: "branchDialog", payload: branchAction } }))                    
+            payload: { key: "branchDialog", payload: branchAction, props: {
+              min: utils.assetAmount(meta.minPot), max: utils.assetAmount(this.player.activebalance)
+            } } }))                    
           
           if (meta.owner === this.player.account) {
             actions.push(Object.assign(commonActions.modifyRulesAction, { 

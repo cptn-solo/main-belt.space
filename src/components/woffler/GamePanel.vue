@@ -40,10 +40,11 @@
         /*  7 */{ key: "untake" },
         /*  8 */{ key: "claimred" },
         /*  9 */{ key: "unjail" },
-        /* 10 */{ key: "claimgreen" },
+        /* 10 */{ key: "claimsafe" },
         /* 11 */{ key: "claimtake" },
         /* 12 */{ key: "vestingwarning", info: new WflVestingInfo() },
         /* 13 */{ key: "splitlvl" },
+        /* 14 */{ key: "buytries" },
       ]
     }),
     computed: {
@@ -126,11 +127,24 @@
           <template #text><Countdown :end="vestingDate"/></template>
           <template #caption>vesting lock</template>
         </ActionBtn>
-        <ActionBtn v-if="canClaimGreen" 
+        <ActionBtn v-if="canClaimSafe" 
           :panel="true"
           :action="actions[10]">
           <template #text>restart lvl</template>
           <template #caption>restart current level</template>
+        </ActionBtn>
+      </v-layout>
+    </div>
+    <div v-if="level.next" class="panel nextlevel">
+      <v-layout column justify-start align-end fill-height>
+        <span flex class="caption">Next pot:</span>
+        <span flex class="asset">{{level.next.potbalance}}</span>
+        <ActionBtn flex v-if="canUnlockNext" icon="lock" :action="actions[0]" 
+          :payload="{ account: this.player.account, idlevel: level.next.id }">
+          <template #caption>{{player.triesleft+" left"}}</template>
+        </ActionBtn>
+        <ActionBtn flex v-else-if="canGoNext" icon="lock_open" :action="actions[5]">
+          <template #caption>next</template>
         </ActionBtn>
       </v-layout>
     </div>
@@ -140,31 +154,18 @@
       <template #text>next</template>
       <template #caption>next level will get {{nextPotAmount}}</template>
     </ActionBtn>
-    <div v-if="level.next" class="panel nextlevel">
-      <v-layout column justify-start align-end fill-height>
-        <span flex class="caption">Next pot:</span>
-        <span flex class="asset">{{level.next.potbalance}}</span>
-        <ActionBtn flex v-if="canUnlockNext" icon="lock" :action="actions[0]" 
-          :payload="{ owner: this.player.account, idlevel: level.next.id }">
-          <template #caption>{{player.triesleft+" left"}}</template>
-        </ActionBtn>
-        <ActionBtn flex v-else-if="canGoNext" icon="lock_open" :action="actions[5]">
-          <template #caption>next</template>
-        </ActionBtn>
-      </v-layout>
-    </div>
-    <ActionBtn v-if="canSplit" 
+    <ActionBtn flex v-else-if="canNext" 
       :panel="true"
-      :action="actions[13]">
-      <template #text>split</template>
-      <template #caption>split level will get {{splitPotAmount}}</template>
+      :action="actions[5]">
+      <template #text>unlock</template>
+      <template #caption>try to unlock {{level.next.potbalance}}</template>
     </ActionBtn>
     <div v-if="level.split" class="panel splitlevel">
       <v-layout column justify-start align-start fill-height>
         <span flex class="caption">Split pot:</span>
         <span flex class="asset">{{level.split.potbalance}}</span>
         <ActionBtn flex v-if="canUnlockSplit" icon="lock" :action="actions[1]" 
-          :payload="{ owner: this.player.account, idlevel: level.split.id }">          
+          :payload="{ account: this.player.account, idlevel: level.split.id }">          
           <template #caption>{{player.triesleft+" left"}}</template>
         </ActionBtn>
         <ActionBtn flex v-else-if="canSwitchToSplit" icon="lock_open" :action="actions[2]" 
@@ -173,6 +174,24 @@
         </ActionBtn>
       </v-layout>
     </div>
+    <ActionBtn v-if="canSplit && !level.split" 
+      :panel="true"
+      :action="actions[13]">
+      <template #text>split</template>
+      <template #caption>split level will get {{splitPotAmount}}</template>
+    </ActionBtn>
+    <ActionBtn flex v-else-if="canSplit" 
+      :panel="true"
+      :action="actions[5]">
+      <template #text>unlock</template>
+      <template #caption>try to unlock {{level.split.potbalance}}</template>
+    </ActionBtn>
+    <ActionBtn flex v-else-if="canBuyTries" 
+      :panel="true"
+      :action="actions[14]">
+      <template #text>buy retries</template>
+      <template #caption>buy additional 3 tries for {{buyTryAmount}}</template>
+    </ActionBtn>
     <ActionBtn v-if="canTake" 
       :panel="true"
       :action="actions[6]">
@@ -316,12 +335,17 @@
     margin-top: -155px;
     background-color: green;
   }
+  .buttonpanel.buytries {
+    margin-left: -60px;
+    margin-top: -155px;
+    background-color: maroon;
+  }
   .buttonpanel.claimred {
     margin-left: -150px;
     margin-top: 105px;
     background-color:orangered;
   }
-  .buttonpanel.claimgreen {
+  .buttonpanel.claimsafe {
     margin-left: -60px;
     margin-top: -40px;    
   }

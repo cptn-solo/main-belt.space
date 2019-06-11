@@ -4,9 +4,9 @@ export default {
   computed: {
     takeAmount() {
       try {
-        const potbalance = parseFloat(this.level.potbalance.split(' ')[0])
+        const potbalance = utils.assetAmount(this.level.potbalance)
         const tkrate = this.level.branch.meta.tkrate
-        const potmin = parseFloat(this.level.branch.meta.potmin.split(' ')[0])
+        const potmin = utils.assetAmount(this.level.branch.meta.potmin)
 
         const amount = utils.parseAmount((potbalance * tkrate) / 100)
         const remains = potbalance - amount
@@ -18,9 +18,9 @@ export default {
     },
     unjailAmount() {
       try {
-        const potbalance = parseFloat(this.level.potbalance.split(' ')[0])
+        const potbalance = utils.assetAmount(this.level.potbalance)
         const unjlrate = this.level.branch.meta.unjlrate
-        const unjlmin = parseFloat(this.level.branch.meta.unjlmin.split(' ')[0])
+        const unjlmin = utils.assetAmount(this.level.branch.meta.unjlmin)
 
         const amount = utils.parseAmount((potbalance * unjlrate) / 100)
         const asset = utils.asset(Math.max(amount, unjlmin))
@@ -30,11 +30,25 @@ export default {
         return null
       }
     },
+    buyTryAmount() {//canBuyTries
+      try {
+        const potbalance = utils.assetAmount(this.level.potbalance)
+        const buytryrate = this.level.branch.meta.buytryrate
+        const buytrymin = utils.assetAmount(this.level.branch.meta.buytrymin)
+
+        const amount = utils.parseAmount((potbalance * buytryrate) / 100)
+        const asset = utils.asset(Math.max(amount, buytrymin))
+        return asset
+
+      } catch (error) {
+        return null
+      }
+    },
     nextPotAmount() {
       try {
-        const potbalance = parseFloat(this.level.potbalance.split(' ')[0])
+        const potbalance = utils.assetAmount(this.level.potbalance)
         const nxtrate = this.level.branch.meta.nxtrate
-        const potmin = parseFloat(this.level.branch.meta.potmin.split(' ')[0])
+        const potmin = utils.assetAmount(this.level.branch.meta.potmin)
 
         const nxtPot = utils.parseAmount((potbalance * nxtrate) / 100)
         
@@ -51,10 +65,9 @@ export default {
       try {
         const spltrate = this.level.branch.meta.spltrate
         const stkrate = this.level.branch.meta.stkrate
-        const stkmin = parseFloat(this.level.branch.meta.stkmin.split(' ')[0])
+        const stkmin = utils.assetAmount(this.level.branch.meta.stkmin)
         
-        const minSplitAmount = (stkmin * 100) / stkrate;
-        const mitSplittablePotAmount = (minSplitAmount * 100) / spltrate;
+        const mitSplittablePotAmount = (stkmin * 100) / spltrate;
         return mitSplittablePotAmount          
       } catch (ex) {
         console.log(ex)
@@ -65,7 +78,7 @@ export default {
       const minsplittablepot = this.minSplittablePotAmount
       if (!minsplittablepot) return false
 
-      const potbalance = parseFloat(this.level.potbalance.split(' ')[0])
+      const potbalance = utils.assetAmount(this.level.potbalance)
       
       if (potbalance >= minsplittablepot) return true
 
@@ -77,7 +90,7 @@ export default {
         
         if (!minsplittablepot) return null
 
-        const potbalance = parseFloat(this.level.potbalance.split(' ')[0])
+        const potbalance = utils.assetAmount(this.level.potbalance)
         const spltrate = this.level.branch.meta.spltrate
         
         if (potbalance >= minsplittablepot) {

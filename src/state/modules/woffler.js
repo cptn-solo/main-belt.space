@@ -71,7 +71,7 @@ export const mutations = {
   setBranchMetas: (state, brnchmetas) => {
     state.brnchmetas = brnchmetas.reduce((ext, _meta) => {
       const stkmin = utils.assetAmount(_meta.stkmin)      
-      const minPot = stkmin / (_meta.spltrate / 100);
+      const minPot = (stkmin * 100) / _meta.spltrate
       _meta['minPot'] = utils.asset(utils.parseAmount(minPot))
       ext.push(_meta)
       return ext

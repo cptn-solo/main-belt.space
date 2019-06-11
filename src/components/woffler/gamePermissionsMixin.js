@@ -1,6 +1,6 @@
 const MAX_TRIES = 3
 const PALYER_STATE = {
-  INIT: 0, SAFE: 1, RED: 2, GREEN: 3, TAKE: 4
+  INIT: 0, SAFE: 1, RED: 2, GREEN: 3, TAKE: 4, NEXT: 5, SPLIT: 6
 }
 
 export default {
@@ -15,7 +15,7 @@ export default {
     },
     canNext() {
       return this.player.status === PALYER_STATE.GREEN
-        && (!this.level.next || !this.level.next.locked)
+        && (!this.level.next || this.level.next.locked)
     },
     canGoNext() {
       return this.player.status === PALYER_STATE.GREEN
@@ -23,8 +23,10 @@ export default {
     },
     canSplit() {
       return this.player.status === PALYER_STATE.GREEN
-        && !this.level.split
-        && this.potSplittable
+        && (
+          (!this.level.split && this.potSplittable) ||
+          (this.level.split && this.level.split.locked)
+        )
     },
     canTake() {
       return this.player.status === PALYER_STATE.GREEN
@@ -44,17 +46,19 @@ export default {
       return this.player.status === PALYER_STATE.RED
       && (this.level.idparent > 0 || this.level.branch.meta.startjailed != 0)
     },
-    canClaimGreen() {
-      return this.player.status === PALYER_STATE.GREEN
+    canClaimSafe() {
+      return this.player.status === PALYER_STATE.GREEN ||
+        this.player.status === PALYER_STATE.NEXT ||
+        this.player.status === PALYER_STATE.SPLIT
     },
     canUnlockNext() {
-      return this.player.status === PALYER_STATE.GREEN
+      return this.player.status === PALYER_STATE.NEXT
         && this.level.next
         && this.level.next.locked
         && this.player.triesleft > 0
     },
     canUnlockSplit() {
-      return this.player.status === PALYER_STATE.GREEN
+      return this.player.status === PALYER_STATE.SPLIT
         && this.level.split
         && this.level.split.locked
         && this.player.triesleft > 0
@@ -63,6 +67,11 @@ export default {
       return this.player.status === PALYER_STATE.GREEN
         && this.level.split
         && !this.level.split.locked
-    }    
+    },
+    canBuyTries() {
+      return (this.player.status === PALYER_STATE.NEXT ||
+        this.player.status === PALYER_STATE.SPLIT) &&
+        this.player.triesleft === 0
+    }
   }
 }

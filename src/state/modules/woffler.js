@@ -13,6 +13,8 @@ import {
 } from '../../dialogs/wofflerErrors'
 import ApplicationError from '../../dialogs/applicationError'
 import utils from './../../utils'
+import gameAmounts from '../../woffler/gameAmounts'
+import gamePermissions from '../../woffler/gamePermissions'
 
 const initialState = {
     branches: [],
@@ -178,6 +180,9 @@ export const actions = {
       const children = (await dispatch('loadChildLevels', idlevel))
       const next = (children.length ? children.find(l => l.idbranch === _level.idbranch) : null)
       const split = (children.length ? children.find(l => l.idbranch != _level.idbranch) : null)
+      const splitBranches = (!split ? null : 
+        (await getters.gameAPI.getBranches(split.idbranch)))
+
       const previous = (_level.idparent === 0 ? null : 
         (await dispatch('loadParentLevel', _level.idparent)))
       
@@ -187,7 +192,18 @@ export const actions = {
       if (metas.length != 1) 
         throw new Error('No valid branch meta found for id: '+_level.idmeta)
 
+      const amounts = gameAmounts.compute(
+        _level, next, branches[0], 
+        split, splitBranches ? splitBranches[0] : null,
+        metas[0])
+      console.log('game state amounts', amounts)
+      const permissions = gamePermissions.compute(
+        getters.player, _level, next, split, 
+        metas[0], amounts)
+      console.log('game state permissions', permissions)
+      
       level = Object.assign(_level, {
+        amounts, permissions,
         previous, next, split,
         branch: Object.assign(branches[0], { 
           meta: metas[0] 
@@ -282,7 +298,7 @@ export const actions = {
       const stake = getters.playerStakes.find(s => s.idbranch === branch.id)
       commit('updateLevelProps', { 
         id: level.id, 
-        props: { locked: level.locked, potbalance: level.potbalance }
+        props: { locked: level.locked }
       })
       commit('updateBranchProps', { 
         id: levelinfo.branch.id, 

@@ -53,7 +53,7 @@ import utils from '../../utils';
           const addStakeAction = Object.assign({}, commonActions.addStakeAction)
           const minStakeValue = utils.parseAmount(
             Math.max(
-              (utils.assetAmount(payload.potbalance) * payload.branch.meta.stkrate) / 100,
+              (utils.assetAmount(payload.branch.potbalance) * payload.branch.meta.stkrate) / 100,
               utils.assetAmount(payload.branch.meta.stkmin)
             )
           )
@@ -88,21 +88,35 @@ import utils from '../../utils';
           <div style="margin-top: 5px">
             <v-layout row justify-start align-center>
               <v-layout flex column justify-start align-right style="text-align: right; line-height: 15px">
-                <div flex>
-                  <span flex>{{$t('wflBranchStake')}}:</span>&nbsp;
-                  <span flex>{{level.branch.totalstake}}</span>
-                </div>
-                <div v-if="!!level.branch.stake.stake"
-                  flex column justify-start align-right
-                  style="color: green">
-                  <span flex>{{$t('wflBranchOwnedStake')}}:</span>&nbsp;
-                  <span flex>{{level.branch.stake.stake}}</span>
-                </div>
-                <div v-if="!level.locked"
-                  flex column justify-start align-right style="text-align: right">
-                  <span flex>{{$t('wflBranchRevenue')}}:</span>&nbsp;
-                  <span flex>{{level.branch.totalrvnue}}</span>
-                </div>            
+                <template v-if="level.locked">
+                  <div flex>
+                    <v-layout row justify-space-between align-baseline>
+                      <span flex>{{$t('wflBranchStake')}}:</span>
+                      <span flex>{{level.branch.totalstake}}</span>
+                    </v-layout>
+                  </div>
+                  <div flex style="color: green"
+                    v-if="!!level.branch.stake.stake">
+                    <v-layout row justify-space-between align-baseline>
+                      <span flex>{{$t('wflBranchOwnedStake')}}:</span>
+                      <span flex>{{level.branch.stake.stake}}</span>
+                    </v-layout>
+                  </div>
+                </template>
+                <template v-else>
+                  <div flex style="color: blue">
+                    <v-layout row justify-space-between align-baseline>
+                      <span flex>{{$t('wflBranchCurrentPot')}}:</span>
+                      <span flex>{{level.branch.potbalance}}</span>
+                    </v-layout>
+                  </div>
+                  <div flex>
+                    <v-layout row justify-space-between align-baseline>
+                      <span flex>{{$t('wflBranchRevenue')}}:</span>
+                      <span flex>{{level.branch.totalrvnue}}</span>
+                    </v-layout>
+                  </div>            
+                </template>
               </v-layout>            
             </v-layout>            
           </div>

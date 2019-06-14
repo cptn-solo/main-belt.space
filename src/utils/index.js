@@ -4,10 +4,10 @@ import * as constants from '../state/constants'
 export default {
 
   asset(amount) {
-    return amount+' '+constants.CURR_CODE
+    return amount.toFixed(constants.CURR_DECIMALS)+' '+constants.CURR_CODE
   },
   parseAmount(text) {
-    return this.truncateDecimals(parseFloat(text), constants.CURR_DECIMALS).toFixed(constants.CURR_DECIMALS)
+    return this.truncateDecimals(parseFloat(text), constants.CURR_DECIMALS)
   },
   truncateDecimals(number, digits) {
     const multiplier = Math.pow(10, digits)

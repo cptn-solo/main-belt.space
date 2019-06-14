@@ -19,14 +19,14 @@
       drawer: null,
       version: 'v.' + process.env.VERSION + ' (' + process.env.BRANCH + ')',
       constants,
-      importPanel: false,
-      darkTheme: true,
+      importPanel: false,    
       currentRoute: { name: "home"},
     }),
     computed: {
       ...mapState({
         player: state => state.userProfile.player,
         status: state => state.userProfile.profileState,
+        darkTheme: state => (!state.settings.theme || state.settings.theme === 'dark'),
       }),
       toolbarFlat() { 
         return this.currentRoute.name === "woffler"
@@ -44,6 +44,12 @@
           this.playerInfoPanel = true
       },
     },
+    methods: {
+      toggleDarkTheme() {
+        this.$store.dispatch('settings/setTheme', this.darkTheme ? 'light' : 'dark')
+        this.drawer = false
+      }
+    }
   }
 </script>
 
@@ -55,7 +61,7 @@
       fixed
       app
     >
-      <NavigationPanel @toggledarktheme="darkTheme = !darkTheme"/>
+      <NavigationPanel @toggledarktheme="toggleDarkTheme"/>
       <LinksPanel />
     </v-navigation-drawer>
     <v-toolbar app fixed clipped-left :flat="toolbarFlat">

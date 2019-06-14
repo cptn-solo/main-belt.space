@@ -1,15 +1,12 @@
 <script>
-  import utils from '../../utils'
+  import utils from '../../../utils'
   import ActionBtn from './ActionButton'
-  import Countdown from '../controls/Countdown'
-  import { WflVestingInfo } from '../../dialogs/wofflerConfirmations'
-  import amounts from './gameAmountsMixin'
-  import permissions from './gamePermissionsMixin'
+  import Countdown from '../../controls/Countdown'
+  import { WflVestingInfo } from '../../../dialogs/wofflerConfirmations'
 
   const LEVEL_LENGTH = 16
 
   export default {
-    mixins: [amounts, permissions],
     props: {
       player: {
         type: Object,
@@ -50,7 +47,10 @@
     computed: {
       loading() {
         return !!this.$store.state.engine.currentGUIAction
-      }
+      },
+      canClaimTake() {
+        return this.showVesting && this.vestingReady
+      },
     },
     methods: {
       cellPositionStyle(idx) {
@@ -70,6 +70,13 @@
         const red = (this.level.redcells&idxBin) > 0
         const currentpos = idx === this.player.currentposition
         const trypos = idx === this.player.tryposition
+        const pathPos = 
+          this.player.tryposition === this.player.currentposition ? 
+            idx === this.player.tryposition  :
+          this.player.tryposition > this.player.currentposition ? 
+            idx > this.player.currentposition && idx <= this.player.tryposition :
+            (idx > this.player.currentposition && idx < LEVEL_LENGTH ||
+             idx <= this.player.tryposition && idx >= 0)
 
         let retval = ["cell"]
         retval.push(green ? "greenpos" : red ? "redpos" : "safepos")
@@ -82,6 +89,10 @@
           if (!currentpos)
             retval.push("trypos")
         }
+
+        if (pathPos)
+          retval.push("pathpos")
+
         return retval
       }
     }
@@ -95,24 +106,24 @@
     >{{ idx-1 }}</div>
     <div class="panel levelpot">
       <span class="caption">Current pot:</span><br>
-      <span class="asset">{{level.potbalance}}</span>
+      <span class="asset">{{level.amounts.currentPot}}</span>
     </div>
-    <div v-if="takeAmount" class="panel levelreward">
+    <div v-if="level.amounts.takeAmount" class="panel levelreward">
       <span class="caption">Reward:</span><br>
-      <span class="asset">{{takeAmount}}</span>
+      <span class="asset">{{level.amounts.takeAmount}}</span>
     </div>
     <div v-if="level.previous" class="panel previouslevel">
       <span class="caption">Previous pot:</span><br>
-      <span class="asset">{{level.previous.potbalance}}</span>
+      <span class="asset">{{level.amounts.prevPot}}</span>
     </div>
     <div class="hud">
       <v-layout row justify-center align-center fill-height>
-        <ActionBtn v-if="canTry" :action="actions[3]" 
+        <ActionBtn v-if="level.permissions.canTry" :action="actions[3]" 
           :color="player.triesleft > 2 ? 'primary' : player.triesleft > 1 ? null : 'warning'">
           <template #text>try</template>
           <template #caption>{{player.triesleft+" left"}}</template>
         </ActionBtn>
-        <ActionBtn v-if="canCommitTry" :action="actions[4]">
+        <ActionBtn v-if="level.permissions.canCommitTry" :action="actions[4]">
           <template #text>turn</template>
           <template #caption>commit turn</template>
         </ActionBtn>
@@ -127,7 +138,7 @@
           <template #text><Countdown :end="vestingDate"/></template>
           <template #caption>vesting lock</template>
         </ActionBtn>
-        <ActionBtn v-if="canClaimSafe" 
+        <ActionBtn v-if="level.permissions.canClaimSafe" 
           :panel="true"
           :action="actions[10]">
           <template #text>restart lvl</template>
@@ -138,73 +149,73 @@
     <div v-if="level.next" class="panel nextlevel">
       <v-layout column justify-start align-end fill-height>
         <span flex class="caption">Next pot:</span>
-        <span flex class="asset">{{level.next.potbalance}}</span>
-        <ActionBtn flex v-if="canUnlockNext" icon="lock" :action="actions[0]" 
+        <span flex class="asset">{{level.amounts.nextPot}}</span>
+        <ActionBtn flex v-if="level.permissions.canUnlockNext" icon="lock" :action="actions[0]" 
           :payload="{ account: this.player.account, idlevel: level.next.id }">
           <template #caption>{{player.triesleft+" left"}}</template>
         </ActionBtn>
-        <ActionBtn flex v-else-if="canGoNext" icon="lock_open" :action="actions[5]">
+        <ActionBtn flex v-else-if="level.permissions.canGoNext" icon="lock_open" :action="actions[5]">
           <template #caption>next</template>
         </ActionBtn>
       </v-layout>
     </div>
-    <ActionBtn v-if="canNext && !level.next" 
+    <ActionBtn v-if="level.permissions.canNext && !level.next" 
       :panel="true"
       :action="actions[5]">
       <template #text>next</template>
-      <template #caption>next level will get {{nextPotAmount}}</template>
+      <template #caption>next level will get {{level.amounts.nextPotCandidate}}</template>
     </ActionBtn>
-    <ActionBtn flex v-else-if="canNext" 
+    <ActionBtn flex v-else-if="level.permissions.canNext" 
       :panel="true"
       :action="actions[5]">
       <template #text>unlock</template>
-      <template #caption>try to unlock {{level.next.potbalance}}</template>
+      <template #caption>try to unlock {{level.amounts.nextPot}}</template>
     </ActionBtn>
     <div v-if="level.split" class="panel splitlevel">
       <v-layout column justify-start align-start fill-height>
         <span flex class="caption">Split pot:</span>
-        <span flex class="asset">{{level.split.potbalance}}</span>
-        <ActionBtn flex v-if="canUnlockSplit" icon="lock" :action="actions[1]" 
+        <span flex class="asset">{{level.amounts.splitPot}}</span>
+        <ActionBtn flex v-if="level.permissions.canUnlockSplit" icon="lock" :action="actions[1]" 
           :payload="{ account: this.player.account, idlevel: level.split.id }">          
           <template #caption>{{player.triesleft+" left"}}</template>
         </ActionBtn>
-        <ActionBtn flex v-else-if="canSwitchToSplit" icon="lock_open" :action="actions[2]" 
+        <ActionBtn flex v-else-if="level.permissions.canSwitchToSplit" icon="lock_open" :action="actions[2]" 
           :payload="{ account: this.player.account, idbranch: level.split.idbranch }">          
           <template #caption>switch</template>
         </ActionBtn>
       </v-layout>
     </div>
-    <ActionBtn v-if="canSplit && !level.split" 
+    <ActionBtn v-if="level.permissions.canSplit && !level.split" 
       :panel="true"
       :action="actions[13]">
       <template #text>split</template>
-      <template #caption>split level will get {{splitPotAmount}}</template>
+      <template #caption>split level will get {{level.amounts.splitPotCandidate}}</template>
     </ActionBtn>
-    <ActionBtn flex v-else-if="canSplit" 
+    <ActionBtn flex v-else-if="level.permissions.canSplit" 
       :panel="true"
       :action="actions[5]">
       <template #text>unlock</template>
-      <template #caption>try to unlock {{level.split.potbalance}}</template>
+      <template #caption>try to unlock {{level.amounts.splitPot}}</template>
     </ActionBtn>
-    <ActionBtn flex v-else-if="canBuyTries" 
+    <ActionBtn flex v-else-if="level.permissions.canBuyTries" 
       :panel="true"
       :action="actions[14]">
       <template #text>buy retries</template>
-      <template #caption>buy additional 3 tries for {{buyTryAmount}}</template>
+      <template #caption>buy additional 3 tries for {{level.amounts.buyTryAmount}}</template>
     </ActionBtn>
-    <ActionBtn v-if="canTake" 
+    <ActionBtn v-if="level.permissions.canTake" 
       :panel="true"
       :action="actions[6]">
       <template #text>take</template>
-      <template #caption>receive {{takeAmount}} to vesting balance<div class="takewarning">blocks progress!</div></template>
+      <template #caption>receive {{level.amounts.takeAmount}} to vesting balance<div class="takewarning">blocks progress!</div></template>
     </ActionBtn>
-    <ActionBtn v-if="canUntake" 
+    <ActionBtn v-if="level.permissions.canUntake" 
       :panel="true"
       :action="actions[7]">
       <template #text>un-take</template>
       <template #caption>return reward to continue</template>
     </ActionBtn>
-    <ActionBtn v-if="canClaimRed" 
+    <ActionBtn v-if="level.permissions.canClaimRed" 
       :panel="true"
       :action="actions[8]">
       <template #text v-if="level.idparent">return</template>
@@ -212,11 +223,11 @@
       <template #caption v-if="level.idparent">go to previous level</template>
       <template #caption v-else>go to 0 cell in current level</template>
     </ActionBtn>
-    <ActionBtn v-if="canUnjail" 
+    <ActionBtn v-if="level.permissions.canUnjail" 
       :panel="true"
       :action="actions[9]">
       <template #text>un-jail</template>
-      <template #caption>pay {{unjailAmount}} to stay on the current level</template>
+      <template #caption>pay {{level.amounts.unjailAmount}} to stay on the current level</template>
     </ActionBtn>
   </div>
 </template>
@@ -258,6 +269,7 @@
   .greenpos { border-color: green }
   .redpos { border-color: red }
   .curpos { font-weight: bold }
+  .pathpos { box-shadow: inset 0px 0px 5px 2px #bdbdbd; }
   .curpos.safepos { background-color: gray; border: none}
   .curpos.redpos { background-color: red; border: none}
   .curpos.greenpos { background-color: green; border: none}
@@ -347,7 +359,8 @@
   }
   .buttonpanel.claimsafe {
     margin-left: -60px;
-    margin-top: -40px;    
+    margin-top: -40px;
+    background-color:olive;
   }
   .buttonpanel.claimtake {
     margin-left: -60px;

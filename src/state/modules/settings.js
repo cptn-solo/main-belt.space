@@ -10,6 +10,7 @@ const initialState = {
   useScatter: false,
   localKey: null,
   localAccount: null,
+  theme: null,
   referrerCode: null,
 }
 
@@ -91,6 +92,9 @@ export const mutations = {
   setLocalAccount(state, account) {
     state.localAccount = account
   },
+  setTheme(state, theme) {
+    state.theme = theme
+  },
   resetData: state => {
     for (var key in state) {
       if (initialState.hasOwnProperty(key)) {
@@ -131,5 +135,8 @@ export const actions = {
   },
   setLocalAccount({ commit }, account) {
     commit('setLocalAccount', account)
+  },
+  setTheme({ commit }, theme) {
+    commit('setTheme', theme)
   },
 }

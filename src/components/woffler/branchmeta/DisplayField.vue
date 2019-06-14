@@ -5,7 +5,8 @@ export default {
   },
   computed: {
     valueType() {
-      return this.value.type.split[0]
+      const parts = this.value.type.split(' ')
+      return parts && parts.length > 1 ? parts[0] : this.value.type      
     }
   }
 }
@@ -29,6 +30,7 @@ export default {
 .subtitle {
   font-size: smaller;
   text-align: left;
+  font-weight: normal;
 }
 </style>
 

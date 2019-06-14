@@ -3,6 +3,7 @@ import { mapState } from 'vuex';
 import { commonActions } from '../../../woffler/commonActions'
 import DisplayField from './DisplayField'
 import EditField from './EditField'
+import metaFields from './metaFields.json'
 export default {
   props: {
     canPlay: {
@@ -11,27 +12,7 @@ export default {
     },
     rows: {
       type: Array,
-      default: () => [
-        ['name', 'text 50'],
-        ['owner', 'text', true],        
-        ['startjailed','bool'],
-        ['lvlgreens','int 14'],
-        ['lvlreds','int 14'],
-        ['potmin','asset'],
-        ['stkmin','asset'],
-        ['stkrate','%'],
-        ['unjlmin','asset'],
-        ['unjlrate','%'],
-        ['buytrymin','asset'],
-        ['buytryrate','%'],
-        ['nxtrate','%'],
-        ['spltrate','%'],
-        ['tkrate','%'],
-        ['tkintrvl','interval'],
-        ['slsrate','%'],
-        ['winnerrate','%'],
-        ['url', 'text 150'],
-      ]
+      default: () => metaFields
     }
   },
   components: {

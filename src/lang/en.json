@@ -134,6 +134,14 @@
   "wflBrMetaurlh": "detailed description and info on the rules set",
   "wflBrMetawinnerrate": "Winner rate",
   "wflBrMetawinnerrateh": "% of level's revenue paid to the branch current winner",
+  "wflBrMetamaxlvlgen": "Max levels",
+  "wflBrMetamaxlvlgenh": "maximum number of levels per branch. 0 if no maximum",
+  "wflBrMetatakemult": "Take multiplier",
+  "wflBrMetatakemulth": "if set, reward will be multiplied on this factor and level generation. 0 for none",
+  "wflBrMetaunljailmult": "Unjail multiplier",
+  "wflBrMetaunljailmulth": "if set, unjail payment will be multiplied on this factor and level generation. 0 for none",
+  "wflBrMetabuytrymult": "Buy tries multiplier",
+  "wflBrMetabuytrymulth": "if set, price for the extra retries will be multiplied on this factor and level generation. 0 for none",
 
   "wflBrMetaSowner": "Owner",
   "wflBrMetaSlvlgreens": "Greens",
@@ -153,9 +161,15 @@
   "wflBrMetaSunjlrate": "Unjail",
   "wflBrMetaSurl": "URL",
   "wflBrMetaSwinnerrate": "Winner",
+  "wflBrMetaSmaxlvlgen": "Max levels",
+  "wflBrMetaStakemult": "Take mult.",
+  "wflBrMetaSunljailmult": "Unj. mult.",
+  "wflBrMetaSbuytrymult": "Buytry mult.",
+
   
   "wflPaidStartBage": "paid start",
   "wflVestingInfoTitle": "Vesting interval",
-	"wflVestingInfoText": "Reward can be claimed after vesting period end"
+  "wflVestingInfoText": "Reward can be claimed after vesting period end",
+  "wflBranchCurrentPot": "сurrent pot"
 
 }

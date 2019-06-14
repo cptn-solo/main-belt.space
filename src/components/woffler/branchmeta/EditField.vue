@@ -73,7 +73,9 @@ export default {
       get() {
         switch (this.valueType) {
           case 'asset':
-            return utils.assetAmount(this.fieldVal)                    
+            return utils.assetAmount(this.fieldVal)
+          case 'int':
+            return this.fieldVal+''              
           default:
             return this.fieldVal;
         }
@@ -83,6 +85,11 @@ export default {
           case 'asset':
             this.fieldVal = utils.asset(utils.parseAmount(n))
             break
+          case 'int': {
+            const _int = parseInt(n)
+            this.fieldVal = isNaN(_int) ? 0 : _int
+            break 
+          }
           default:
             this.fieldVal = n
         }

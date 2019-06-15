@@ -192,23 +192,27 @@ export const actions = {
       if (metas.length != 1) 
         throw new Error('No valid branch meta found for id: '+_level.idmeta)
 
+      const meta = metas[0]
+      const branch = Object.assign(branches[0], { 
+        meta: metas[0] 
+      })
+      const splitBranch = splitBranches ? splitBranches[0] : null
       const amounts = gameAmounts.compute(
-        _level, next, branches[0], 
-        split, splitBranches ? splitBranches[0] : null,
-        metas[0])
-      console.log('game state amounts', amounts)
+        _level, previous, next, branch, 
+        split, splitBranch,
+        meta)
+      
       const permissions = gamePermissions.compute(
-        getters.player, _level, next, split, 
-        metas[0], amounts)
-      console.log('game state permissions', permissions)
+        getters.player, 
+        _level, next, split, 
+        branch, splitBranch,
+        meta, amounts)
       
       level = Object.assign(_level, {
         amounts, permissions,
         previous, next, split,
-        branch: Object.assign(branches[0], { 
-          meta: metas[0] 
-        })        
-      })          
+        branch
+      })                
 
       return level
     } catch (ex) {
@@ -266,7 +270,6 @@ export const actions = {
   },
   //payload: { owner, idmeta, pot}
   async createBranch({ dispatch, getters }, { idmeta, amount }) {
-    console.log('createBranch',amount)
     try {
       await getters.gameAPI.playerAction({actionname: 'branch', payload: {
         owner: getters.accountname, 
@@ -292,7 +295,6 @@ export const actions = {
   },
   async updateBranchStake({ getters, commit }, levelinfo) {
     try {
-      console.log('updateBranchStake', levelinfo)
       const level = (await getters.gameAPI.getLevels(levelinfo.id))[0]
       const branch = (await getters.gameAPI.getBranches(levelinfo.branch.id))[0]
       const stake = getters.playerStakes.find(s => s.idbranch === branch.id)

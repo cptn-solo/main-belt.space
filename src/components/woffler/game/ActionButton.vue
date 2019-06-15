@@ -44,15 +44,15 @@ export default {
   <div :class="[panel ? 'buttonpanel' : '', action.key]">
     <template v-if="icon">
       <v-btn 
-        icon ripple style="margin: 0px"
+        icon ripple style="margin: 0px;"
         :class="action.key + 'btn'" 
         :loading="loading" :disabled="disabled" 
         @click="onclick">
         <v-icon>{{ icon }}</v-icon>
-      </v-btn><br>
-      <span class="caption">
+      </v-btn>
+      <div class="caption" style="margin: -4px">
         <slot name="caption" />
-      </span>
+      </div>
     </template>
     <template v-else>
       <v-btn :fab="!panel" :small="panel" :class="action.key + 'btn'" 

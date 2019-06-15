@@ -65,7 +65,6 @@
     methods: {
       setActivePanel(panel) {
         this.activePanel = panel
-        console.log(panel)
       },
       async loadData() {
         this.loading = true

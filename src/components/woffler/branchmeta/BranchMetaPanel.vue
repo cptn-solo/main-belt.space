@@ -50,7 +50,6 @@ export default {
       this.dialog = false
     },
     changed(change) {
-      console.log('meta changed: '+change.key, change.value)
       this.meta[change.key] = change.value
     },
     saveMeta() {

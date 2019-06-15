@@ -365,6 +365,8 @@
   .buttonpanel.claimtake {
     margin-left: -60px;
     margin-top: -40px;    
+    background-color:purple;
+    border: none;
   }
   .buttonpanel.unjail {
     margin-left: -60px;

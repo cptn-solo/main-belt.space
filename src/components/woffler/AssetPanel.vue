@@ -36,9 +36,7 @@ export default {
       
       if (this.maxValue) 
         arr.push(value => { return parseFloat(value) <= this.maxValue || 'max. '+utils.asset(this.maxValue) })
-      
-      console.log(arr)
-      
+            
       return arr
     }
 

@@ -1,14 +1,13 @@
 import utils from '../utils'
 
 export default {
-  compute(level, next, branch, split, splitBranch, meta) {
+  compute(level, prev, next, branch, split, splitBranch, meta) {
     
-    const potbalanceAmount = utils.assetAmount(branch.potbalance)
-    this.potbalance = branch.potbalance
+    this.potbalance = level.potbalance
+    const potbalanceAmount = utils.assetAmount(level.potbalance)
 
-    const splitbalanceAmount = split && splitBranch ? 
-      utils.assetAmount(splitBranch.potbalance) : 0
-    this.splitbalance = splitBranch ? splitBranch.potbalance : null
+    this.splitbalance = split ? split.potbalance : null
+    const splitbalanceAmount = split ? utils.assetAmount(split.potbalance) : 0
 
     const tkrate = meta.tkrate
     const nxtrate = meta.nxtrate
@@ -19,59 +18,91 @@ export default {
     //minSplittablePotAmount:
     const spltrate = meta.spltrate
     const stkmin = utils.assetAmount(meta.stkmin)    
-    this.minSplittablePotAmount = 
-      utils.parseAmount((stkmin * 100) / spltrate);
+    this.minSplittablePotAmount = utils.parseAmount((stkmin * 100) / spltrate);
 
-    const gap = branch.winlevgen - level.generation //current level gap from last level
-    const tail = 1 - (nxtrate/100) //left behind the next level
-    const tailWeight = Math.pow(tail, gap) //ratio to produce tail for given level dept from total pot balance
+    this.prevPot = prev ? prev.potbalance : null
+    this.prevPotAmount = prev ? utils.assetAmount(prev.potbalance) : 0
 
-    this.prevPotAmount = level.generation < 2 ? 0 :
-      potbalanceAmount * tailWeight * tail
-    this.prevPot = utils.asset(this.prevPotAmount)
-
-    this.currentPotAmount = 
-      potbalanceAmount * tailWeight - 
-        (level.generation > 1 ? this.prevPotAmount : 0)
-    this.currentPot = utils.asset(this.currentPotAmount)
+    this.currentPotAmount = potbalanceAmount
+    this.currentPot = this.potbalance
 
     //potSplittable:
     this.potSplittable = this.currentPotAmount >= this.minSplittablePotAmount
 
     //nextPotAmount:
-    this.nextPotCandidateAmount = next ? 0 : 
-      (this.currentPotAmount * nxtrate) / 100
+    this.nextPotCandidateAmount = next ? 0 : (this.currentPotAmount * nxtrate) / 100
     this.nextPotCandidate = utils.asset(this.nextPotCandidateAmount)
 
-    this.nextPotAmount = !next ? 0 :
-      (potbalanceAmount * tailWeight / tail) - this.currentPotAmount - this.prevPotAmount
-    this.nextPot = utils.asset(this.nextPotAmount)
+    this.nextPotAmount = next ? utils.assetAmount(next.potbalance) : 0
+    this.nextPot = next ? next.potbalance : null
 
     //splitPotAmount:
     this.splitPotCandidateAmount = split ? 0 : !this.potSplittable ? 0 :
-      utils.parseAmount((this.currentPotAmount * spltrate) / 100)
+      (this.currentPotAmount * spltrate) / 100
     this.splitPotCandidate = utils.asset(this.splitPotCandidateAmount)
 
-    this.splitPotAmount = !(split && splitBranch) ? 0 :
-      (splitbalanceAmount * Math.pow((100 - nxtrate)/100, splitBranch.winlevgen - split.generation))
-    this.splitPot = utils.asset(this.splitPotAmount)
+    this.splitPotAmount = split ? utils.assetAmount(split.potbalance) : 0
+    this.splitPot = split ? split.potbalance : null
     
     //takeAmount:
-    const takeAmount = utils.parseAmount((potbalanceAmount * tkrate) / 100)
-    const remains = potbalanceAmount - takeAmount
-    this.takeAmount = remains > potmin ? utils.asset(takeAmount) : null
+    const takeAmount = this.getTakeAmount(meta, this.currentPotAmount, level.generation, branch.winlevgen)
+    this.takeAmount = utils.asset(takeAmount)
 
     //unjailAmount:
-    const unjlmin = utils.assetAmount(meta.unjlmin)
-    const unjailAmount = utils.parseAmount((this.currentPotAmount * unjlrate) / 100)
-    this.unjailAmount = utils.asset(Math.max(unjailAmount, unjlmin))
+    const unjailAmount = this.getUnjailPrice(meta, this.currentPotAmount, level.generation)
+    this.unjailAmount = utils.asset(unjailAmount)
 
     //buyTryAmount:
-    const buytrymin = utils.assetAmount(meta.buytrymin)
-
-    const buyTryAmount = utils.parseAmount((this.currentPotAmount * buytryrate) / 100)
-    this.buyTryAmount = utils.asset(Math.max(buyTryAmount, buytrymin))    
+    const buyTryAmount = this.getBuytryPrice(meta, this.currentPotAmount, level.generation)
+    this.buyTryAmount = utils.asset(buyTryAmount)    
 
     return this
+  },
+  getTakeAmount(_meta, pot, generation, winlevgen) {
+    if (_meta.maxlvlgen > 0 && _meta.maxlvlgen == generation)//last level winner gets all remaining pot
+      return pot;
+
+    let reward = (pot * _meta.tkrate) / 100;
+    
+    if(reward.amount > 0) return 0;
+
+    if (_meta.takemult > 0) 
+      reward *= (_meta.takemult * generation); 
+
+    if (reward > pot)
+      return pot;
+
+    return reward;
+  },
+  getStakeThreshold(_meta, pot) {
+    //stake amounts derived from total branch pot, not current level's amount
+    let price = (pot * _meta.stkrate) / 100;
+    const sktmin = utils.assetAmount(_meta.sktmin);
+    if (price < stkmin)
+      price = stkmin;
+
+    return price;
+  },
+  getUnjailPrice(_meta, pot, generation) {
+    let price = (pot * _meta.unjlrate) / 100;
+    if (_meta.unljailmult > 0)
+      price *= (_meta.unljailmult * generation);
+
+    const unjlmin = utils.assetAmount(_meta.unjlmin);
+    if (price < unjlmin)
+      price = unjlmin;
+
+    return price;
+  },
+  getBuytryPrice(_meta, pot, generation) {
+    let price = (pot * _meta.buytryrate) / 100;
+    if (_meta.buytrymult > 0) 
+      price *= (_meta.buytrymult * generation);
+
+    const buytrymin = utils.assetAmount(_meta.buytrymin);
+    if (price < buytrymin)
+      price = buytrymin;
+
+    return price;
   }
 }

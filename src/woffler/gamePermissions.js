@@ -5,51 +5,73 @@ const PALYER_STATE = {
 }
 
 export default {
-  compute(player, level, next, split, meta, amounts) {
-    this.canTry = player.status === PALYER_STATE.SAFE
+  compute(player, level, next, split, branch, splitBranch, meta, amounts) {
+    
+    const closedBranch = (branch.closed != 0)
+    const closedSplit = splitBranch ? splitBranch.closed != 0 : false
+
+    this.branchClosed = closedBranch
+    this.splitClosed = closedSplit
+
+    this.canTry = !closedBranch
+      && player.status === PALYER_STATE.SAFE
       && player.triesleft > 0
 
-    this.canCommitTry = player.status === PALYER_STATE.SAFE
+    this.canCommitTry = !closedBranch
+      && player.status === PALYER_STATE.SAFE
       && player.triesleft < MAX_TRIES
     
-    this.canNext = player.status === PALYER_STATE.GREEN
+    this.canNext = !closedBranch
+      && player.status === PALYER_STATE.GREEN
       && (!next || next.locked)
     
-    this.canGoNext = player.status === PALYER_STATE.GREEN
-      && (next && !next.locked)
-    this.canSplit = player.status === PALYER_STATE.GREEN
-      && ((!split && amounts.potSplittable) ||
-          (split && split.locked))
+    this.canGoNext = !closedBranch
+      && player.status === PALYER_STATE.GREEN
+      && (next && !next.locked)    
 
-    this.canTake = player.status === PALYER_STATE.GREEN
+    this.canSplit = player.status === PALYER_STATE.GREEN
+      && ((!split && amounts.potSplittable && !closedBranch) ||
+          (split && split.locked && !closedSplit))
+
+    this.canTake = !closedBranch
+      && player.status === PALYER_STATE.GREEN
       && amounts.takeAmount
     
-    this.canUntake = player.status === PALYER_STATE.TAKE 
+    this.canUntake = !closedBranch
+      && player.status === PALYER_STATE.TAKE
     
-    this.canClaimRed = player.status === PALYER_STATE.RED
+    this.canClaimRed = !closedBranch
+      && player.status === PALYER_STATE.RED
       && (level.idparent > 0 || meta.startjailed === 0)
     
-    this.canUnjail = player.status === PALYER_STATE.RED
+    this.canUnjail = !closedBranch
+      && player.status === PALYER_STATE.RED      
       && (level.idparent > 0 || meta.startjailed != 0)
     
-    this.canClaimSafe = player.status === PALYER_STATE.GREEN ||
+    this.canClaimSafe = !closedBranch && (
+      player.status === PALYER_STATE.GREEN ||
       player.status === PALYER_STATE.NEXT ||
       player.status === PALYER_STATE.SPLIT
+    )
     
-    this.canUnlockNext = player.status === PALYER_STATE.NEXT
+    this.canUnlockNext = !closedBranch
+      && player.status === PALYER_STATE.NEXT
       && next && next.locked
       && player.triesleft > 0
 
-    this.canUnlockSplit = player.status === PALYER_STATE.SPLIT
+    this.canUnlockSplit = !closedSplit
+      && player.status === PALYER_STATE.SPLIT
       && split && split.locked
       && player.triesleft > 0
 
-    this.canSwitchToSplit = player.status === PALYER_STATE.GREEN
+    this.canSwitchToSplit = !closedSplit
+      && player.status === PALYER_STATE.GREEN
       && split && !split.locked
 
-    this.canBuyTries = (player.status === PALYER_STATE.NEXT ||
-      player.status === PALYER_STATE.SPLIT) &&
-      player.triesleft === 0
+    this.canBuyTries = (
+      (player.status === PALYER_STATE.NEXT && !closedBranch) ||
+      (player.status === PALYER_STATE.SPLIT && !closedSplit)
+    ) && player.triesleft === 0
 
     return this
   } 

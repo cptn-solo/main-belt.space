@@ -144,13 +144,9 @@ export const actions = {
     }
     commit('setProfileState', constants.PROFILE_LOGGEDIN)
     try {
-      const isInitialized = await dispatch(
-        'loadAndProcessIngameProfile',
-        accountname
-      )
-      if (isInitialized) {
+      if (await dispatch('loadAndProcessIngameProfile')) 
         commit('setProfileState', constants.PROFILE_INITIALIZED)
-      }
+      
       return getters.profileState
     } catch (ex) {
       throw ex
@@ -161,7 +157,6 @@ export const actions = {
     try {
       const accountname = account || getters.accountname      
       const profileRows = await getters.gameAPI.getIngameProfileForAccount(accountname)
-      console.log('profileRows',profileRows)
       let profileInitialized = false
       let player = null
       if (profileRows.length === 1) {
@@ -191,10 +186,11 @@ export const actions = {
       throw new UserBalancesLoadError(ex)
     }
   },
-  async depositAsset({ dispatch, getters }, asset) {
+  async depositAsset({ commit, dispatch, getters }, asset) {
     try {
       await getters.gameAPI.depositAsset(asset)
-      return await dispatch('loadAndProcessIngameProfile')
+      if (await dispatch('loadAndProcessIngameProfile')) 
+        commit('setProfileState', constants.PROFILE_INITIALIZED)
     } catch (ex) {
       throw new UserTransferAssetError(ex)
     }
@@ -202,7 +198,7 @@ export const actions = {
   async withdrawAsset({ dispatch, getters }, asset ) {
     try {
       await getters.gameAPI.withdrawAsset(asset)
-      return await dispatch('loadAndProcessIngameProfile')
+      await dispatch('loadAndProcessIngameProfile')
     } catch (ex) {
       throw new UserTransferAssetError(ex)
     }

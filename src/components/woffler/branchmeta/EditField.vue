@@ -36,7 +36,11 @@ export default {
       this.valueLimit = parts && parts.length > 1 ? parseInt(parts[1]) : null
       this.maxLength = this.valueType === 'text' ? this.valueLimit : null
       this.intRules = [
-        value => { return parseInt(value) <= this.valueLimit || 'reds and greens together cant exceed '+this.valueLimit }
+        value => { 
+          if (this.valueLimit) 
+            return parseInt(value) <= this.valueLimit || 'value cant exceed '+this.valueLimit          
+          return   true
+        }
       ]
     }
   },

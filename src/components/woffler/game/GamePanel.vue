@@ -257,11 +257,11 @@
     position: absolute;
     width: 30px;
     height: 30px;
-    border: 2px dotted gray;
+    border: 1px dotted gray;
     line-height: 30px;
     vertical-align: middle;
     text-align: center;
-    border-radius: 15px;
+    border-radius: 50%;
     margin-left: -15px;
     margin-top: -15px
   }
@@ -269,11 +269,11 @@
   .greenpos { border-color: green }
   .redpos { border-color: red }
   .curpos { font-weight: bold }
-  .pathpos { box-shadow: inset 0px 0px 5px 2px #bdbdbd; }
+  .pathpos { box-shadow: inset 0px 0px 2px 1px; border-width: 1px }
   .curpos.safepos { background-color: gray; border: none}
   .curpos.redpos { background-color: red; border: none}
   .curpos.greenpos { background-color: green; border: none}
-  .trypos { border-width: 3px; border-style: solid; font-weight: bold }
+  .trypos { border-width: 2px; border-style: solid; font-weight: bold }
   .asset { font-size: smaller; font-weight: bold }
   .caption { font-size: smaller; color: gray }
   .panel {

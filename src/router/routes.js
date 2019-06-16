@@ -18,7 +18,26 @@ export default [
   {
     path: "/woffler",
     name: "woffler",
-    component: () => import("../views/woffler/Woffler.vue")
+    component: () => import("../views/woffler/Woffler.vue"),
+    props: (route) => ({ 
+      panel: null, 
+      subpanel: null })
+  },
+  {
+    path: "/woffler/:panel",
+    name: "woffler",
+    component: () => import("../views/woffler/Woffler.vue"),
+    props: (route) => ({ 
+      panel: route.params.panel, 
+      subpanel: null })
+  },
+  {
+    path: "/woffler/:panel/:subpanel",
+    name: "woffler",
+    component: () => import("../views/woffler/Woffler.vue"),
+    props: (route) => ({ 
+      panel: route.params.panel, 
+      subpanel: route.params.subpanel })
   },
   {
     path: "/contract",

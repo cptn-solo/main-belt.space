@@ -104,9 +104,12 @@
       :class="cellValueClasses(idx-1)"
       :style="cellPositionStyle(idx-1)"
     >{{ idx-1 }}</div>
-    <div class="panel levelpot">
+    <div class="panel levelpot" v-if="!level.permissions.lastPot">
       <span class="caption">Current pot:</span><br>
       <span class="asset">{{level.amounts.currentPot}}</span>
+    </div>
+    <div class="panel levelpot lastpot" v-else>
+      <span>Last level!</span>
     </div>
     <div v-if="level.amounts.takeAmount" class="panel levelreward">
       <span class="caption">Reward:</span><br>
@@ -230,8 +233,14 @@
       <template #caption>pay {{level.amounts.unjailAmount}} to stay on the current level</template>
     </ActionBtn>
   </div>
+  <div v-else class="nogame">
+    {{ $t('wflNoActiveGameYet')}}
+  </div>
 </template>
 <style scoped>
+  .nogame {
+    padding: 30px; font-size: larger;
+  }
   .wflbox {
     position: absolute;
     width: 280px;
@@ -273,13 +282,22 @@
   .curpos.safepos { background-color: gray; border: none}
   .curpos.redpos { background-color: red; border: none}
   .curpos.greenpos { background-color: green; border: none}
-  .trypos { border-width: 2px; border-style: solid; font-weight: bold }
+  .trypos_ { border-width: 2px; border-style: solid; font-weight: bold }
+  .trypos.safepos { background-color: gray; border: none}
+  .trypos.redpos { background-color: red; border: none}
+  .trypos.greenpos { background-color: green; border: none}
   .asset { font-size: smaller; font-weight: bold }
   .caption { font-size: smaller; color: gray }
   .panel {
     border: 1px solid gray;
     border-radius: 5px;
     line-height: 16px;
+  }
+  .lastpot {
+    line-height: 40px;
+    font-size: large;
+    font-weight: bold;
+    color: darkorange;
   }
   .levelpot {
     position: absolute;

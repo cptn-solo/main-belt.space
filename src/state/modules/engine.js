@@ -61,10 +61,12 @@ export const actions = {
   async performEnqueuedAction({ dispatch, commit, state }) {
     try {      
       const action = state.currentGUIAction
-      if (action.selector)
-        await dispatch(action.selector, action.payload, { root: true })
-      else if (action.promise) {        
-        await action.promise
+      if (action.selector) {
+        const result = await dispatch(action.selector, action.payload, { root: true })
+        if (action.success) action.success(result)
+      } else if (action.promise) {        
+        const result = await action.promise
+        if (action.success) action.success(result)
       }        
       commit('requestActions', [])//actions left queued if exception occured to allow retry
     } catch (ex) {

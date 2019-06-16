@@ -10,6 +10,8 @@ export default {
     const closedBranch = (branch.closed != 0)
     const closedSplit = splitBranch ? splitBranch.closed != 0 : false
 
+    this.lastPot = meta.maxlvlgen && level.generation === meta.maxlvlgen
+
     this.branchClosed = closedBranch
     this.splitClosed = closedSplit
 
@@ -22,6 +24,7 @@ export default {
       && player.triesleft < MAX_TRIES
     
     this.canNext = !closedBranch
+      && (meta.maxlvlgen === 0 || level.generation < meta.maxlvlgen)
       && player.status === PALYER_STATE.GREEN
       && (!next || next.locked)
     

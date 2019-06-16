@@ -23,12 +23,33 @@
       BranchMetaPanel,
       BranchMetaPicker,
     },
+    props: {
+      panel: { type: String, default: 'info' },
+      subpanel: { type: String, default: null }
+    },
     data:() => ({
       constants,
       loading: false,
       playerInfoPanel: false,
       activePanel: null,
+      gamePanels: [
+        { key: 'info', ttitle: 'wflInfoPanelTitle', atitle: 'wflInfoActionTitle', aicon: 'help_outline' },
+        { key: 'levels', ttitle: 'wflStartBranchesPanelTitle', atitle: 'wflStartBranchesActionTitle', aicon: 'list' },
+        { key: 'metas', ttitle: 'wflMetasPanelTitle', atitle: 'wflMetasActionTitle', aicon: 'ballot' },
+        { key: 'active', ttitle: 'wflActiveGamePanelTitle', atitle: 'wflActiveGameActionTitle', aicon: 'videogame_asset' }
+      ],
     }),
+    created() {
+      console.log('panel', this.panel, 'subpanel', this.subpanel)
+      if (this.panel)
+        this.pickPanelByKey(this.panel)
+      else if (this.hasCurrentGame)
+        this.pickPanelByKey('active')
+      else if (this.hasIngameProfile && this.hasAvailableGames)
+        this.pickPanelByKey('levels')
+      else 
+        this.pickPanelByKey('info')
+    },
     computed: {
       ...mapState({
         player: state => state.userProfile.player,
@@ -57,14 +78,20 @@
       }      
     },
     watch: {
-      activePanel(n, o) {
-        if (n.key != "info")
-          this.loadData()
-      },
+      panel(n, o) {
+        console.log('watch panel', n)
+        this.pickPanelByKey(n)
+      }
     },
     methods: {
+      pickPanelByKey(key) {
+        const _panel = this.gamePanels.find(p => p.key === key)
+        if (_panel) this.setActivePanel(_panel)
+      },
       setActivePanel(panel) {
         this.activePanel = panel
+        if (panel.key != "info") 
+          this.loadData()
       },
       async loadData() {
         this.loading = true
@@ -92,9 +119,7 @@
         <BranchMetaPanel :canPlay="canPlay"/>
         <v-toolbar style="z-index:2">
           <GamePanelsMenu
-            :hasCurrentGame="hasCurrentGame"
-            :hasAvailableGames="hasAvailableGames"
-            :oldPanelKey="activePanel ? activePanel.key : ''"
+            :panels="gamePanels"
             @panelselected="setActivePanel" />
           <v-toolbar-title v-if="activePanel">
             {{$t(activePanel.ttitle)}}

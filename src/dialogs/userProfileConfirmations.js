@@ -55,6 +55,15 @@ export class RegisterWithImportedKeyConfirm extends ApplicationDialog {
   }
 }
 
+export class SubmitResourceChangeConfirm extends ApplicationDialog {
+  constructor() {
+    super({
+      title: 'udCSubmitResChangeConfirmTitle',
+      text: 'udCSubmitResChangeConfirmText',
+    })
+  }
+}
+
 export class BackupKeyPromptConfirm extends ApplicationDialog {
   constructor() {
     super({

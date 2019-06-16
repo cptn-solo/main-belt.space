@@ -9,7 +9,8 @@ import {
   UserProfileNoKeyGeneratedError,
   UserProfileNoKeyToImportError,
   UserProfileKeyExportError,
-  UserProfileWrongKeyError
+  UserProfileWrongKeyError,
+  AccountResourceManagementError,
 } from '../../dialogs/userProfileErrors'
 import ApplicationError from '../../dialogs/applicationError'
 
@@ -21,6 +22,21 @@ const initialState = {
 export const state = Object.assign({}, initialState)
 
 export const getters = {
+  cpu(state) {
+    return state.blockchainAccount ? 
+      (state.blockchainAccount.cpu_limit.used /state.blockchainAccount.cpu_limit.max) :
+      0
+  },
+  net(state) {
+    return state.blockchainAccount ? 
+      (state.blockchainAccount.net_limit.used /state.blockchainAccount.net_limit.max) :
+      0
+  },
+  ram(state) {
+    return state.blockchainAccount ? 
+      (state.blockchainAccount.ram_usage /state.blockchainAccount.ram_quota) :
+      0
+  },
   signatureProvider(state) {
     return state.signatureProvider
   },
@@ -159,9 +175,10 @@ export const actions = {
       throw new ApplicationError(ex)
     }
   },
-  async loadBlockchainAccount({ commit, getters }, accountname) {
+  async loadBlockchainAccount({ commit, getters }, accountname = null) {
     try {
-      const account = await getters.gameAPI.getAccount(accountname)
+      const account = await getters.gameAPI.getAccount(accountname || getters.accountname)
+      console.log('account', account)
       commit('setBlockchainAccount', account)
       return account
     } catch (ex) {
@@ -169,6 +186,75 @@ export const actions = {
         throw ex
       
       throw new UserProfileAccountsLoadError(ex)
+    }
+  },
+  async getRamPrice({ getters }){
+    try {
+      const parseAsset = asset => asset.split(' ')[0];
+      const getRamInfo = async () => getters.gameAPI.fetchFromSysTable('rammarket')
+        .then(rows => {
+          const ramInfo = rows[0];
+          return [parseAsset(ramInfo.quote.balance), parseAsset(ramInfo.base.balance)];
+        });
+
+      const ramInfo = await getRamInfo();
+      console.log('ramInfo', ramInfo)
+      return (ramInfo[0] / ramInfo[1]).toFixed(8);
+    } catch(ex) {
+      throw new AccountResourceManagementError(ex)      
+    }
+	},
+  async buyram({ getters, dispatch }, amount) {
+    try {
+      const account = getters.accountname
+      await getters.gameAPI.systemAction('buyram', {
+        payer: account,
+        receiver: account,
+        quant: amount
+      })
+      await dispatch('loadBlockchainAccount', account)
+    } catch (ex) {
+      throw new AccountResourceManagementError(ex)      
+    }
+  },
+  async sellram({ getters, dispatch }, bytes) {
+    try {
+      const account = getters.accountname
+      await getters.gameAPI.systemAction('sellram', {
+        account, bytes
+      })
+      await dispatch('loadBlockchainAccount', account)
+    } catch (ex) {
+      throw new AccountResourceManagementError(ex)      
+    }
+  },
+  async delegateBW({ getters, dispatch}, { net, cpu }) {
+    try {
+      const account = getters.accountname
+      await getters.gameAPI.systemAction('delegatebw', {
+        from: account,
+        receiver: account,
+        stake_net_quantity: net,
+        stake_cpu_quantity: cpu,
+        transfer: false
+      })
+      await dispatch('loadBlockchainAccount', account)
+    } catch (ex) {
+      throw new AccountResourceManagementError(ex)      
+    }
+  },
+  async undelegateBW({ getters, dispatch }, { net, cpu }) {
+    try {
+      const account = getters.accountname
+      await getters.gameAPI.systemAction('undelegatebw', {
+        from: account,
+        receiver: account,
+        unstake_net_quantity: net,
+        unstake_cpu_quantity: cpu        
+      })
+      await dispatch('loadBlockchainAccount', account)
+    } catch (ex) {
+      throw new AccountResourceManagementError(ex)      
     }
   }
 }

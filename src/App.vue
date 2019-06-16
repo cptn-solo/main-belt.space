@@ -4,13 +4,15 @@
   import ProfilePanel from './components/ProfilePanel'
   import ImportPanel from './components/ImportPanel'
   import ActionsPanel from './components/ActionsPanel'
+  import AccountResManagePanel from './components/AccountResManagePanel'
   import LanguageSelector from './components/controls/LanguageSelector'
   import { mapState } from 'vuex'
   import * as constants from './state/constants'
 
   export default {
     components: {
-      NavigationPanel, LinksPanel, ProfilePanel, ImportPanel, ActionsPanel, LanguageSelector
+      NavigationPanel, LinksPanel, ProfilePanel, ImportPanel, ActionsPanel, LanguageSelector,
+      AccountResManagePanel,
     },
     props: {
       source: String
@@ -76,6 +78,7 @@
       <ImportPanel @finished="importPanel = false"/>
     </v-dialog>
     <ActionsPanel />
+    <AccountResManagePanel />
     <v-content>
       <!-- moved outside layout to enable custom layouts in views -->
       <router-view></router-view>

@@ -60,15 +60,15 @@ export default {
         :loading="loading" :disabled="disabled" 
         @click="onclick">
         <slot name="text" />
-      </v-btn><br>
-      <span :class="panel ? 'panelcaption' : 'caption'">
+      </v-btn>
+      <div :class="panel ? 'panelcaption' : 'caption'">
         <slot name="caption" />
-      </span>
+      </div>
     </template>
   </div>    
 </template>
 <style scoped>
-  .caption { font-size: smaller; color: gray }
+  .caption { font-size: smaller; color: gray; margin-top: -4px;}
   .panelcaption { font-size: smaller; color: white ;line-height: 13px}
   .buttonpanel { line-height: 10px }
 </style>

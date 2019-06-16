@@ -4,6 +4,7 @@ export const state = {
   branchDialog: false,
   stakeDialog: false,
   levelInfoDialog: false,
+  resManagerDialog: false,
   payload: null,
   props: null,
 }

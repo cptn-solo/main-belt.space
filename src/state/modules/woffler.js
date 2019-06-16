@@ -114,10 +114,10 @@ export const actions = {
       throw new WflBranchSwitchError(ex)
     }
   },
-  async signupAndJoinGame({ dispatch }, levelInfo) {    
+  async signupAndJoinGame({ dispatch }, idbranch) {    
     try {
       await dispatch('userProfile/signup', null, { root: true })
-      await dispatch('joinGame', levelInfo)
+      await dispatch('joinGame', idbranch)
     } catch (ex) {
       throw new WflBranchSwitchError(ex)
     }
@@ -158,8 +158,9 @@ export const actions = {
       throw new WflLevelsLoadError(ex)
     }
   },
-  async fetchGameContext({ dispatch, commit, state }, idlevel) {
-    try {      
+  async fetchGameContext({ dispatch, commit, getters, state }, idlevel) {
+    try {
+      /* async */dispatch('noscatter/loadBlockchainAccount', getters.accountname, { root: true })
       commit('setCurrentLevel', (idlevel > 0 ? (await dispatch('loadGameContext', idlevel)) : null))
       return state.currentLevelInfo
     } catch (ex) {
@@ -168,7 +169,7 @@ export const actions = {
   },
   async loadGameContext({ getters, dispatch }, idlevel) {
     try {
-      let level = null
+      let level = null      
       const levels = (await getters.gameAPI.getLevels(idlevel))
       if (levels.length != 1) 
         throw new Error('No valid level found for id: '+idlevel)
@@ -289,6 +290,7 @@ export const actions = {
       await getters.gameAPI.playerAction({actionname: 'unlocklvl', payload: { account, idlevel }})
       const level = (await getters.gameAPI.getLevels(idlevel))[0]
       commit('updateLevelProps', {id: level.id, props: { locked: level.locked }})
+      return { id: level.id, locked: level.locked }
     } catch (ex) {
       throw new WflUnlockRootLevelError(ex)
     }

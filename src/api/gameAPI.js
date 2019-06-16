@@ -31,6 +31,14 @@ export default {
     })
     // return getTokenBalance('ASTRO') // запрос контракта не взлетел, переделал на запрос таблицы
   },
+  fetchFromSysTable(table) {
+    return getEOSTableRows(this.rpc, {
+      json:true,
+			code:'eosio',
+      scope:'eosio',
+      table
+    })
+  },
   fetchFromMainTable(table, id = null) {
     let data = {
       code: this.gameContract,
@@ -153,6 +161,10 @@ export default {
     const data = payload.payload || { account: this.accountname }
     return transactEOS(this.api, this.accountname, this.gameContract, payload.actionname, data)
   },
+  systemAction(actionname, payload) {
+    const data = payload
+    return transactEOS(this.api, this.accountname, 'eosio', actionname, data)
+  },
   /** Voting */
   async getProducers() {
     return getEOSTableRows(this.rpc, {
@@ -190,7 +202,7 @@ export default {
         await this.playerAction({actionname: "rmbranch", payload: { idbranch: obj.id }})
       })
       await asyncForEach(await this.fetchFromMainTable('brnchmeta'), async obj => {
-        await this.playerAction({actionname: "rmbrmeta", payload: { owner: obj.owner, idmeta: obj.id }})
+        await this.playerAction({actionname: "rmbrmeta", payload: { owner: this.accountname, idmeta: obj.id }})
       })
       await asyncForEach(await this.fetchFromMainTable('players'), async obj => {
         await this.playerAction({actionname: "rmplayer", payload: { account: obj.account }})

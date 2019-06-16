@@ -20,6 +20,15 @@ export class AddStakeConfirm extends ApplicationDialog {
   }  
 }
 
+export class CreateNewGamePrompt extends ApplicationDialog {
+  constructor() {
+    super({
+      titleLocalized: ApplicationDialog.t('wflCreateBranchPromptTitle'),
+      textLocalized: ApplicationDialog.t('wflCreateBranchPromptText'),
+    })
+  }
+}
+
 export class CreateBranchConfirm extends ApplicationDialog {
   constructor(params = []) {
     super({ titleLocalized: ApplicationDialog.t('wflCreateBranchConfirmTitle') })
@@ -63,6 +72,30 @@ export class SignupAndBranchSwitchConfirm extends ApplicationDialog {
     super({
       titleLocalized: ApplicationDialog.t('wflSignupAndJoinGameConfirmTitle'),
       textLocalized: ApplicationDialog.t('wflSignupAndJoinGameConfirmText'),
+    })
+  }
+}
+
+export class LoginRequiredWarning extends ApplicationDialog {
+  constructor() {
+    super({
+      titleLocalized: ApplicationDialog.t('wflLoginRequiredWarningTitle'),
+      textLocalized: ApplicationDialog.t('wflLoginRequiredWarningText'),
+      actions: {
+        falseLocalized: ApplicationDialog.t('miskOk')
+      }
+    })
+  }
+}
+
+export class ClosedBranchWarning extends ApplicationDialog {
+  constructor() {
+    super({
+      titleLocalized: ApplicationDialog.t('wflClosedBranchWarningTitle'),
+      textLocalized: ApplicationDialog.t('wflClosedBranchWarningText'),
+      actions: {
+        falseLocalized: ApplicationDialog.t('miskOk')
+      }
     })
   }
 }

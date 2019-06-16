@@ -1,6 +1,7 @@
 <script>
   import { mapGetters, mapState } from 'vuex'
   import ApplicationError from '../dialogs/applicationError'
+  import AccountResourcesInfo from './AccountResourcesInfo'
   import * as constants from '../state/constants'
 
   export default {
@@ -8,6 +9,9 @@
       showMenu: false,
       constants
     }),
+    components: {
+      AccountResourcesInfo
+    },
     props: {
       player: {
         type: Object,
@@ -29,6 +33,10 @@
     methods: {
       importPrompt() {
         this.$emit('showimportpanel')
+      },
+      manageResources() {
+        console.log('manage')
+        this.$store.dispatch('gui/showDialog', { key: 'resManagerDialog', payload: true })
       },
       async loginScatter() {
         let loader = this.$loading.show()
@@ -81,11 +89,17 @@
           <v-list-tile-action><v-icon>input</v-icon></v-list-tile-action>                
         </v-list-tile>
       </template>
-      <v-list-tile v-if="status >= constants.PROFILE_LOGGEDIN"
-        @click="logout" >
-        <v-list-tile-content>{{$t('upLogout')}}</v-list-tile-content>
-        <v-list-tile-action><v-icon>power_settings_new</v-icon></v-list-tile-action>                
-      </v-list-tile>
+      <template v-if="status >= constants.PROFILE_LOGGEDIN">
+        <v-list-tile 
+          @click="logout" >
+          <v-list-tile-content>{{$t('upLogout')}}</v-list-tile-content>
+          <v-list-tile-action><v-icon>power_settings_new</v-icon></v-list-tile-action>                
+        </v-list-tile>
+        <v-list-tile 
+          @click="manageResources">
+          <AccountResourcesInfo ripple v-if="status >= constants.PROFILE_LOGGEDIN" />
+        </v-list-tile>
+      </template>
     </v-list>    
   </v-menu>
 </template>

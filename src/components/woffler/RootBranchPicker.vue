@@ -1,6 +1,6 @@
 <script>  
   import { commonActions } from '../../woffler/commonActions'
-  import { AddStakeConfirm } from '../../dialogs/wofflerConfirmations'
+  import { AddStakeConfirm, CreateNewGamePrompt, ClosedBranchWarning } from '../../dialogs/wofflerConfirmations'
   import AssetPanel from './AssetPanel'
 import utils from '../../utils';
   
@@ -28,27 +28,54 @@ import utils from '../../utils';
       showMeta(idx) {
         this.$store.dispatch('gui/showDialog', { key: "levelInfoDialog", payload: this.startLevels[idx] })          
       },
+      showClosed(idx) {
+        this.$dialog.warning(new ClosedBranchWarning())
+      },
       unlockBranch(idx) {
         const level = this.startLevels[idx]
-        this.$store.dispatch('engine/enqueueAction', Object.assign(commonActions.unlockGameAction, { payload: level.id }))
+        const unlockAction = Object.assign(commonActions.unlockGameAction, { payload: level.id })
+        unlockAction.success = this.unlockSuccess
+        this.$store.dispatch('engine/enqueueAction', unlockAction)
       },
       joinGame(idx) {
         const level = this.startLevels[idx]
-        this.$store.dispatch('engine/enqueueAction', Object.assign(commonActions.joinGameAction, { payload: level.idbranch }))
+        const joinAction = Object.assign(commonActions.joinGameAction, { payload: level.idbranch })
+        joinAction.success = this.joinSuccess
+        this.$store.dispatch('engine/enqueueAction', joinAction)
       },
-      createRootBranch() {
-        this.$dialog.message.info('coming soon')
+      joinSuccess() {
+        this.$router.push({ path: "/woffler/active" })
+      },
+      unlockSuccess(info) {
+        if (!info.locked) {
+          const levelIdx = this.startLevels.findIndex(l => l.id === info.id)
+          if (levelIdx >= 0) 
+            this.joinGame(levelIdx)
+        } else {
+          this.$dialog.message.info(this.$t('wflNoluckUnlockMessage'))
+        }
+      },
+      async createRootBranch() {
+        if (await this.$dialog.confirm(new CreateNewGamePrompt()))
+          this.$router.push({ path: "/woffler/metas" })
       },
       showActions(idx) {
         const payload = this.startLevels[idx]
         const actions = []
         if (this.loggedIn) {
-          if (payload.locked === 1)
-            actions.push(Object.assign(commonActions.unlockGameAction, { payload: payload.id }))
-          else if (this.hasIngameProfile)
-            actions.push(Object.assign(commonActions.joinGameAction, { payload: payload.idbranch }))
-          else 
-            actions.push(Object.assign(commonActions.signupAdnJoinGameAction, { payload }))
+          if (payload.locked === 1) {
+            const unlockAction = Object.assign(commonActions.unlockGameAction, { payload: payload.id })
+            unlockAction.success = this.unlockSuccess
+            actions.push(unlockAction)
+          } else if (this.hasIngameProfile) {
+            const joinAction = Object.assign(commonActions.joinGameAction, { payload: payload.idbranch })
+            joinAction.success = this.joinSuccess
+            actions.push(joinAction)
+          } else {
+            const signAndJoin = Object.assign(commonActions.signupAdnJoinGameAction, { paylopayload: payload.idbranchad })
+            signAndJoin.success = this.joinSuccess
+            actions.push(signAndJoin)
+          }
 
           const addStakeAction = Object.assign({}, commonActions.addStakeAction)
           const minStakeValue = utils.parseAmount(
@@ -104,7 +131,7 @@ import utils from '../../utils';
                   </div>
                 </template>
                 <template v-else>
-                  <div flex style="color: blue">
+                  <div flex>
                     <v-layout row justify-space-between align-baseline>
                       <span flex>{{$t('wflBranchCurrentPot')}}:</span>
                       <span flex>{{level.branch.potbalance}}</span>
@@ -122,7 +149,12 @@ import utils from '../../utils';
           </div>
           <div flex>
             <v-layout row>
-              <v-btn flex icon ripple v-if="level.locked" 
+              <v-btn flex icon v-if="level.branch.closed" 
+                class="actionbtn"
+                @click.stop="showClosed(idx)">
+                <v-icon color="warning">highlight_off</v-icon>
+              </v-btn>
+              <v-btn flex icon ripple v-else-if="level.locked" 
                 class="actionbtn"
                 @click.stop="unlockBranch(idx)">
                 <v-icon color="primary">lock</v-icon>

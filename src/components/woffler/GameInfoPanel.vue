@@ -23,7 +23,8 @@
         this.$store.dispatch('engine/enqueueAction', {
           title: 'quitgame', selector: 'woffler/joinGame',
           lock: true, payload: 0, //called with 0 switch to 0 branch (quit game)
-          confirm: new QuitGameConfirm()
+          confirm: new QuitGameConfirm(),
+          success: () => { this.$router.push({ path: "/woffler/levels" })}
         })
       },
       showLvlvInfo() {

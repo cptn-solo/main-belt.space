@@ -1,6 +1,6 @@
 <script>
 import { commonActions } from '../../woffler/commonActions'
-import { CreateBranchConfirm } from '../../dialogs/wofflerConfirmations'
+import { CreateBranchConfirm, LoginRequiredWarning } from '../../dialogs/wofflerConfirmations'
 import AssetPanel from './AssetPanel'
 import defaultMeta from '../woffler/branchmeta/defaultMeta.json'
 import utils from '../../utils';
@@ -60,11 +60,16 @@ export default {
         const branchAction = Object.assign({}, commonActions.branchAction)
         branchAction.payload = { idmeta: meta.id }
         branchAction.confirm = new CreateBranchConfirm([meta.id])
+        branchAction.success = () => { this.$router.push({ path: "/woffler/levels" })}
         this.$store.dispatch('gui/showDialog', { key: "branchDialog", payload: branchAction, props: {
           min: utils.assetAmount(meta.minPot), max: utils.assetAmount(this.player.activebalance)
         } })
       },
       createBranchMeta() {
+        if (!this.loggedIn) {
+          this.$dialog.warning(new LoginRequiredWarning())
+          return
+        }
         const meta = defaultMeta
         meta.id = 0 //for contract integrity checks
         meta.owner = this.player.account //for contract integrity checks

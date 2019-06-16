@@ -169,6 +169,16 @@ export class UserProfileAccountsLoadError extends ApplicationError {
   }
 }
 
+export class AccountResourceManagementError extends ApplicationError {
+  constructor(error) {
+    super(
+      error,
+      'Error staking/unstaking resources',
+      'Error managing account resources allocation'
+    )
+  }
+}
+
 export class UserProfileFailureLoginError extends ApplicationError {
   constructor() {
     super('Cannot login with registred account', 'Login failure')

@@ -177,8 +177,8 @@ export const actions = {
   },
   async loadBlockchainAccount({ commit, getters }, accountname = null) {
     try {
+      if (!accountname && !getters.accountname) return null
       const account = await getters.gameAPI.getAccount(accountname || getters.accountname)
-      console.log('account', account)
       commit('setBlockchainAccount', account)
       return account
     } catch (ex) {
@@ -260,6 +260,9 @@ export const actions = {
 }
 
 function checkPermission(accountData, pubKey) {
+  
+  if (!accountData) return false
+
   const keys = accountData.permissions
     .filter(p => p.perm_name === 'active')
     .reduce((keys, p) => {

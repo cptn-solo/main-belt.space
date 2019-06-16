@@ -25,7 +25,7 @@ export default [
   },
   {
     path: "/woffler/:panel",
-    name: "woffler",
+    name: "wofflerpanel",
     component: () => import("../views/woffler/Woffler.vue"),
     props: (route) => ({ 
       panel: route.params.panel, 
@@ -33,7 +33,7 @@ export default [
   },
   {
     path: "/woffler/:panel/:subpanel",
-    name: "woffler",
+    name: "wofflersubpanel",
     component: () => import("../views/woffler/Woffler.vue"),
     props: (route) => ({ 
       panel: route.params.panel, 
